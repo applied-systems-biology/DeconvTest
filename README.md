@@ -19,15 +19,13 @@ quantitative comparison and consists of three main modules: (1) *in silico* micr
 
 ## Installation
 
-### Prerequisites
-- python2.7
-- setuptools
-- pandas
-- [HelperLib](https://github.com/applied-systems-biology/HelperLib)
-
-To install the package run ``python setup.py install``.
-
-To test the package run ``python setup.py test``.
+1. Install [Fiji](https://fiji.sc/#download); note the Fiji installation path: you will have to provide it later when installing the DeconvTest packge 
+1. Install [python 2.7 Anaconda](https://www.anaconda.com/distribution/)
+1. Download [HelperLib package](https://github.com/applied-systems-biology/HelperLib)
+1. Enter the HelperLib directory and install the HelperLib package by running ``python setup.py install`` withing the Anaconda environment
+1. Download the DeconvTest package
+1. Enter the DeconvTest directory and install the DeconvTest by running ``python setup.py install`` withing the Anaconda environment
+1. Provide the path to Fiji when prompted
 
 ## License
 

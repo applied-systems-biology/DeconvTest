@@ -19,6 +19,12 @@ quantitative comparison and consists of three main modules: (1) *in silico* micr
 
 ## Installation
 
+### Prerequisites
+- python2.7
+- setuptools
+- pandas
+- [HelperLib](https://github.com/applied-systems-biology/HelperLib)
+
 To install the package run ``python setup.py install``.
 
 To test the package run ``python setup.py test``.

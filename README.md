@@ -40,7 +40,7 @@ The DeconvTest package contains several subpackages.
     a batch mode. 
     - `quantification`: the performance quantification module; contains functions for evaluating deconvolution 
     accuracy in a batch mode.
-- `scripts`: exemplary scripts and settings files.
+- `scripts`: exemplary scripts and configuration files.
 - `tests`: unit tests.
 
 For a detailed user guide, 

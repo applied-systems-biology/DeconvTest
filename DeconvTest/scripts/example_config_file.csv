@@ -4,40 +4,40 @@ cell_parameter_filename	cell_parameters.csv
 cell_parameter_folder	cell_parameters
 convolution_results_folder	convolved
 deconvolution_results_folder	deconvolved
-detect	FALSE
+detect	[True]
 dimensions_folder	dimensions
-equal_dimensions	FALSE
+equal_dimensions	False
 gaussian_snrs	[None]
-input_voxel_size	0.1
+input_voxel_size	0.3
 inputfolder	input
-iterations	20
-log_computing_time	TRUE
+iterations	[5, 10]
+log_computing_time	True
 log_folder	timelog
-low	1
-max_threads	75
+low	[1]
+max_threads	60
 noise_results_folder	noise
-normalize	FALSE
-number_of_cells	5
+normalize	[True]
+number_of_cells	1
 spikiness_range	(0, 0)
 number_of_stacks	None
-perform	TRUE
-poisson_snrs	[None]
-postprocess	FALSE
-preprocess	FALSE
-print_progress	TRUE
-psf_elongations	[ 2, 3, 4, 5, 6]
-psf_sigmas	[0.5, 0.8, 1.0, 1.2]
+perform	[True]
+poisson_snrs	[2]
+postprocess	False
+preprocess	False
+print_progress	True
+psf_elongations	[4.5]
+psf_sigmas	[1]
 psffolder	psf
-relative_thr	FALSE
+relative_thr	False
 resizing_results_folder	resized
-rif_lambda	0.05
-rltv_lambda	0.01
+rif_lambda	[0.000001, 0.0001]
+rltv_lambda	[0.000001]
 segmentation_results_folder	segmented
-simulation_folder	../../../Data/simulation2_psf_and_resolution
+simulation_folder	../../../Data/simulation1_settings_adjustment
 size_mean_and_std	(10, 2)
 spike_size_range	(0, 0)
-spike_smoothness_range	(0, 0)
-terminate	0.001
+spike_smoothness_range	(0.05, 0.1)
+terminate	[0.1]
 thr	None
-voxel_sizes_for_resizing	[0.2, 0.3, 0.4, 0.5, [1, 0.3, 0.3], [1, 0.5, 0.5], [3, 0.3, 0.3], [3, 0.5, 0.5]]
-wiener	0.5
+voxel_sizes_for_resizing	[0.3, [1, 0.3, 0.3]]
+wiener	[0, 0.1]

@@ -21,7 +21,7 @@ def get_fiji_path():
         if os.path.exists(path) and os.path.isdir(path):
             files = os.listdir(path)
             for fn in files:
-                if len(fn.split('deconv_test')) > 1:
+                if len(fn.split('deconvtest')) > 1:
                     if zipfile.is_zipfile(path + '/' + fn):
                         zf = zipfile.ZipFile(path + '/' + fn, 'r')
                         zf.extract('DeconvTest/config', path='temp/')

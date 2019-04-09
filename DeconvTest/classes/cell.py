@@ -295,10 +295,11 @@ class Cell(Image):
 
         if phi > 0:
             i = np.argmin(abs(Phi[1] - phi))
-            R = np.zeros_like(grid)
-            R[:, :i] = grid[:, -i:]
-            R[:, i:] = grid[:, :-i]
-            grid = R
+            if i > 0:
+                R = np.zeros_like(grid)
+                R[:, :i] = grid[:, -i:]
+                R[:, i:] = grid[:, :-i]
+                grid = R
 
         # introduce spikes
 

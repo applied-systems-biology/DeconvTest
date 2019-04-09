@@ -19,5 +19,5 @@ command = "-image file " + path_input +
           " -path " + path_output;
 
 run("DeconvolutionLab2 Run", command);
-wait(1000);  // wait for 1 second before exiting the process
+wait(3000);  // wait for 3 seconds before exiting the process
 eval("script", "System.exit(0);");

@@ -10,7 +10,7 @@ setup(
     scripts=['DeconvTest/scripts/run_simulation.py'],
     author_email='anna.medyukhina@gmail.com',
     license='BSD-3-Clause',
-    package_data={'': ['config']},
+    package_data={'': ['fiji_path']},
     include_package_data=True,
 
     install_requires=[

@@ -59,4 +59,5 @@ selectWindow("psf");
 close();
 saveAs("tiff", path_output);
 close();
+wait(1000);  // wait for 1 second before exiting the process
 eval("script", "System.exit(0);");

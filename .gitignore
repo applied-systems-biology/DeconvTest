@@ -102,3 +102,11 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+
+# PyCharm files
+.Rhistory
+.idea/
+
+# config files
+fiji_path

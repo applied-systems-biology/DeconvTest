@@ -29,8 +29,8 @@ def run_rif(imagej_path, inputfile, psffile, rif_lambda, outputfile):
 
     """
 
-    os.system(imagej_path + " --headless --console -macro rif.ijm '" + inputfile + ' ' +
-              psffile + ' ' + str(rif_lambda) + ' ' + outputfile + "'")
+    os.system(imagej_path + " --headless --console -macro rif.ijm '" + inputfile + ' ' + psffile + ' ' +
+              str(rif_lambda) + ' ' + os.path.dirname(outputfile) + ' ' + os.path.basename(outputfile)[:-4] + "'")
 
 
 def run_rltv(imagej_path, inputfile, psffile, iterations, rltv_lambda, outputfile):
@@ -55,8 +55,9 @@ def run_rltv(imagej_path, inputfile, psffile, iterations, rltv_lambda, outputfil
 
     """
 
-    os.system(imagej_path + " --headless --console -macro rltv.ijm '" + inputfile + ' ' +
-              psffile + ' ' + str(iterations) + ' ' + str(rltv_lambda) + ' ' + outputfile + "'")
+    os.system(imagej_path + " --headless --console -macro rltv.ijm '" + inputfile + ' ' + psffile + ' ' +
+              str(iterations) + ' ' + str(rltv_lambda) + ' ' + os.path.dirname(outputfile) + ' ' +
+              os.path.basename(outputfile)[:-4] + "'")
 
 
 def run_iterative(imagej_path, inputfile, psffile, outputfile, normalize, perform, detect, wiener,

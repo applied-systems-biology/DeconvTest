@@ -9,12 +9,15 @@ path_psf = args[1];
 iters = args[2];
 lambda = args[3];
 path_output = args[4];
-command = "-image file " + path_input + 
-		" -psf file " + path_psf + 
-		" -algorithm RLTV " + iters + " " + lambda + " " + 
-		" -display yes" + 
-		" -monitor none";
+filename_output = args[5];
+
+command = "-image file " + path_input +
+          " -psf file " + path_psf +
+		  " -algorithm RLTV " + iters + " " + lambda + " " +
+          " -monitor no " +
+          " -out stack " + filename_output +
+          " -path " + path_output;
 
 run("DeconvolutionLab2 Run", command);
-saveAs("tiff", path_output);
+wait(1000);  // wait for 1 second before exiting the process
 eval("script", "System.exit(0);");

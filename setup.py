@@ -14,8 +14,8 @@ def check_imagej_path(path):
         return None
     files = os.listdir(path)
     for fn in files:
-        # if len(fn.split('ImageJ')) > 1 and not fn.endswith('desktop'):
-        if len(fn.split('ImageJ')) > 1:
+        if len(fn.split('ImageJ')) > 1 and not fn.endswith('desktop'):
+        # if len(fn.split('ImageJ')) > 1:
             return path + fn
     return None
 
@@ -24,8 +24,8 @@ if __name__ == '__main__':
 
     args = sys.argv[1:]
     imagej_path = None
-    if os.path.exists('DeconvTest/config'):
-        stat = pd.read_csv('DeconvTest/config', sep='\t', index_col=0, header=-1).transpose().iloc[0].T
+    if os.path.exists('DeconvTest/fiji_path'):
+        stat = pd.read_csv('DeconvTest/fiji_path', sep='\t', index_col=0, header=-1).transpose().iloc[0].T
         if 'Fiji_path' in stat.index:
             imagej_path = stat['Fiji_path']
         else:
@@ -38,7 +38,7 @@ if __name__ == '__main__':
             imagej_path = check_imagej_path(imagej_dir)
 
         config = pd.Series({'Fiji_path': imagej_path})
-        config.to_csv('DeconvTest/config', sep='\t')
+        config.to_csv('DeconvTest/fiji_path', sep='\t')
 
     if not os.path.exists(os.path.dirname(imagej_path) + '/macros'):
         os.makedirs(os.path.dirname(imagej_path) + '/macros')

@@ -151,7 +151,7 @@ class CellParams(pd.DataFrame):
 
         """
 
-        cell = self.__parameters_ellipsoid(size_mean_and_std=size_mean_and_std, equal_dimensions=equal_dimensions)
+        cell = self.parameters_ellipsoid(size_mean_and_std=size_mean_and_std, equal_dimensions=equal_dimensions)
 
         if spikiness_range[0] == spikiness_range[1]:
             cell['spikiness'] = spikiness_range[0]

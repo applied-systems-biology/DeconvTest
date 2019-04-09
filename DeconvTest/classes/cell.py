@@ -294,7 +294,6 @@ class Cell(Image):
         grid = np.sqrt(1 / ((x / size[0]) ** 2 + (y / size[1]) ** 2 + (z / size[2]) ** 2))
 
         if phi > 0:
-            print Phi[1]
             i = np.argmin(abs(Phi[1] - phi))
             if i > 0:
                 R = np.zeros_like(grid)

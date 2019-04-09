@@ -20,6 +20,7 @@ quantitative comparison and consists of three main modules: (1) *in silico* micr
 ## Installation
 
 1. Install [Fiji](https://fiji.sc/#download); note the Fiji installation path: you will have to provide it later when installing the DeconvTest packge 
+1. Download the [DeconvolutionLab_2.jar](http://bigwww.epfl.ch/deconvolution/deconvolutionlab2/) and [Iterative_Deconvolve_3D.class](https://imagej.net/Iterative_Deconvolve_3D) and copy them to the plugins folder of Fiji
 1. Install [python 2.7 Anaconda](https://www.anaconda.com/distribution/)
 1. Download [HelperLib package](https://github.com/applied-systems-biology/HelperLib)
 1. Enter the HelperLib directory and install the HelperLib package by running ``python setup.py install`` withing the Anaconda environment

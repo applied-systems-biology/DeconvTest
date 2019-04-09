@@ -3,7 +3,8 @@ This macro runs Iterative Deconvolve 3D plugin with given parameters.
 */
 run("Misc...", "divide=Infinity save");
 arg = getArgument();
-args = split(arg, ' ');
+arg = replace(arg, '___', "@");
+args = split(arg, '@');
 path_input = args[0];
 path_psf = args[1];
 path_output = args[2];

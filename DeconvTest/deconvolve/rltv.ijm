@@ -3,7 +3,8 @@ This macro runs Richardson-Lucy with Total Variance (RLTV) from DeconvolutionLab
 */
 run("Misc...", "divide=Infinity save");
 arg = getArgument();
-args = split(arg, ' ');
+arg = replace(arg, '___', "@");
+args = split(arg, '@');
 path_input = args[0];
 path_psf = args[1];
 iters = args[2];

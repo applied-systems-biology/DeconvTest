@@ -14,51 +14,11 @@ class CellParams(pd.DataFrame):
     Class for generation and storing parameters for a set of cells.
     """
 
-    def __init__(self, number_of_cells=1, size_mean_and_std=(10, 2), equal_dimensions=False, coordinates=True,
-                 spikiness_range=(0, 0), spike_size_range=(0, 0), spike_smoothness_range=(0.05, 0.1)):
+    def __init__(self, **kwargs):
         """
         Initializes the class for CellParams and generate random cell parameters with given properties.
 
-        Parameters:
-        -----------    
-        number_of_cells: int, optional
-            Number of cells to generate.
-            Default is 1.
-        size_mean_and_std: tuple, optional
-            Mean value and standard deviation for the cell size in micrometers.
-            The cell size is drawn randomly from a Gaussian distribution with given mean and standard deviation.
-            Default is (10, 2).
-        equal_dimensions: bool, optional
-            If True, generates parameters for a sphere.
-            If False, generate parameters for an ellipsoid with sizes for all three axes chosen independently.
-            Default is True
-        coordinates : bool, optional
-            If True, relative cell coordinates will be generated.
-            Default is True.
-        spikiness_range : tuple, optional
-            Range for the fraction of cell surface area covered by spikes.
-            Default is (0, 0).
-        spike_size_range : tuple, optional
-            Range for the standard deviation for the spike amplitude relative to the cell radius.
-            Default is (0, 0).
-        spike_smoothness_range : tuple, optional
-            Range for the width of the Gaussian filter that is used to smooth the spikes.
-            Default is (0.05, 0.1).
-        
-        """
-        super(CellParams, self).__init__()
-        self.generate_parameters(number_of_cells=number_of_cells, size_mean_and_std=size_mean_and_std,
-                                 equal_dimensions=equal_dimensions, coordinates=coordinates,
-                                 spikiness_range=spikiness_range,
-                                 spike_size_range=spike_size_range,
-                                 spike_smoothness_range=spike_smoothness_range)
-
-    def generate_parameters(self, number_of_cells, size_mean_and_std, equal_dimensions, coordinates,
-                            spikiness_range, spike_size_range, spike_smoothness_range):
-        """
-        Generates random cells sizes and rotation angles.
-
-        Parameters:
+        Keyword arguments:
         -----------    
         number_of_cells: int
             Number of cells to generate.
@@ -76,58 +36,137 @@ class CellParams(pd.DataFrame):
             Range for the standard deviation for the spike amplitude relative to the cell radius.
         spike_smoothness_range : tuple
             Range for the width of the Gaussian filter that is used to smooth the spikes.
+        
+        """
+        super(CellParams, self).__init__()
+        self.generate_parameters(**kwargs)
+
+    def generate_parameters(self, kind='ellipsoid', number_of_cells=1, coordinates=True, **kwargs):
+        """
+        Generates random cells sizes and rotation angles.
+
+        Parameters:
+        -----------
+        kind : string, optional
+            Name of the shape of the ground truth object from set of
+            {ellipoid, spiky_cell}.
+            Default is 'ellipsoid'
+        number_of_cells: int, optional
+            Number of cells to generate.
+            Default is 1.
+        coordinates : bool, optional
+            If True, relative cell coordinates will be generated.
+            Default is True.
+        kwargs : key, value pairings
+            Keyword arguments passed to corresponding methods to generate cell parameters.
         """
 
-        if not equal_dimensions:
+        valid_shapes = ['ellipsoid', 'spiky_cell']
+
+        if 'parameters_' + kind in dir(self) and kind in valid_shapes:
+            cells = pd.DataFrame()
+            for i in range(int(number_of_cells)):
+                cell = getattr(self, 'parameters_' + kind)(**kwargs)
+                if coordinates:
+                    cell['z'], cell['y'], cell['x'] = np.random.uniform(0, 1, 3)
+
+                cells = pd.concat([cells, cell], ignore_index=True)
+
+            for col in cells.columns:
+                self[col] = cells[col]
+
+        else:
+            raise AttributeError(kind + ' is not a valid object shape!')
+
+    def parameters_ellipsoid(self, size_mean_and_std=(10, 2), equal_dimensions=False, **kwargs_to_ignore):
+        """
+        Generates random cells sizes and rotation angles.
+
+        Parameters:
+        -----------
+        size_mean_and_std: tuple, optional
+            Mean value and standard deviation for the cell size in micrometers.
+            The cell size is drawn randomly from a Gaussian distribution with given mean and standard deviation.
+            Default is (10, 2).
+        equal_dimensions: bool, optional
+            If True, generates parameters for a sphere.
+            If False, generate parameters for an ellipsoid with sizes for all three axes chosen independently.
+            Default is True
+        """
+
+        size_mean, size_std = size_mean_and_std
+        if equal_dimensions:
+            sizex = sizey = sizez = np.random.normal(size_mean, size_std)
+            if sizex < 1:
+                sizex = sizey = sizez = 1
+            phi = theta = 0
+        else:
             theta_range = [0, np.pi]
             phi_range = [0, 2 * np.pi]
+            sizex = np.random.normal(size_mean, size_std)
+            sizey = np.random.normal(size_mean, size_std)
+            sizez = np.random.normal(size_mean, size_std)
 
-        cells = pd.DataFrame()
-        size_mean, size_std = size_mean_and_std
-        for i in range(int(number_of_cells)):
-            if equal_dimensions:
-                sizex = sizey = sizez = np.random.normal(size_mean, size_std)
-                if sizex < 1:
-                    sizex = sizey = sizez = 1
-                phi = theta = 0
-            else:
-                sizex = np.random.normal(size_mean, size_std)
-                sizey = np.random.normal(size_mean, size_std)
-                sizez = np.random.normal(size_mean, size_std)
+            if sizex < 1:
+                sizex = 1
 
-                if sizex < 1:
-                    sizex = 1
+            if sizey < 1:
+                sizey = 1
 
-                if sizey < 1:
-                    sizey = 1
+            if sizez < 1:
+                sizez = 1
 
-                if sizez < 1:
-                    sizez = 1
+            theta = self.__sine_distribution(theta_range[0], theta_range[1])
+            phi = np.random.uniform(phi_range[0], phi_range[1])
 
-                theta = self.__sine_distribution(theta_range[0], theta_range[1])
-                phi = np.random.uniform(phi_range[0], phi_range[1])
+        cell = pd.DataFrame({'size_x': [sizex], 'size_y': [sizey], 'size_z': [sizez], 'phi': [phi], 'theta': [theta]})
 
-            cell = pd.Series({'size_x': sizex, 'size_y': sizey, 'size_z': sizez, 'phi': phi,
-                              'theta': theta})
-            if coordinates:
-                cell['z'], cell['y'], cell['x'] = np.random.uniform(0, 1, 3)
+        return cell
 
-            if spikiness_range[0] == spikiness_range[1]:
-                cell['spikiness'] = spikiness_range[0]
-            else:
-                cell['spikiness'] = np.random.uniform(spikiness_range[0], spikiness_range[1])
-            if spike_size_range[0] == spike_size_range[1]:
-                cell['spike_size'] = spike_size_range[0]
-            else:
-                cell['spike_size'] = np.random.uniform(spike_size_range[0], spike_size_range[1])
-            if spike_smoothness_range[0] == spike_smoothness_range[1]:
-                cell['spike_smoothness'] = spike_smoothness_range[0]
-            else:
-                cell['spike_smoothness'] = np.random.uniform(spike_smoothness_range[0], spike_smoothness_range[1])
-            cells = cells.append(cell, ignore_index=True)
+    def parameters_spiky_cell(self, size_mean_and_std=(10, 2), equal_dimensions=False,
+                                spikiness_range=(0, 0), spike_size_range=(0, 0),
+                                spike_smoothness_range=(0.05, 0.1), **kwargs_to_ignore):
+        """
+        Generates random cells sizes and rotation angles.
 
-        for col in cells.columns:
-            self[col] = cells[col]
+        Parameters:
+        -----------
+        size_mean_and_std: tuple, optional
+            Mean value and standard deviation for the cell size in micrometers.
+            The cell size is drawn randomly from a Gaussian distribution with given mean and standard deviation.
+            Default is (10, 2).
+        equal_dimensions: bool, optional
+            If True, generates parameters for a sphere.
+            If False, generate parameters for an ellipsoid with sizes for all three axes chosen independently.
+            Default is True
+        spikiness_range : tuple, optional
+            Range for the fraction of cell surface area covered by spikes.
+            Default is (0, 0).
+        spike_size_range : tuple, optional
+            Range for the standard deviation for the spike amplitude relative to the cell radius.
+            Default is (0, 0).
+        spike_smoothness_range : tuple, optional
+            Range for the width of the Gaussian filter that is used to smooth the spikes.
+            Default is (0.05, 0.1).
+
+        """
+
+        cell = self.__parameters_ellipsoid(size_mean_and_std=size_mean_and_std, equal_dimensions=equal_dimensions)
+
+        if spikiness_range[0] == spikiness_range[1]:
+            cell['spikiness'] = spikiness_range[0]
+        else:
+            cell['spikiness'] = np.random.uniform(spikiness_range[0], spikiness_range[1])
+        if spike_size_range[0] == spike_size_range[1]:
+            cell['spike_size'] = spike_size_range[0]
+        else:
+            cell['spike_size'] = np.random.uniform(spike_size_range[0], spike_size_range[1])
+        if spike_smoothness_range[0] == spike_smoothness_range[1]:
+            cell['spike_smoothness'] = spike_smoothness_range[0]
+        else:
+            cell['spike_smoothness'] = np.random.uniform(spike_smoothness_range[0], spike_smoothness_range[1])
+
+        return cell
 
     def save(self, outputfile):
         """

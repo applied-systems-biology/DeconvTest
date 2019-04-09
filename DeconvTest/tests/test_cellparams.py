@@ -50,6 +50,7 @@ class TestCellData(unittest.TestCase):
             self.assertEqual(c in celldata2.columns, True)
         shutil.rmtree('data/')
 
+
 if __name__ == '__main__':
     unittest.main()
 

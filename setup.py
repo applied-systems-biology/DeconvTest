@@ -15,7 +15,6 @@ def check_imagej_path(path):
     files = os.listdir(path)
     for fn in files:
         if len(fn.split('ImageJ')) > 1 and not fn.endswith('desktop'):
-        # if len(fn.split('ImageJ')) > 1:
             return path + fn
     return None
 

@@ -19,7 +19,7 @@ class Image(object):
 
     """
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, image=None):
         """
         Initializes the Image class
 
@@ -28,12 +28,17 @@ class Image(object):
         filename: str, optional
             The path used to load the image.
             If None, an empty class is created.
+            If `image` argument is provided, the image will be initialized from the `image` argument.
+            Default is None.
+        image : ndarray, optional
+            3D array to initiate the image.
+            If None, an empty class is created.
             Default is None.
         """
-        self.image = None
+        self.image = image
         self.filename = filename
         self.metadata = None
-        if filename is not None and os.path.exists(filename):  # read the image from file
+        if self.image is None and filename is not None and os.path.exists(filename):  # read the image from file
             self.from_file(filename)
 
     def __repr__(self):
@@ -147,6 +152,39 @@ class Image(object):
             self.image = rescale_intensity(self.image, out_range=(0, 255))
         return self.image
 
+    def add_noise(self, kind=None, snr=None):
+        """
+        Adds random Poisson noise to the current image.
+
+        Parameters
+        ----------
+        kind : string, sequence of strings or None, optional
+            Name of the method to generate nose from set of {gaussian, poisson}.
+            If a sequence is provided, several noise types will be added.
+            If None, no noise will be added.
+            Default is None.
+        snr : float, optional
+            Target signal-to-noise ratio (SNR) after adding the noise.
+            If None, no noise is added.
+            Default is None
+
+        Returns
+        -------
+        ndarray
+            Output noisy image of the same shape as the current image.
+        """
+        valid_noise_types = ['gaussian', 'poisson']
+        if kind is not None:
+            if type(kind) is str:
+                kind = [kind]
+            for k in kind:
+                if 'add_' + k + '_noise' in dir(self) and k in valid_noise_types:
+                    self.image = getattr(self, 'add_' + k + '_noise')(snr=snr)
+                else:
+                    raise AttributeError(k + ' is not a valid noise type!')
+
+        return self.image
+
     def add_poisson_noise(self, snr=None):
         """
         Adds random Poisson noise to the current image.
@@ -199,4 +237,5 @@ class Image(object):
             sig = self.image.max() * 1. / (10 ** (snr / 20.))
             noise = np.random.normal(0, sig, self.image.shape)
             self.image = self.image + noise
+            self.image[np.where(self.image < 0)] = 0
         return self.image

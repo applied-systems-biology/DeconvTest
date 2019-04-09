@@ -131,6 +131,34 @@ class TestImageClass(unittest.TestCase):
         img = Image()
         self.assertRaises(ValueError, img.add_gaussian_noise, 2)
 
+    @data(
+        'gaussian',
+        'poisson',
+        ['poisson', 'gaussian'],
+        ['gaussian', 'poisson'],
+        ['poisson', 'poisson', 'gaussian'],
+    )
+    def test_valid_noise_types(self, kind):
+        img = Image()
+        arr = np.zeros([50, 50, 50])
+        arr[10:-10, 10:-10, 10:-10] = 255
+        img.image = arr
+        img.add_noise(kind=kind, snr=10)
+        self.assertIsNotNone(img.image)
+        self.assertGreater(np.sum(np.abs(img.image - arr)), 0)
+
+    @data(
+        'argwr',
+        'invalid_noise',
+    )
+    def test_valid_types(self, kind):
+        img = Image()
+        arr = np.zeros([50, 50, 50])
+        arr[10:-10, 10:-10, 10:-10] = 255
+        img.image = arr
+        self.assertRaises(AttributeError, img.add_noise, kind=kind, snr=10)
+
+
 if __name__ == '__main__':
 
     unittest.main()

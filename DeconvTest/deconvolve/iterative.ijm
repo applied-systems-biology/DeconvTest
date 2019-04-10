@@ -60,5 +60,10 @@ selectWindow("psf");
 close();
 saveAs("tiff", path_output);
 close();
-wait(3000);  // wait for 3 seconds before exiting the process
-eval("script", "System.exit(0);");
+for (i=0; i<1000; i++){
+    if (File.exists(path_output)){
+        eval("script", "System.exit(0);");
+    }
+    wait(500);
+}
+

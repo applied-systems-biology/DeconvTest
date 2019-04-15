@@ -69,6 +69,7 @@ class CellParams(pd.DataFrame):
                 cell = getattr(self, 'parameters_' + kind)(**kwargs)
                 if coordinates:
                     cell['z'], cell['y'], cell['x'] = np.random.uniform(0, 1, 3)
+                cell['kind'] = kind
 
                 cells = pd.concat([cells, cell], ignore_index=True)
 

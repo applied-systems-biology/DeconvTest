@@ -65,7 +65,7 @@ class TestCellData(unittest.TestCase):
         'ellipsoids',
         'invalid_shape'
     )
-    def test_valid_types(self, kind):
+    def test_invalid_types(self, kind):
         self.assertRaises(AttributeError, CellParams, kind=kind)
 
 

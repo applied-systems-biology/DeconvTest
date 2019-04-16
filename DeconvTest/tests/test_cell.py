@@ -71,8 +71,8 @@ class TestCellClass(unittest.TestCase):
         self.assertAlmostEqual(cell.volume()/volume, 1, 2)
 
     def test_spiky_cell(self):
-        Cell(resolution=0.3, size=[10, 10, 10], phi=np.pi/4, theta=np.pi/2, spikiness=0.5,
-             spike_size=1, spike_smoothness=0.1)
+        Cell(kind='spiky_cell', resolution=0.3, size=[10, 10, 10], phi=np.pi/4, theta=np.pi/2,
+             spikiness=0.5, spike_size=1, spike_smoothness=0.1)
 
     def test_segment(self):
         img = Cell()
@@ -132,6 +132,23 @@ class TestCellClass(unittest.TestCase):
                               coordinates=False)
         cell = Cell(resolution=0.5, **dict(celldata.iloc[0]))
         self.assertIsNotNone(cell.image)
+
+    @data(
+            'ellipsoid',
+            'spiky_cell'
+        )
+    def test_valid_types(self, kind):
+        cell = Cell()
+        cell.generate(kind=kind, resolution=0.5)
+        self.assertIsNotNone(cell.image)
+
+    @data(
+        'ellipsoids',
+        'invalid_shape'
+    )
+    def test_invalid_types(self, kind):
+        self.assertRaises(AttributeError, CellParams, kind=kind)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -101,16 +101,91 @@ class Cell(Image):
         ind = np.int_(np.round_(ind))
         self.image[tuple(ind)] = 255
 
-    def generate(self, resolution, size=None, size_x=10, size_y=10, size_z=10,
-                 phi=0, theta=0, spikiness=0, spike_size=0, spike_smoothness=0.05):
+    def generate(self, resolution, kind='ellipsoid', **kwargs):
         """
-        Generates a cell image from cell parameters and stores the output in the `self.image` variable.
+        Generates a synthetic object image from given parameters and stores the output in the `self.image` variable.
 
         Parameters
         ----------
         resolution : scalar or sequence of scalars
-            Voxel size in z, y and x used to generate the cell image.
-            If one value is provided, the voxel size is assume to be equal along all axes.
+            Voxel size in z, y and x used to generate the object image.
+            If one value is provided, the voxel size is assumed to be equal along all axes.
+        kind : string, optional
+            Name of the shape of the ground truth object from set of
+            {ellipoid, spiky_cell}.
+            Default is 'ellipsoid'
+        kwargs : key, value pairings
+            Keyword arguments passed to corresponding methods to generate synthetic objects.
+        """
+
+        valid_shapes = ['ellipsoid', 'spiky_cell']
+
+        if 'generate_' + kind in dir(self) and kind in valid_shapes:
+            self.metadata = Metadata(resolution=resolution)
+            self.image = getattr(self, 'generate_' + kind)(**kwargs)
+        else:
+            raise AttributeError(kind + ' is not a valid object shape!')
+
+    def generate_ellipsoid(self, size=None, size_x=10, size_y=10, size_z=10, theta=0, phi=0, **kwargs_to_ignore):
+        """
+        Generates a synthetic object of ellipsoidal shape.
+
+        Parameters
+        ----------
+        size : scalar or sequence of scalars, optional
+            Size of the cell in micrometers.
+            If only one value is provided, the size along all axes is assume to be equal (spherical cell).
+            To specify individual size for each axis (ellipsoid cells), 3 values should be provided ([z, y, x]).
+            If None, the cell sizes in x, y, and z are extracted from `size_x`, `size_y`, `size_z`.
+            Default is None.
+        size_x, size_y, size_z : scalar or sequence of scalars, optional
+            Cell size in micrometers in x, y, and z.
+            The values specified here are only used if the parameter `size` is None.
+            Default is 10.
+        phi : float, optional
+            Azimuthal rotation angle in the range from 0 to 2 pi.
+            If 0, no azimuthal rotation is done.
+            Default is 0.
+        theta : float, optional
+            Polar rotation angle in the range from 0 to pi.
+            If 0, no polar rotation is done.
+            Default is 0.
+        """
+
+        sizes = self.__convert_size(size, size_x, size_y, size_z)
+        sizes = sizes / self.metadata.resolution  # convert the sizes into pixels
+
+        phi = phi * 180 / np.pi  # convert the angles from radians to degrees
+        theta = theta * 180 / np.pi
+
+        target_volume = 4. / 3 * np.pi * sizes[0] * sizes[1] * sizes[2] / 8.  # compute the volume of the cell in voxels
+        maxsize = np.max([sizes])  # maximal dimension
+        side = int(maxsize * 0.6) + 2  # half-dimension of the cell image
+
+        x = np.zeros([side * 2 + 1, side * 2 + 1, side * 2 + 1])  # empty array for the cell image
+        x[side, side, side] = 1000.  # a peak in the center
+        sig = sizes / 7.5  # compute the optimal sigma for smoothing
+
+        x = ndimage.gaussian_filter(x, sig)  # smooth the peak with a Gaussian filter
+
+        if theta > 0:  # rotate the image, if rotation angles are not 0
+            x = ndimage.interpolation.rotate(x, theta, axes=(0, 1))
+            if phi > 0:
+                x = ndimage.interpolation.rotate(x, phi, axes=(1, 2))
+
+        # compute the intensity percentile (for the thresholding) that corresponds to the target volume of the cells
+        per = 100 - target_volume * 100. / (x.shape[0] * x.shape[1] * x.shape[2])
+        x = (x >= np.percentile(x, per)) * 255  # threshold the image at the computed intensity percentile
+
+        return x
+
+    def generate_spiky_cell(self, size=None, size_x=10, size_y=10, size_z=10, theta=0, phi=0,
+                            spikiness=0.1, spike_size=0.5, spike_smoothness=0.05):
+        """
+        Generates a synthetic object of ellipsoidal shape.
+
+        Parameters
+        ----------
         size : scalar or sequence of scalars, optional
             Size of the cell in micrometers.
             If only one value is provided, the size along all axes is assume to be equal (spherical cell).
@@ -133,42 +208,94 @@ class Cell(Image):
             Fraction of cell surface area covered by spikes.
             If 0, no spikes will be added.
             If 1, all point of the surface will be replaced by a random radius.
-            Default is 0.
+            Default is 0.1.
         spike_size : float, optional
             Standard deviation for the spike amplitude relative to the cell radius.
             If 0, no spikes will be added (amplitude 0).
             Values in the range from 0 to 1 are recommended.
-            Default is 0.
+            Default is 0.5.
         spike_smoothness : float, optional
             Width of the Gaussian filter that is used to smooth the spikes.
             The value is provided relative to the cell radius.
             0 corresponds to no Gaussian smoothing.
             Default is 0.05.
         """
-        resolution = np.array([resolution]).flatten()
-        if len(resolution) == 1:
-            resolution = np.array([resolution[0], resolution[0], resolution[0]])
-        elif len(resolution) != 3:
-            raise ValueError('Resolution must be a number or sequence of length 3!')
-        if size is not None:
-            size = np.array([size]).flatten()
-            if len(size) == 1:
-                sizes = np.array([size[0], size[0], size[0]])
-            elif len(size) == 3:
-                sizes = size
-            else:
-                raise ValueError('The size value has to be a number or sequence of length 3!')
-        else:
-            sizes = np.array([size_z, size_y, size_x])
+        sizes = self.__convert_size(size, size_x, size_y, size_z) / 2
 
-        if spikiness == 0:
-            sizes = sizes / resolution  # convert the sizes into pixels
-            self.image = self.__ellipsoid_cell(sizes, theta, phi)
-        else:
-            self.image = self.__spiky_cell(sizes/2., resolution, theta, phi,
-                                           spikiness, spike_size, spike_smoothness)
+        gridsize = 100
+        number_of_spikes = int(spikiness * gridsize**2)
+        Phi, Theta = np.meshgrid(np.linspace(0, 2 * np.pi, gridsize, endpoint=True),
+                                 np.linspace(0, np.pi, gridsize, endpoint=True))
 
-        self.metadata = Metadata(resolution=resolution)
+        x = np.sin(Theta) * np.cos(Phi) * np.cos(theta) + np.cos(Theta) * np.sin(theta)
+        y = np.sin(Theta) * np.sin(Phi)
+        z = np.cos(Theta) * np.cos(theta) - np.sin(Theta) * np.cos(Phi) * np.sin(theta)
+        grid = np.sqrt(1 / ((x / sizes[0]) ** 2 + (y / sizes[1]) ** 2 + (z / sizes[2]) ** 2))
+
+        if phi > 0:
+            i = np.argmin(abs(Phi[1] - phi))
+            if i > 0:
+                R = np.zeros_like(grid)
+                R[:, :i] = grid[:, -i:]
+                R[:, i:] = grid[:, :-i]
+                grid = R
+
+        # introduce spikes
+
+        phi = np.random.randint(0, grid.shape[1], size=number_of_spikes)
+        theta = []
+        while len(theta) < number_of_spikes:
+            x = np.random.randint(0, grid.shape[0])
+            y = np.random.rand()
+            if y <= np.sin(Theta[x, 0]):
+                theta.append(x)
+
+        if spike_size > 0:
+            random_points = np.random.normal(1, spike_size, size=number_of_spikes)
+            grid[theta, phi] = grid[theta, phi] * random_points
+            if spike_smoothness > 0:
+                grid = ndimage.gaussian_filter(grid, spike_smoothness * gridsize / np.pi)
+            grid[grid < 0] = 0
+
+        # interpolate the grid
+        points = np.array([Theta.flatten(), Phi.flatten()]).transpose()
+        Phi, Theta = np.meshgrid(np.linspace(0, 2 * np.pi, 500, endpoint=True),
+                                 np.linspace(0, np.pi, 500, endpoint=True))
+
+        xi = np.asarray([[Theta[i, j], Phi[i, j]] for i in range(len(Theta)) for j in range(len(Theta[0]))])
+        grid = griddata(points, grid.flatten(), xi, method='linear')
+        grid = grid.reshape((500, 500))
+
+        # fill in the cell interior
+        Grid = [grid]
+        n = int(round(np.max(sizes / self.metadata.resolution)))
+        for i in range(n):
+            Grid.append(i * grid / n)
+
+        # convert to Cartesian coordinates and make an image
+        img = None
+        mincoords = None
+        for grid in Grid:
+            coords = self.__spherical_to_cart(grid, Phi, Theta)
+            coords = np.array(coords).reshape([3, len(coords[0])])
+            for i in range(len(coords)):
+                coords[i] = np.int_(np.round_(coords[i] / self.metadata.resolution[i]))
+            if mincoords is None:
+                mincoords = np.min(coords, axis=1)
+
+            for i in range(len(coords)):
+                coords[i] = coords[i] - mincoords[i] + 5
+
+            coords = np.int_(coords)
+            if img is None:
+                img = np.zeros(np.max(coords, axis=1) + 5)  # empty array for the cell image
+            z, y, x = coords
+            img[z, y, x] = 255
+
+        img = (morphology.remove_small_objects((img > 0).astype(bool),
+                                               min_size=4. / 3 * np.pi * sizes[0] * sizes[1] * sizes[2] / 2) > 0) * 255
+
+        return img
 
     def volume(self):
         """
@@ -282,81 +409,6 @@ class Cell(Image):
 
     #########################################################
     # private helper functions
-    def __spiky_cell(self, size, resolution, theta=0, phi=0, spikiness=0, spike_size=0, spike_smoothness=0.05):
-        gridsize = 100
-        number_of_spikes = int(spikiness*(gridsize)**2)
-        Phi, Theta = np.meshgrid(np.linspace(0, 2 * np.pi, gridsize, endpoint=True),
-                                 np.linspace(0, np.pi, gridsize, endpoint=True))
-
-        x = np.sin(Theta) * np.cos(Phi) * np.cos(theta) + np.cos(Theta) * np.sin(theta)
-        y = np.sin(Theta) * np.sin(Phi)
-        z = np.cos(Theta) * np.cos(theta) - np.sin(Theta) * np.cos(Phi) * np.sin(theta)
-        grid = np.sqrt(1 / ((x / size[0]) ** 2 + (y / size[1]) ** 2 + (z / size[2]) ** 2))
-
-        if phi > 0:
-            i = np.argmin(abs(Phi[1] - phi))
-            if i > 0:
-                R = np.zeros_like(grid)
-                R[:, :i] = grid[:, -i:]
-                R[:, i:] = grid[:, :-i]
-                grid = R
-
-        # introduce spikes
-
-        phi = np.random.randint(0, grid.shape[1], size=number_of_spikes)
-        theta = []
-        while len(theta) < number_of_spikes:
-            x = np.random.randint(0, grid.shape[0])
-            y = np.random.rand()
-            if y <= np.sin(Theta[x, 0]):
-                theta.append(x)
-
-        if spike_size > 0:
-            random_points = np.random.normal(1, spike_size, size=number_of_spikes)
-            grid[theta, phi] = grid[theta, phi] * random_points
-            if spike_smoothness > 0:
-                grid = ndimage.gaussian_filter(grid, spike_smoothness*gridsize/np.pi)
-            grid[grid < 0] = 0
-
-        # interpolate the grid
-        points = np.array([Theta.flatten(), Phi.flatten()]).transpose()
-        Phi, Theta = np.meshgrid(np.linspace(0, 2 * np.pi, 500, endpoint=True),
-                                 np.linspace(0, np.pi, 500, endpoint=True))
-
-        xi = np.asarray([[Theta[i, j], Phi[i, j]] for i in range(len(Theta)) for j in range(len(Theta[0]))])
-        grid = griddata(points, grid.flatten(), xi, method='linear')
-        grid = grid.reshape((500, 500))
-
-        # fill in the cell interior
-        Grid = [grid]
-        n = int(round(np.max(size/resolution)))
-        for i in range(n):
-            Grid.append(i*grid / n)
-
-        # convert to Cartesian coordinates and make an image
-        img = None
-        mincoords = None
-        for grid in Grid:
-            coords = self.__spherical_to_cart(grid, Phi, Theta)
-            coords = np.array(coords).reshape([3, len(coords[0])])
-            for i in range(len(coords)):
-                coords[i] = np.int_(np.round_(coords[i]/resolution[i]))
-            if mincoords is None:
-                mincoords = np.min(coords, axis=1)
-
-            for i in range(len(coords)):
-                coords[i] = coords[i] - mincoords[i] + 5
-
-            coords = np.int_(coords)
-            if img is None:
-                img = np.zeros(np.max(coords, axis=1) + 5)  # empty array for the cell image
-            z, y, x = coords
-            img[z, y, x] = 255
-
-        img = (morphology.remove_small_objects((img > 0).astype(bool),
-                                               min_size=4./3*np.pi*size[0]*size[1]*size[2]/2) > 0)*255
-
-        return img
 
     def __spherical_to_cart(self, r, phi, theta):
         x = r * np.sin(phi) * np.cos(theta - np.pi)
@@ -364,32 +416,18 @@ class Cell(Image):
         z = r * np.cos(phi)
         return x.flatten(), y.flatten(), z.flatten()
 
-    def __ellipsoid_cell(self, sizes, theta=0, phi=0):
-
-        phi = phi * 180 / np.pi  # convert the angles from radians to degrees
-        theta = theta * 180 / np.pi
-
-        target_volume = 4. / 3 * np.pi * sizes[0] * sizes[1] * sizes[2] / 8.  # compute the volume of the cell in voxels
-        maxsize = np.max([sizes])  # maximal dimension
-        side = int(maxsize * 0.6) + 2  # half-dimension of the cell image
-
-        x = np.zeros([side * 2 + 1, side * 2 + 1, side * 2 + 1])  # empty array for the cell image
-        x[side, side, side] = 1000.  # a peak in the center
-        sig = sizes / 7.5  # compute the optimal sigma for smoothing
-
-        x = ndimage.gaussian_filter(x, sig)  # smooth the peak with a Gaussian filter
-
-        if theta > 0:  # rotate the image, if rotation angles are not 0
-            x = ndimage.interpolation.rotate(x, theta, axes=(0, 1))
-            if phi > 0:
-                x = ndimage.interpolation.rotate(x, phi, axes=(1, 2))
-
-        # compute the intensity percentile (for the thresholding) that corresponds to the target volume of the cells
-        per = 100 - target_volume * 100. / (x.shape[0] * x.shape[1] * x.shape[2])
-        x = (x >= np.percentile(x, per)) * 255  # threshold the image at the computed intensity percentile
-
-        return x
-
+    def __convert_size(self, size=None, size_x=10, size_y=10, size_z=10):
+        if size is not None:
+            size = np.array([size]).flatten()
+            if len(size) == 1:
+                sizes = np.array([size[0], size[0], size[0]])
+            elif len(size) == 3:
+                sizes = size
+            else:
+                raise ValueError('The size value has to be a number or sequence of length 3!')
+        else:
+            sizes = np.array([size_z, size_y, size_x])
+        return sizes
 
 
 

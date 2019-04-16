@@ -52,4 +52,7 @@ def segment(image, preprocess=False, thr=None, relative_thr=False, postprocess=F
     image = sgm(image, thr=thr, relative_thr=relative_thr, median=median,
                 morphology=morphology, fill_holes=fill_holes, label=label)
 
+    if label is False:
+        image = (image > 0) * 255
+
     return image

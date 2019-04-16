@@ -160,7 +160,7 @@ class Cell(Image):
         ndarray
             Segmented binary mask.
         """
-        self.image = quantification.segment(self.image, preprocess, thr, relative_thr, postprocess)
+        self.image = quantification.segment(self.image, preprocess, thr, relative_thr, postprocess, label=False)
 
         return self.image
 

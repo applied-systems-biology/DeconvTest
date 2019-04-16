@@ -4,7 +4,7 @@ import sys
 import pandas as pd
 
 from helper_lib import filelib
-from DeconvTest.classes.plotting import plot
+from DeconvTest.modules.plotting import plot
 
 
 def summarize_results(**params):

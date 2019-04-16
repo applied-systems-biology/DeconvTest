@@ -1,9 +1,5 @@
 """
-Module containing functions running ImageJ deconvolution plugins with given parameters. 
-Includes the following ImageJ plugins / algorithms:
-- Iterative fiji 3D
-- DeconvolutionLab2: Regularized Inverse Filter (RIF)
-- DeconvolutionLab2: Richardson-Lucy with Total Variance (RLTV)
+This module contains functions for running Fiji deconvolution plugins with given parameters.
 """
 from __future__ import division
 import os
@@ -13,66 +9,71 @@ import zipfile
 import pandas as pd
 from helper_lib import filelib
 
+valid_algorithms = ['deconvolution_lab_rif', 'deconvolution_lab_rltv', 'iterative_deconvolve_3d']
 
-def run_rif(imagej_path, inputfile, psffile, rif_lambda, outputfile):
+
+def deconvolution_lab_rif(inputfile, psffile, regularization_lambda, outputfile, imagej_path=None, **kwargs_to_ignore):
     """
     Runs Regularized Inverse Filter (RIF) from DeconvolutionLab2 plugin with given parameters.
     
     Parameters
     ----------
-    imagej_path : str
-        Absolute path to the Fiji / ImageJ software
     inputfile : str
         Absolute path to the input file that should be deconvolved.
     psffile : str
         Absolute path to the psf file.
-    rif_lambda : float
+    regularization_lambda : float
         Regularization parameter for the RIF algorithm.
     outputfile : str
         Absolute path to the output file.
+    imagej_path : str
+        Absolute path to the Fiji / ImageJ software
 
     """
+    if imagej_path is None:
+        imagej_path = get_fiji_path()
 
-    os.system(imagej_path + " --headless --console -macro rif.ijm '" + inputfile + ' ' + psffile + ' ' +
-              str(rif_lambda) + ' ' + os.path.dirname(outputfile) + ' ' + os.path.basename(outputfile)[:-4] + "'")
+    os.system(imagej_path + " --headless --console -macro deconvolution_lab_rif.ijm '" + inputfile + ' ' +
+              psffile + ' ' + str(regularization_lambda) + ' ' + os.path.dirname(outputfile) + ' ' +
+              os.path.basename(outputfile)[:-4] + "'")
 
 
-def run_rltv(imagej_path, inputfile, psffile, iterations, rltv_lambda, outputfile):
+def deconvolution_lab_rltv(inputfile, psffile, iterations, regularization_lambda, outputfile,
+                           imagej_path=None, **kwargs_to_ignore):
     """
     Runs Richardson-Lucy with Total Variance (RLTV) from DeconvolutionLab2 plugin with given parameters.
     
     Parameters
     ----------
-    imagej_path : str
-        Absolute path to the Fiji / ImageJ software
     inputfile : str
         Absolute path to the input file that should be deconvolved.
     psffile : str
         Absolute path to the psf file.
     iterations : int
         Number of iterations in the RLTV algorithm.
-    rltv_lambda : float
+    regularization_lambda : float
         Regularization parameter for the RLTV algorithm.
     outputfile : str
         Absolute path to the output file.
-
+    imagej_path : str
+        Absolute path to the Fiji / ImageJ software
 
     """
+    if imagej_path is None:
+        imagej_path = get_fiji_path()
 
-    os.system(imagej_path + " --headless --console -macro rltv.ijm '" + inputfile + ' ' + psffile + ' ' +
-              str(iterations) + ' ' + str(rltv_lambda) + ' ' + os.path.dirname(outputfile) + ' ' +
-              os.path.basename(outputfile)[:-4] + "'")
+    os.system(imagej_path + " --headless --console -macro deconvolution_lab_rltv.ijm '" + inputfile + ' ' +
+              psffile + ' ' + str(iterations) + ' ' + str(regularization_lambda) + ' ' +
+              os.path.dirname(outputfile) + ' ' + os.path.basename(outputfile)[:-4] + "'")
 
 
-def run_iterative(imagej_path, inputfile, psffile, outputfile, normalize, perform, detect, wiener,
-                  low, terminate, iterations):
-    """   
+def iterative_deconvolve_3d(inputfile, psffile, outputfile, normalize, perform, detect, wiener, low, terminate,
+                            iterations=200, imagej_path=None, **kwargs_to_ignore):
+    """
     Runs Iterative Deconvolve 3D plugin with given parameters.
     
     Parameters
     ----------
-    imagej_path : str
-        Absolute path to the Fiji / ImageJ software
     inputfile : str
         Absolute path to the input file that should be deconvolved.
     psffile : str
@@ -96,10 +97,15 @@ def run_iterative(imagej_path, inputfile, psffile, outputfile, normalize, perfor
         0 to turn off.
     iterations : int
         Number of iterations in the Iterative Deconvolve 3D algorithm.
+    imagej_path : str
+        Absolute path to the Fiji / ImageJ software
 
     """
 
-    os.system(imagej_path + " --headless --console -macro iterative.ijm '" + inputfile + ' ' +
+    if imagej_path is None:
+        imagej_path = get_fiji_path()
+
+    os.system(imagej_path + " --headless --console -macro iterative_deconvolve_3d.ijm '" + inputfile + ' ' +
               psffile + ' ' + outputfile + ' ' + str(normalize).upper() + ' ' + str(perform).upper() +
               ' ' + str(detect).upper() + ' ' + str(wiener) + ' ' + str(low) + ' ' +
               str(terminate) + ' ' + str(iterations) + "'")
@@ -147,7 +153,7 @@ def save_fiji_version(outputfolder):
     filelib.make_folders([outputfolder])
     if not outputfolder.endswith('/'):
         outputfolder += '/'
-    os.system(get_fiji_path() + " --headless --console -macro version.ijm '" + outputfolder + "'")
+    os.system(get_fiji_path() + " --headless --console -macro get_fiji_version.ijm '" + outputfolder + "'")
 
 
 

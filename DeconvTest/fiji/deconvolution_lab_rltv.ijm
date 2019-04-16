@@ -19,5 +19,9 @@ command = "-image file " + path_input +
           " -path " + path_output;
 
 run("DeconvolutionLab2 Run", command);
-wait(3000);  // wait for 3 seconds before exiting the process
-eval("script", "System.exit(0);");
+for (i=0; i<1000; i++){
+if (File.exists(path_output + '/' + filename_output + '.tif')){
+        eval("script", "System.exit(0);");
+    }
+    wait(500);
+}

@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+from DeconvTest.modules import input_objects
 from helper_lib import filelib
 
 
@@ -61,12 +62,10 @@ class CellParams(pd.DataFrame):
             Keyword arguments passed to corresponding methods to generate cell parameters.
         """
 
-        valid_shapes = ['ellipsoid', 'spiky_cell']
-
-        if 'parameters_' + kind in dir(self) and kind in valid_shapes:
+        if 'parameters_' + kind in dir(input_objects) and kind in input_objects.valid_shapes:
             cells = pd.DataFrame()
             for i in range(int(number_of_cells)):
-                cell = getattr(self, 'parameters_' + kind)(**kwargs)
+                cell = getattr(input_objects, 'parameters_' + kind)(**kwargs)
                 if coordinates:
                     cell['z'], cell['y'], cell['x'] = np.random.uniform(0, 1, 3)
                 cell['kind'] = kind
@@ -78,96 +77,6 @@ class CellParams(pd.DataFrame):
 
         else:
             raise AttributeError(kind + ' is not a valid object shape!')
-
-    def parameters_ellipsoid(self, size_mean_and_std=(10, 2), equal_dimensions=False, **kwargs_to_ignore):
-        """
-        Generates random cells sizes and rotation angles.
-
-        Parameters:
-        -----------
-        size_mean_and_std: tuple, optional
-            Mean value and standard deviation for the cell size in micrometers.
-            The cell size is drawn randomly from a Gaussian distribution with given mean and standard deviation.
-            Default is (10, 2).
-        equal_dimensions: bool, optional
-            If True, generates parameters for a sphere.
-            If False, generate parameters for an ellipsoid with sizes for all three axes chosen independently.
-            Default is True
-        """
-
-        size_mean, size_std = size_mean_and_std
-        if equal_dimensions:
-            sizex = sizey = sizez = np.random.normal(size_mean, size_std)
-            if sizex < 1:
-                sizex = sizey = sizez = 1
-            phi = theta = 0
-        else:
-            theta_range = [0, np.pi]
-            phi_range = [0, 2 * np.pi]
-            sizex = np.random.normal(size_mean, size_std)
-            sizey = np.random.normal(size_mean, size_std)
-            sizez = np.random.normal(size_mean, size_std)
-
-            if sizex < 1:
-                sizex = 1
-
-            if sizey < 1:
-                sizey = 1
-
-            if sizez < 1:
-                sizez = 1
-
-            theta = self.__sine_distribution(theta_range[0], theta_range[1])
-            phi = np.random.uniform(phi_range[0], phi_range[1])
-
-        cell = pd.DataFrame({'size_x': [sizex], 'size_y': [sizey], 'size_z': [sizez], 'phi': [phi], 'theta': [theta]})
-
-        return cell
-
-    def parameters_spiky_cell(self, size_mean_and_std=(10, 2), equal_dimensions=False,
-                                spikiness_range=(0, 0), spike_size_range=(0, 0),
-                                spike_smoothness_range=(0.05, 0.1), **kwargs_to_ignore):
-        """
-        Generates random cells sizes and rotation angles.
-
-        Parameters:
-        -----------
-        size_mean_and_std: tuple, optional
-            Mean value and standard deviation for the cell size in micrometers.
-            The cell size is drawn randomly from a Gaussian distribution with given mean and standard deviation.
-            Default is (10, 2).
-        equal_dimensions: bool, optional
-            If True, generates parameters for a sphere.
-            If False, generate parameters for an ellipsoid with sizes for all three axes chosen independently.
-            Default is True
-        spikiness_range : tuple, optional
-            Range for the fraction of cell surface area covered by spikes.
-            Default is (0, 0).
-        spike_size_range : tuple, optional
-            Range for the standard deviation for the spike amplitude relative to the cell radius.
-            Default is (0, 0).
-        spike_smoothness_range : tuple, optional
-            Range for the width of the Gaussian filter that is used to smooth the spikes.
-            Default is (0.05, 0.1).
-
-        """
-
-        cell = self.parameters_ellipsoid(size_mean_and_std=size_mean_and_std, equal_dimensions=equal_dimensions)
-
-        if spikiness_range[0] == spikiness_range[1]:
-            cell['spikiness'] = spikiness_range[0]
-        else:
-            cell['spikiness'] = np.random.uniform(spikiness_range[0], spikiness_range[1])
-        if spike_size_range[0] == spike_size_range[1]:
-            cell['spike_size'] = spike_size_range[0]
-        else:
-            cell['spike_size'] = np.random.uniform(spike_size_range[0], spike_size_range[1])
-        if spike_smoothness_range[0] == spike_smoothness_range[1]:
-            cell['spike_smoothness'] = spike_smoothness_range[0]
-        else:
-            cell['spike_smoothness'] = np.random.uniform(spike_smoothness_range[0], spike_smoothness_range[1])
-
-        return cell
 
     def save(self, outputfile):
         """
@@ -228,39 +137,4 @@ class CellParams(pd.DataFrame):
         pl = sns.pairplot(cells, vars=['phi', 'theta'])
 
         return pl.fig
-
-    def __sine_distribution(self, minval, maxval, size=1):
-        """
-        Generates a random values or an array of values in a given range, which is distributed as sin(x) 
-    
-        Parameters
-        ----------
-        minval : float
-            Minimal value of the range of the random variable.
-        maxval : float
-            Maximal value of the range of the random variable.
-        size : integer, optional
-            Number of random values to generate.
-            Default: 1
-    
-        Returns
-        -------
-        scalar or sequence of scalars
-            Returned array of sine-distributed values.
-        """
-        out = []
-        while len(out) < size:  # check whether the target size of the array has been reached
-            x = np.random.rand()*(maxval - minval) + minval  # generate a random number between minval and maxval
-            y = np.random.rand()  # generate a random number between 0 and 1
-
-            # accept the generated value x, if sin(x) >= y;
-            # values around pi/2 will be accepted with high probability,
-            # while values around 0 and pi will be accepted with low probability
-            if y <= np.sin(x):
-                out.append(x)
-
-        if size == 1:
-            out = out[0]
-
-        return out
 

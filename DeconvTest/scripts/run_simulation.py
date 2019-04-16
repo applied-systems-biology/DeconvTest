@@ -10,7 +10,7 @@ from helper_lib import filelib
 from DeconvTest.batch import simulation as sim
 from DeconvTest.batch import quantification as quant
 from DeconvTest.batch import deconvolution as dec
-from DeconvTest.deconvolve.fiji import save_fiji_version
+from DeconvTest.fiji.fiji import save_fiji_version
 
 import mkl
 mkl.set_num_threads(1)

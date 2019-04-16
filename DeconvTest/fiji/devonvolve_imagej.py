@@ -1,7 +1,7 @@
 """
 Module containing functions running ImageJ deconvolution plugins with given parameters. 
 Includes the following ImageJ plugins / algorithms:
-- Iterative deconvolve 3D
+- Iterative fiji 3D
 - DeconvolutionLab2: Regularized Inverse Filter (RIF)
 - DeconvolutionLab2: Richardson-Lucy with Total Variance (RLTV)
 """

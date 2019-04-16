@@ -42,10 +42,10 @@ if __name__ == '__main__':
     if not os.path.exists(os.path.dirname(imagej_path) + '/macros'):
         os.makedirs(os.path.dirname(imagej_path) + '/macros')
 
-    shutil.copy('DeconvTest/deconvolve/version.ijm', os.path.dirname(imagej_path) + '/macros/' + 'version.ijm')
-    shutil.copy('DeconvTest/deconvolve/rif.ijm', os.path.dirname(imagej_path) + '/macros/' + 'rif.ijm')
-    shutil.copy('DeconvTest/deconvolve/rltv.ijm', os.path.dirname(imagej_path) + '/macros/' + 'rltv.ijm')
-    shutil.copy('DeconvTest/deconvolve/iterative.ijm', os.path.dirname(imagej_path) + '/macros/' + 'iterative.ijm')
+    shutil.copy('DeconvTest/fiji/version.ijm', os.path.dirname(imagej_path) + '/macros/' + 'version.ijm')
+    shutil.copy('DeconvTest/fiji/rif.ijm', os.path.dirname(imagej_path) + '/macros/' + 'rif.ijm')
+    shutil.copy('DeconvTest/fiji/rltv.ijm', os.path.dirname(imagej_path) + '/macros/' + 'rltv.ijm')
+    shutil.copy('DeconvTest/fiji/iterative.ijm', os.path.dirname(imagej_path) + '/macros/' + 'iterative.ijm')
 
     command = 'python ./.setup.py '
     for arg in args:

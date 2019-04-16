@@ -1,7 +1,7 @@
 """
 Module containing functions for deconvolving images with ImageJ plugins in a batch mode.
 Includes the following ImageJ plugins / algorithms:
-- Iterative deconvolve 3D
+- Iterative fiji 3D
 - DeconvolutionLab2: Regularized Inverse Filter (RIF)
 - DeconvolutionLab2: Richardson-Lucy with Total Variance (RLTV)
 """
@@ -11,8 +11,8 @@ import time
 import numpy as np
 import pandas as pd
 
-from DeconvTest.deconvolve.fiji import get_fiji_path
-from DeconvTest.deconvolve.devonvolve_imagej import *
+from DeconvTest.fiji.fiji import get_fiji_path
+from DeconvTest.fiji.devonvolve_imagej import *
 from DeconvTest.classes.metadata import Metadata
 from helper_lib.parallel import run_parallel
 from helper_lib import filelib
@@ -27,11 +27,11 @@ def deconvolve_batch(inputfolder, outputfolder, algorithm, rif_lambda=0.01, rltv
     Parameters
     ----------
     inputfolder : str
-        Input directory with cell images to deconvolve.
+        Input directory with cell images to fiji.
     outputfolder : str
         Output directory to save the deconvolved images.
     algorithm : str or sequence of str
-        Deconvolution algorithm that will be applied to deconvolve the input images.
+        Deconvolution algorithm that will be applied to fiji the input images.
         If a sequence of algorithms is provided, all algorithms from the sequence will be applied.
         The valid values are as follows:
         

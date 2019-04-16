@@ -6,7 +6,8 @@ import pandas as pd
 from image import Image
 from metadata import Metadata
 from DeconvTest.modules import input_objects
-from helper_lib.image import unify_shape, segment
+from DeconvTest.modules import quantification
+from helper_lib.image import unify_shape
 
 
 class Cell(Image):
@@ -159,23 +160,7 @@ class Cell(Image):
         ndarray
             Segmented binary mask.
         """
-
-        if self.image is None:
-            raise ValueError('Image is None!')
-
-        if preprocess:
-            median = 3
-        else:
-            median = None
-        if postprocess:
-            morphology = True
-            fill_holes = True
-        else:
-            morphology = False
-            fill_holes = False
-
-        self.image = (segment(self.image, thr=thr, relative_thr=relative_thr, median=median,
-                             morphology=morphology, fill_holes=fill_holes, label=False) > 0)*255
+        self.image = quantification.segment(self.image, preprocess, thr, relative_thr, postprocess)
 
         return self.image
 

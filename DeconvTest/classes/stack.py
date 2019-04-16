@@ -12,9 +12,10 @@ from skimage.measure import label as lbl
 from cell import Cell
 from image import Image
 from metadata import Metadata
+from DeconvTest.modules import quantification
 
 from helper_lib import filelib
-from helper_lib.image import unify_shape, segment
+from helper_lib.image import unify_shape
 
 
 class Stack(Image):
@@ -180,23 +181,8 @@ class Stack(Image):
         ndarray
             Segmented binary mask or labeled image.
         """
-        if self.image is None:
-            raise ValueError('Image is None!')
+        self.image = quantification.segment(self.image, preprocess, thr, relative_thr, postprocess, label)
         self.is_segmented = True
-
-        if preprocess:
-            median = 3
-        else:
-            median = None
-        if postprocess:
-            morphology = True
-            fill_holes = True
-        else:
-            morphology = False
-            fill_holes = False
-
-        self.image = segment(self.image, thr=thr, relative_thr=relative_thr, median=median,
-                             morphology=morphology, fill_holes=fill_holes, label=label)
 
         if label is True:
             self.is_labeled = True

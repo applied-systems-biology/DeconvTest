@@ -90,14 +90,14 @@ class TestImageClass(unittest.TestCase):
         arr[10:-10, 10:-10, 10:-10] = 255
         img.image = arr
         psf = PSF()
-        psf.generate(5, 4)
+        psf.generate(sigma=5, aspect_ratio=4)
         img.convolve(psf)
         self.assertEqual(len(img.image.shape), len(arr.shape))
 
     def test_convolve_None(self):
         img = Image()
         psf = PSF()
-        psf.generate(5, 4)
+        psf.generate(sigma=5, aspect_ratio=4)
         self.assertRaises(ValueError, img.convolve, psf)
 
     def test_convolve_None2(self):

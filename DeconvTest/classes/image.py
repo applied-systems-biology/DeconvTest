@@ -6,11 +6,12 @@ from scipy import ndimage
 from scipy.signal import fftconvolve
 from skimage import io
 import pylab as plt
+from skimage.exposure import rescale_intensity
 import warnings
 
 from metadata import Metadata
+from DeconvTest.modules import noise
 from helper_lib import filelib
-from skimage.exposure import rescale_intensity
 
 
 class Image(object):
@@ -173,69 +174,14 @@ class Image(object):
         ndarray
             Output noisy image of the same shape as the current image.
         """
-        valid_noise_types = ['gaussian', 'poisson']
         if kind is not None:
             if type(kind) is str:
                 kind = [kind]
             for k in kind:
-                if 'add_' + k + '_noise' in dir(self) and k in valid_noise_types:
-                    self.image = getattr(self, 'add_' + k + '_noise')(snr=snr)
+                if 'add_' + k + '_noise' in dir(noise) and k in noise.valid_noise_types:
+                    self.image = getattr(noise, 'add_' + k + '_noise')(img=self.image, snr=snr)
                 else:
                     raise AttributeError(k + ' is not a valid noise type!')
 
         return self.image
 
-    def add_poisson_noise(self, snr=None):
-        """
-        Adds random Poisson noise to the current image.
-
-        Parameters
-        ----------
-        snr : float, optional
-            Target signal-to-noise ratio (SNR) after adding the noise.
-            If None, no noise is added.
-            Default is None
-
-        Returns
-        -------
-        ndarray
-            Output noisy image of the same shape as the current image.
-        """
-
-        if self.image is None:
-            raise ValueError('self.image is None! The image has to be initialized!')
-
-        if snr is not None:
-            imgmax = snr ** 2
-            ratio = imgmax / self.image.max()
-            self.image = self.image * 1. * ratio
-            self.image = np.random.poisson(self.image)
-            self.image = self.image / ratio
-        return self.image
-
-    def add_gaussian_noise(self, snr=None):
-        """
-        Adds random Gaussian noise to the current image.
-
-        Parameters
-        ----------
-        snr : float, optional
-            Target signal-to-noise ratio (SNR) after adding the noise.
-            If None, no noise is added.
-            Default is None
-
-        Returns
-        -------
-        ndarray
-            Output noisy image of the same shape as the current image.
-        """
-
-        if self.image is None:
-            raise ValueError('self.image is None! The image has to be initialized!')
-
-        if snr is not None:
-            sig = self.image.max() * 1. / (10 ** (snr / 20.))
-            noise = np.random.normal(0, sig, self.image.shape)
-            self.image = self.image + noise
-            self.image[np.where(self.image < 0)] = 0
-        return self.image

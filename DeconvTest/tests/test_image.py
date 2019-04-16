@@ -112,7 +112,7 @@ class TestImageClass(unittest.TestCase):
         arr = np.zeros([50, 50, 50])
         arr[10:-10, 10:-10, 10:-10] = 255
         img.image = arr
-        img.add_gaussian_noise(2)
+        img.add_noise(kind='gaussian', snr=2)
         self.assertEqual(img.image.shape, arr.shape)
 
     def test_noise2(self):
@@ -120,16 +120,16 @@ class TestImageClass(unittest.TestCase):
         arr = np.zeros([50, 50, 50])
         arr[10:-10, 10:-10, 10:-10] = 255
         img.image = arr
-        img.add_poisson_noise(2)
+        img.add_noise(kind='poisson', snr=2)
         self.assertEqual(img.image.shape, arr.shape)
 
     def test_noise_None(self):
         img = Image()
-        self.assertRaises(ValueError, img.add_poisson_noise, 2)
+        self.assertRaises(ValueError, img.add_noise, 'poisson', 2)
 
     def test_noise_None2(self):
         img = Image()
-        self.assertRaises(ValueError, img.add_gaussian_noise, 2)
+        self.assertRaises(ValueError, img.add_noise, 'gaussian', 2)
 
     @data(
         'gaussian',

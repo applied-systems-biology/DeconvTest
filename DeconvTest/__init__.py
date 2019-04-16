@@ -6,3 +6,4 @@ from DeconvTest.classes.stack import Stack
 from DeconvTest.classes.metadata import Metadata
 
 from DeconvTest.modules.input_objects import *
+from DeconvTest.modules.noise import *

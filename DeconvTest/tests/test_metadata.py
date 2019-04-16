@@ -1,9 +1,6 @@
-import sys
 import unittest
 
-import pandas as pd
 from ddt import ddt, data
-
 from DeconvTest import Metadata
 
 

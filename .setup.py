@@ -6,7 +6,7 @@ setup(
     version='1.0',                          # python versioneer
     url="https://github.com/applied-systems-biology/DeconvTest",
     author="Anna Medyukhina",
-    packages=['DeconvTest', 'DeconvTest.classes', 'DeconvTest.batch', 'DeconvTest.deconvolve'],
+    packages=['DeconvTest', 'DeconvTest.classes', 'DeconvTest.batch', 'DeconvTest.deconvolve', 'DeconvTest.modules'],
     scripts=['DeconvTest/scripts/run_simulation.py'],
     author_email='anna.medyukhina@gmail.com',
     license='BSD-3-Clause',

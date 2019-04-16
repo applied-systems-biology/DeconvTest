@@ -101,6 +101,22 @@ class Image(object):
                 plt.sca(axs[i])
                 io.imshow(self.image.max(i), cmap='viridis')
 
+    def save_projection(self, outputfile, axis=1):
+        """
+        Saves the maximum intensity projection of the stack.
+
+        Parameters
+        ----------
+        outputfile : str
+            The path used to save the maximum intensity projection.
+        axis : int, optional
+            Axis along which the projection should be made.
+            Default is 1 (xz).
+        """
+        filelib.make_folders([os.path.dirname(outputfile)])
+        maxproj = np.max(self.image, axis=axis)
+        io.imsave(outputfile, maxproj.astype(np.uint8))
+
     def convolve(self, psf):
         """
         Convolves the current image with a given point spread function (PSF).

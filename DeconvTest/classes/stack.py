@@ -137,21 +137,6 @@ class Stack(Image):
 
         self.image[ind] = 255  # add the new cell to the stack
 
-    def save_projection(self, outputfile, axis=1):
-        """
-        Saves the maximum intensity projection of the stack.
-
-        Parameters
-        ----------
-        outputfile : str
-            The path used to save the maximum intensity projection.
-        axis : int, optional
-            Axis along which the projection should be made.
-            Default is 1 (xz).
-        """
-        filelib.make_folders([os.path.dirname(outputfile)])
-        maxproj = np.max(self.image, axis=axis)
-        io.imsave(outputfile, maxproj.astype(np.uint8))
 
     def segment(self, preprocess=False, thr=None, relative_thr=False, postprocess=False, label=True):
         """

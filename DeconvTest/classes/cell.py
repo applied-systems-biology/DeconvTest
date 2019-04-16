@@ -1,13 +1,11 @@
 from __future__ import division
 
 import numpy as np
-import pandas as pd
 
 from image import Image
 from metadata import Metadata
 from DeconvTest.modules import input_objects
 from DeconvTest.modules import quantification
-from helper_lib.image import unify_shape
 
 
 class Cell(Image):

@@ -123,9 +123,9 @@ class TestCellClass(unittest.TestCase):
         cell.generate(size=[5, 6, 5], resolution=0.5)
         errors = cell.compare_to_ground_truth(cell)
         for c in ['Overdetection error', 'Underdetection error', 'Overlap error']:
-            self.assertEqual(errors[c], 0)
+            self.assertEqual(errors[c].iloc[0], 0)
         for c in ['Jaccard index', 'Sensitivity', 'Precision']:
-            self.assertEqual(errors[c], 1)
+            self.assertEqual(errors[c].iloc[0], 1)
 
     def test_cell_from_params(self):
         celldata = CellParams(number_of_cells=5, spikiness_range=(0, 1), spike_size_range=(0.1, 1),

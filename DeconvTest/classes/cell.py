@@ -194,27 +194,14 @@ class Cell(Image):
         Parameters
         ----------
         gt : Image or Cell 
-            Binary ground truth image.
+            Ground truth image.
 
         Returns
         -------
-        pandas.Series()
-            Dictionary containing the values for the computed accuracy measures.
+        pandas.DataFrame()
+            Data frame containing the values for the computed accuracy measures.
         """
-        data = pd.Series()
-        self.image, gt.image = unify_shape(self.image, gt.image)  # convert cell images to the same shape
-        self.image = (self.image > 0) * 1.
-        gt.image = (gt.image > 0) * 1.
-        overlap = np.sum(self.image * gt.image)
-        union = np.sum((self.image + gt.image) > 0)
-        a = np.sum(gt.image)
-        b = np.sum(self.image)
-        data['Overdetection error'] = (b - overlap) / a
-        data['Underdetection error'] = (a - overlap) / a
-        data['Overlap error'] = (union - overlap) / a
-        data['Jaccard index'] = overlap / union
-        data['Sensitivity'] = overlap / a
-        data['Precision'] = overlap / b
+        data = quantification.compute_binary_accuracy_measures(self.image, gt.image)
         return data
 
 

@@ -1,12 +1,10 @@
 from __future__ import division
 
-import os
 import warnings
 import numpy as np
 import pandas as pd
 from scipy import ndimage
 
-from skimage import io
 from skimage.measure import label as lbl
 
 from cell import Cell
@@ -14,7 +12,6 @@ from image import Image
 from metadata import Metadata
 from DeconvTest.modules import quantification
 
-from helper_lib import filelib
 from helper_lib.image import unify_shape
 
 
@@ -137,7 +134,6 @@ class Stack(Image):
 
         self.image[ind] = 255  # add the new cell to the stack
 
-
     def segment(self, preprocess=False, thr=None, relative_thr=False, postprocess=False, label=True):
         """
         Segments the current image by thresholding with optional preprocessing and finding connected regions.
@@ -240,9 +236,9 @@ class Stack(Image):
             The length of the data frame equals to the number of connected regions in the ground truth image.
 
         """
-        data = pd.DataFrame()
         self.image, gt.image = unify_shape(self.image, gt.image)  # convert cell images to the same shape
 
+        data = pd.DataFrame()
         if len(gt.cells) == 0:
             gt.segment()
             if len(gt.cells) == 0:
@@ -267,7 +263,7 @@ class Stack(Image):
                 dist = np.sum((centers - center) ** 2, axis=1)
                 curdata = self.cells[dist.argmin()].compare_to_ground_truth(gt.cells[i])
                 curdata['CellID'] = i
-                data = data.append(curdata, ignore_index=True)
+                data = pd.concat([data, curdata], ignore_index=True)
 
         return data
 

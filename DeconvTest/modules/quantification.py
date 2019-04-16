@@ -2,7 +2,11 @@
 This module contains functions for quantification of deconvolution accuracy
 """
 
+import pandas as pd
+import numpy as np
+
 from helper_lib.image import segment as sgm
+from helper_lib.image import unify_shape
 
 
 def segment(image, preprocess=False, thr=None, relative_thr=False, postprocess=False, label=True):
@@ -56,3 +60,35 @@ def segment(image, preprocess=False, thr=None, relative_thr=False, postprocess=F
         image = (image > 0) * 255
 
     return image
+
+
+def compute_binary_accuracy_measures(image, gt_image):
+    """
+    Computes binary accuracy measures between the current image and a given ground truth image.
+
+    Parameters
+    ----------
+    image : ndarray
+        Binary image to evaluate.
+    gt : ndarray
+        Binary ground truth image.
+
+    Returns
+    -------
+    pandas.DataFrame()
+        Data frame containing the values for the computed accuracy measures.
+    """
+    image, gt_image = unify_shape(image, gt_image)  # convert cell images to the same shape
+    image = (image > 0) * 1.
+    gt_image = (gt_image > 0) * 1.
+    overlap = np.sum(image * gt_image)
+    union = np.sum((image + gt_image) > 0)
+    a = np.sum(gt_image)
+    b = np.sum(image)
+    data = pd.DataFrame({'Jaccard index': [overlap / union],
+                         'Sensitivity': overlap / a,
+                         'Precision': overlap / b,
+                         'Overdetection error': (b - overlap) / a,
+                         'Underdetection error': (a - overlap) / a,
+                         'Overlap error': (union - overlap) / a})
+    return data

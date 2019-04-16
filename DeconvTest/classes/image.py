@@ -180,8 +180,9 @@ class Image(object):
             If a sequence is provided, several noise types will be added.
             If None, no noise will be added.
             Default is None.
-        snr : float, optional
-            Target signal-to-noise ratio (SNR) after adding the noise.
+        snr : float or sequence of floats, optional
+            Target signal-to-noise ratio (SNR) for each noise type.
+            Must be the same shape as the `kind` argument.
             If None, no noise is added.
             Default is None
 
@@ -193,9 +194,15 @@ class Image(object):
         if kind is not None:
             if type(kind) is str:
                 kind = [kind]
-            for k in kind:
+            snr = np.array([snr]).flatten()
+            if len(kind) != len(snr):
+                if len(snr) == 1:
+                    snr = np.ones(len(kind)) * snr
+                else:
+                    raise TypeError("The length of the array for SNR must be the same as for the noise type!")
+            for i, k in enumerate(kind):
                 if 'add_' + k + '_noise' in dir(noise) and k in noise.valid_noise_types:
-                    self.image = getattr(noise, 'add_' + k + '_noise')(img=self.image, snr=snr)
+                    self.image = getattr(noise, 'add_' + k + '_noise')(img=self.image, snr=snr[i])
                 else:
                     raise AttributeError(k + ' is not a valid noise type!')
 

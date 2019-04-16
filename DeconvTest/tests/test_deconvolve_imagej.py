@@ -1,7 +1,6 @@
 import unittest
 
 import os
-import time
 from ddt import ddt
 import shutil
 from DeconvTest.fiji.fiji import get_fiji_path
@@ -9,7 +8,7 @@ from DeconvTest.fiji.fiji import get_fiji_path
 
 from DeconvTest import Cell
 from DeconvTest import PSF
-from DeconvTest.fiji.devonvolve_imagej import run_rif, run_rltv, run_iterative
+from DeconvTest.modules.deconvolution_fiji import run_rif, run_rltv, run_iterative
 
 
 @ddt

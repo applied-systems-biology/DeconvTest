@@ -9,10 +9,8 @@ from __future__ import division
 
 import time
 import numpy as np
-import pandas as pd
 
-from DeconvTest.fiji.fiji import get_fiji_path
-from DeconvTest.fiji.devonvolve_imagej import *
+from DeconvTest.modules.deconvolution_fiji import *
 from DeconvTest.classes.metadata import Metadata
 from helper_lib.parallel import run_parallel
 from helper_lib import filelib

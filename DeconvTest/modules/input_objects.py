@@ -161,7 +161,7 @@ def parameters_spiky_cell(size_mean_and_std=(10, 2), equal_dimensions=False,
 
 
 def generate_spiky_cell(resolution, size=None, size_x=10, size_y=10, size_z=10, theta=0, phi=0,
-                        spikiness=0.1, spike_size=0.5, spike_smoothness=0.05):
+                        spikiness=0.1, spike_size=0.5, spike_smoothness=0.05, **kwargs_to_ignore):
     """
     Generates a synthetic object of ellipsoidal shape.
 

@@ -6,6 +6,7 @@ from __future__ import division
 
 import os
 import numpy as np
+import itertools
 
 from DeconvTest import CellParams
 from DeconvTest import StackParams
@@ -298,21 +299,11 @@ def add_noise_batch(inputfolder, outputfolder, kind, snr, test_snr_combinations=
     kind = np.array([kind]).flatten()
     snr = np.array([snr]).flatten()
     if len(kind) > 1 and test_snr_combinations:
-        if len(kind) == 2:
-            items = [(inputfile, kind, [snr1, snr2]) for inputfile in inputfiles
-                     for snr1 in snr for snr2 in snr]
-        elif len(kind) == 3:
-            items = [(inputfile, kind, [snr1, snr2, snr3]) for inputfile in inputfiles
-                     for snr1 in snr for snr2 in snr for snr3 in snr]
-        elif len(kind) == 4:
-            items = [(inputfile, kind, [snr1, snr2, snr3, snr4]) for inputfile in inputfiles
-                     for snr1 in snr for snr2 in snr for snr3 in snr for snr4 in snr]
-        else:
-            raise ValueError("Only up to 4 different noise iterations are supported")
+        snr_items = list(itertools.product(*[snr]*len(kind)))
+        items = [(inputfile, kind, list(snr_item)) for inputfile in inputfiles for snr_item in snr_items]
 
     else:
-        items = [(inputfile, kind, snr1) for inputfile in inputfiles
-                 for snr1 in snr]
+        items = [(inputfile, kind, snr1) for inputfile in inputfiles for snr1 in snr]
 
     kwargs['items'] = items
     kwargs['outputfolder'] = outputfolder

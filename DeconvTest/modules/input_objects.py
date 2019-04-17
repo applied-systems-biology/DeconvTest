@@ -115,7 +115,7 @@ def generate_ellipsoid(resolution, size=None, size_x=10, size_y=10, size_z=10, t
 
 
 def parameters_spiky_cell(size_mean_and_std=(10, 2), equal_dimensions=False,
-                          spikiness_range=(0, 0), spike_size_range=(0, 0),
+                          spikiness_range=(0.1, 0.5), spike_size_range=(0.1, 0.5),
                           spike_smoothness_range=(0.05, 0.1), **kwargs_to_ignore):
     """
     Generates random cells sizes and rotation angles.
@@ -132,10 +132,10 @@ def parameters_spiky_cell(size_mean_and_std=(10, 2), equal_dimensions=False,
         Default is True
     spikiness_range : tuple, optional
         Range for the fraction of cell surface area covered by spikes.
-        Default is (0, 0).
+        Default is (0.1, 0.5).
     spike_size_range : tuple, optional
         Range for the standard deviation for the spike amplitude relative to the cell radius.
-        Default is (0, 0).
+        Default is (0.1, 0.5).
     spike_smoothness_range : tuple, optional
         Range for the width of the Gaussian filter that is used to smooth the spikes.
         Default is (0.05, 0.1).

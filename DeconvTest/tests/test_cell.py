@@ -121,7 +121,7 @@ class TestCellClass(unittest.TestCase):
     def test_overlap_error(self):
         cell = Cell()
         cell.generate(size=[5, 6, 5], resolution=0.5)
-        errors = cell.compare_to_ground_truth(cell)
+        errors = cell.compute_binary_accuracy_measures(cell)
         for c in ['Overdetection error', 'Underdetection error', 'Overlap error']:
             self.assertEqual(errors[c].iloc[0], 0)
         for c in ['Jaccard index', 'Sensitivity', 'Precision']:

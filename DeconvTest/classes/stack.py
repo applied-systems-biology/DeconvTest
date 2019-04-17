@@ -134,7 +134,8 @@ class Stack(Image):
 
         self.image[ind] = 255  # add the new cell to the stack
 
-    def segment(self, preprocess=False, thr=None, relative_thr=False, postprocess=False, label=True):
+    def segment(self, preprocess=False, thr=None, relative_thr=False,
+                postprocess=False, label=True, **kwargs_to_ignore):
         """
         Segments the current image by thresholding with optional preprocessing and finding connected regions.
         
@@ -219,7 +220,7 @@ class Stack(Image):
                 dims.append(c.dimensions(**kwargs))
         return np.int_(np.round_(dims))
 
-    def compare_to_ground_truth(self, gt):
+    def compute_binary_accuracy_measures(self, gt):
         """   
         Computes the overlap errors, Jaccard index, and other accuracy measures between each connected region 
          in the current image and a given ground truth image.
@@ -261,7 +262,7 @@ class Stack(Image):
             for i in range(len(gt.cells)):  # compare each cell to the closest one in the ground truth Stack
                 center = np.reshape(gt.cells[i].position, (1, 3))
                 dist = np.sum((centers - center) ** 2, axis=1)
-                curdata = self.cells[dist.argmin()].compare_to_ground_truth(gt.cells[i])
+                curdata = self.cells[dist.argmin()].compute_binary_accuracy_measures(gt.cells[i])
                 curdata['CellID'] = i
                 data = pd.concat([data, curdata], ignore_index=True)
 

@@ -184,7 +184,7 @@ class Cell(Image):
                 dim.append(0)
         return np.array(dim)
 
-    def compare_to_ground_truth(self, gt):
+    def compute_binary_accuracy_measures(self, gt):
         """
         Computes the overlap errors, Jaccard index, and other accuracy measures between each connected region 
          in the current image and a given ground truth image.

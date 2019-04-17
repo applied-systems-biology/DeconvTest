@@ -227,7 +227,7 @@ class TestStackClass(unittest.TestCase):
                                'x': [0.5, 0.1], 'y': [0.5, 0.1], 'z': [0.5, 0.1]})
         stack.generate(params, 0.5, [10, 10, 10])
         stack.split_to_cells()
-        errors = stack.compare_to_ground_truth(stack)
+        errors = stack.compute_binary_accuracy_measures(stack)
         for i in range(len(errors)):
             self.assertEqual(errors.iloc[i]['Overlap error'], 0)
             self.assertEqual(errors.iloc[i]['Overdetection error'], 0)
@@ -253,7 +253,7 @@ class TestStackClass(unittest.TestCase):
         stack2.image = np.ones_like(stack.image)
         stack2.is_segmented = True
         stack2.split_to_cells()
-        errors = list(stack2.compare_to_ground_truth(stack)['Overlap error'])
+        errors = list(stack2.compute_binary_accuracy_measures(stack)['Overlap error'])
         errors.sort()
         self.assertEqual(tuple(volumes), tuple(errors))
 
@@ -266,7 +266,7 @@ class TestStackClass(unittest.TestCase):
         stack2.image = np.zeros_like(stack.image)
         stack2.is_segmented = True
         stack2.split_to_cells()
-        errors = stack2.compare_to_ground_truth(stack)
+        errors = stack2.compute_binary_accuracy_measures(stack)
         for i in range(len(errors)):
             self.assertEqual(errors.iloc[i]['Overlap error'], 1)
             self.assertEqual(errors.iloc[i]['Overdetection error'], 0)

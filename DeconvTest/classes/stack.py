@@ -87,8 +87,7 @@ class Stack(Image):
             shift = np.array([cell_params['size_z'].mean(), cell_params['size_y'].mean(), cell_params['size_x'].mean()])
         shift = shift / np.array(resolution) / 2 / stack_size_pix
         for i, c in enumerate(['z', 'y', 'x']):
-            # cell_params[c] = rescale_intensity(np.array(cell_params[c]), out_range=[shift[i], 1-shift[i]])
-            cell_params[c] = np.array(cell_params[c])*(1 - 2*shift[i]) + shift[i]
+            cell_params.loc[:, c] = np.array(cell_params[c])*(1 - 2*shift[i]) + shift[i]
         self.image = np.zeros(stack_size_pix)
 
         for i in range(len(cell_params)):

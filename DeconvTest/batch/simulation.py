@@ -9,7 +9,6 @@ import numpy as np
 import itertools
 
 from DeconvTest import CellParams
-from DeconvTest import StackParams
 from DeconvTest import Cell, Stack, PSF
 from DeconvTest.classes.metadata import Metadata
 from helper_lib.parallel import run_parallel
@@ -34,7 +33,7 @@ def generate_cell_parameters(outputfile, **kwargs):
     params.save(outputfile)
 
 
-def generate_cells_batch(params_file, outputfolder, **kwargs):
+def generate_cells_batch(params_file, **kwargs):
     """
     Generate synthetic cells with given parameters in a parallel mode and saves them in a given directory.
     
@@ -58,58 +57,24 @@ def generate_cells_batch(params_file, outputfolder, **kwargs):
         Default is True.
 
     """
-    if not outputfolder.endswith('/'):
-        outputfolder += '/'
     if not os.path.exists(params_file):
         raise ValueError('Parameter file does not exist!')
     params = CellParams()
     params.read_from_csv(filename=params_file)
-    items = []
-    for i in range(len(params)):
-        items.append(('cell_%03d.tif' % i, params.iloc[i]))
+    if 'stack' in params.columns:
+        items = []
+        for st in params['stack'].unique():
+            items.append(('stack_%03d.tif' % st, params[params['stack'] == st]))
+        kwargs['items'] = items
+        run_parallel(process=__generate_stacks_batch_helper, process_name='Generation of stacks', **kwargs)
 
-    kwargs['items'] = items
-    kwargs['outputfolder'] = outputfolder
-    run_parallel(process=__generate_cells_batch_helper, process_name='Generation of cells', **kwargs)
+    else:
+        items = []
+        for i in range(len(params)):
+            items.append(('cell_%03d.tif' % i, params.iloc[i]))
 
-
-def generate_stacks_batch(params_folder, outputfolder, **kwargs):
-    """
-    Generate synthetic multicellular stacks with given parameters in a parallel mode and saves them in a given directory.
-    
-    Parameters
-    ----------
-    params_folder : str
-        Directory with csv files with cell parameters.
-    outputfolder : str 
-        Output directory to save the generated stacks.
-
-    Keyword arguments
-    -----------------
-    resolution : scalar or sequence of scalars, optional
-        Voxel size in z, y and x used to generate the stack image.
-        If one value is provided, the voxel size is assume to be equal along all axes.
-    stack_size_microns : sequence of scalars
-        Dimensions of the image stack in micrometers.
-    max_threads : int, optional
-        The maximal number of processes to run in parallel.
-        Default is 8.
-    print_progress : bool, optional
-        If True, the progress of the computation will be printed.
-        Default is True.
-
-    """
-    if not outputfolder.endswith('/'):
-        outputfolder += '/'
-    if not params_folder.endswith('/'):
-        params_folder += '/'
-    if not os.path.exists(params_folder):
-        raise ValueError('Parameter folder does not exist!')
-    files = filelib.list_subfolders(params_folder, extensions=['csv'])
-    kwargs['items'] = files
-    kwargs['outputfolder'] = outputfolder
-    kwargs['inputfolder'] = params_folder
-    run_parallel(process=__generate_stacks_batch_helper, process_name='Generation of stacks', **kwargs)
+        kwargs['items'] = items
+        run_parallel(process=__generate_cells_batch_helper, process_name='Generation of cells', **kwargs)
 
 
 def generate_psfs_batch(outputfolder, sigmas, aspect_ratios, **kwargs):
@@ -299,18 +264,21 @@ def add_noise_batch(inputfolder, outputfolder, kind, snr, test_snr_combinations=
 
 def __generate_cells_batch_helper(item, outputfolder, resolution, **kwargs_to_ignore):
     filename, params = item
+    if not outputfolder.endswith('/'):
+        outputfolder += '/'
     cell = Cell(resolution=resolution, **dict(params))
     cell.save(outputfolder + filename)
     cell.metadata.save(outputfolder + filename[:-4] + '.csv')
 
 
-def __generate_stacks_batch_helper(item, inputfolder, outputfolder, resolution,
+def __generate_stacks_batch_helper(item, outputfolder, resolution,
                                    stack_size_microns, **kwargs_to_ignore):
-    params = CellParams()
-    params.read_from_csv(filename=inputfolder + item)
+    filename, params = item
+    if not outputfolder.endswith('/'):
+        outputfolder += '/'
     stack = Stack(resolution=resolution, stack_size=stack_size_microns, cell_params=params)
-    stack.save(outputfolder + item[:-4] + '.tif')
-    stack.metadata.save(outputfolder + item[:-4] + '.csv')
+    stack.save(outputfolder + filename[:-4] + '.tif')
+    stack.metadata.save(outputfolder + filename[:-4] + '.csv')
 
 
 def __generate_psfs_batch_helper(item, outputfolder, resolution, **kwargs_to_ignore):

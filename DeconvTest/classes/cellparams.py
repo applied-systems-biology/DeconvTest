@@ -88,16 +88,16 @@ class CellParams(pd.DataFrame):
                 for i_num in range(int(number_of_cells)):
                     cell = getattr(input_objects, 'parameters_' + kind)(**kwargs)
                     if coordinates:
-                        cell['z'], cell['y'], cell['x'] = np.random.uniform(0, 1, 3)
-                    cell['kind'] = kind
+                        cell.loc[:, 'z'], cell.loc[:, 'y'], cell.loc[:, 'x'] = np.random.uniform(0, 1, 3)
+                    cell.loc[:, 'kind'] = kind
 
                     cells = pd.concat([cells, cell], ignore_index=True)
 
                 if number_of_stacks is not None:
-                    cells['stack'] = i_iter
+                    cells.loc[:, 'stack'] = i_iter
                 data = pd.concat([data, cells], ignore_index=True)
             for c in data.columns:
-                self[c] = data[c]
+                self.loc[:, c] = data[c]
 
         else:
             raise AttributeError(kind + ' is not a valid object shape!')

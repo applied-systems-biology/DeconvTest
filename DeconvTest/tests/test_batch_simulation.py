@@ -2,6 +2,7 @@ import unittest
 
 from ddt import ddt
 import os
+import pandas as pd
 import shutil
 
 
@@ -12,8 +13,10 @@ from DeconvTest.batch import simulation as sim
 class TestSimulation(unittest.TestCase):
 
     def test_cell_params(self):
-        sim.generate_cell_parameters('data/params')
-        self.assertEqual(os.path.exists('data/params.csv'), True)
+        sim.generate_cell_parameters('data/params', number_of_cells=3)
+        data = pd.read_csv('data/params.csv', sep='\t')
+        self.assertEqual(len(data), 3)
+        self.assertNotIn('stack', data.columns)
         shutil.rmtree('data/')
 
     def test_generate_cells(self):
@@ -25,15 +28,16 @@ class TestSimulation(unittest.TestCase):
         shutil.rmtree('data/')
 
     def test_stack_params(self):
-        sim.generate_stack_parameters('data/stack_params', number_of_stacks=5)
-        files = os.listdir('data/stack_params')
-        self.assertEqual(len(files), 5)
+        sim.generate_cell_parameters('data/stack_params.csv', number_of_stacks=5, number_of_cells=3)
+        data = pd.read_csv('data/stack_params.csv', sep='\t')
+        self.assertEqual(len(data), 15)
+        self.assertIn('stack', data.columns)
         shutil.rmtree('data/')
 
     def test_generate_stacks(self):
-        sim.generate_stack_parameters('data/stack_params', number_of_stacks=2)
-        sim.generate_stacks_batch(params_folder='data/stack_params', outputfolder='data/stacks',
-                                  resolution=[1, 0.3, 0.3], stack_size_microns=[10, 30, 30], print_progress=False)
+        sim.generate_cell_parameters('data/stack_params.csv', number_of_stacks=2)
+        sim.generate_cells_batch(params_file='data/stack_params.csv', outputfolder='data/stacks',
+                                 resolution=[1, 0.3, 0.3], stack_size_microns=[10, 30, 30], print_progress=False)
         files = os.listdir('data/stacks')
         self.assertEqual(len(files), 4)
         shutil.rmtree('data/')
@@ -73,8 +77,8 @@ class TestSimulation(unittest.TestCase):
         shutil.rmtree('data/')
 
     def test_simulate_stack(self):
-        sim.generate_stack_parameters('data/stack_params', number_of_stacks=2)
-        sim.generate_stacks_batch(params_folder='data/stack_params', outputfolder='data/stacks',
+        sim.generate_cell_parameters('data/stack_params.csv', number_of_stacks=2)
+        sim.generate_cells_batch(params_file='data/stack_params.csv', outputfolder='data/stacks',
                                   resolution=1, stack_size_microns=[10, 30, 30], print_progress=False)
         sim.generate_psfs_batch('data/psfs', sigmas=[1.5], aspect_ratios=[1.5],
                                 resolution=1, print_progress=False)

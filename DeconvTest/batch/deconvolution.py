@@ -1,9 +1,5 @@
 """
-Module containing functions for deconvolving images with ImageJ plugins in a batch mode.
-Includes the following ImageJ plugins / algorithms:
-- Iterative fiji 3D
-- DeconvolutionLab2: Regularized Inverse Filter (RIF)
-- DeconvolutionLab2: Richardson-Lucy with Total Variance (RLTV)
+Module containing functions for deconvolving images in a batch mode.
 """
 from __future__ import division
 

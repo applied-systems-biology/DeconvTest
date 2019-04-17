@@ -4,7 +4,7 @@ from ddt import ddt
 
 from DeconvTest import Cell
 from DeconvTest import PSF
-from DeconvTest.modules.deconvolution_fiji import *
+from DeconvTest.modules.deconvolution import *
 
 
 @ddt

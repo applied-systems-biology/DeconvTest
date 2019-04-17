@@ -12,7 +12,7 @@ from helper_lib import filelib
 valid_algorithms = ['deconvolution_lab_rif', 'deconvolution_lab_rltv', 'iterative_deconvolve_3d']
 
 
-def deconvolution_lab_rif(inputfile, psffile, regularization_lambda, outputfile, imagej_path=None, **kwargs_to_ignore):
+def deconvolution_lab_rif(inputfile, psffile, outputfile, regularization_lambda=0.01, imagej_path=None, **kwargs_to_ignore):
     """
     Runs Regularized Inverse Filter (RIF) from DeconvolutionLab2 plugin with given parameters.
     
@@ -22,12 +22,13 @@ def deconvolution_lab_rif(inputfile, psffile, regularization_lambda, outputfile,
         Absolute path to the input file that should be deconvolved.
     psffile : str
         Absolute path to the psf file.
-    regularization_lambda : float
-        Regularization parameter for the RIF algorithm.
     outputfile : str
         Absolute path to the output file.
+    regularization_lambda : float, optional
+        Regularization parameter for the RIF algorithm.
+        Default is 0.01
     imagej_path : str
-        Absolute path to the Fiji / ImageJ software
+        Absolute path to the Fiji / ImageJ software.
 
     """
     if imagej_path is None:
@@ -38,7 +39,7 @@ def deconvolution_lab_rif(inputfile, psffile, regularization_lambda, outputfile,
               os.path.basename(outputfile)[:-4] + "'")
 
 
-def deconvolution_lab_rltv(inputfile, psffile, iterations, regularization_lambda, outputfile,
+def deconvolution_lab_rltv(inputfile, psffile, outputfile, iterations=10, regularization_lambda=0.01,
                            imagej_path=None, **kwargs_to_ignore):
     """
     Runs Richardson-Lucy with Total Variance (RLTV) from DeconvolutionLab2 plugin with given parameters.
@@ -49,12 +50,14 @@ def deconvolution_lab_rltv(inputfile, psffile, iterations, regularization_lambda
         Absolute path to the input file that should be deconvolved.
     psffile : str
         Absolute path to the psf file.
-    iterations : int
-        Number of iterations in the RLTV algorithm.
-    regularization_lambda : float
-        Regularization parameter for the RLTV algorithm.
     outputfile : str
         Absolute path to the output file.
+    iterations : int, optional
+        Number of iterations in the RLTV algorithm.
+        Default is 10.
+    regularization_lambda : float, optional
+        Regularization parameter for the RLTV algorithm.
+        Default is 0.01
     imagej_path : str
         Absolute path to the Fiji / ImageJ software
 
@@ -67,7 +70,8 @@ def deconvolution_lab_rltv(inputfile, psffile, iterations, regularization_lambda
               os.path.dirname(outputfile) + ' ' + os.path.basename(outputfile)[:-4] + "'")
 
 
-def iterative_deconvolve_3d(inputfile, psffile, outputfile, normalize, perform, detect, wiener, low, terminate,
+def iterative_deconvolve_3d(inputfile, psffile, outputfile, normalize=False, perform=True,
+                            detect=False, wiener=0.5, low=1, terminate=0.001,
                             iterations=200, imagej_path=None, **kwargs_to_ignore):
     """
     Runs Iterative Deconvolve 3D plugin with given parameters.
@@ -80,23 +84,34 @@ def iterative_deconvolve_3d(inputfile, psffile, outputfile, normalize, perform, 
         Absolute path to the psf file.
     outputfile : str
         Absolute path to the output file.
-    normalize : bool
-        `Normalize PSF` parameter for the Iterative Deconvolve 3D plugin. 
-    perform : bool
-        `Perform anti-ringig step` parameter for the Iterative Deconvolve 3D plugin. 
-    detect : bool
-        `Detect divergence` parameter for the Iterative Deconvolve 3D plugin. 
-    wiener : float
+    normalize : bool, optional
+        `Normalize PSF` parameter for the Iterative Deconvolve 3D plugin.
+        Normalizes the PSF before deconvoltution.
+        Default is False.
+    perform : bool, optional
+        `Perform anti-ringing step` parameter for the Iterative Deconvolve 3D plugin.
+        Reduces artifacts from features close to the image border.
+        Default is True.
+    detect : bool, optional
+        `Detect divergence` parameter for the Iterative Deconvolve 3D plugin.
+        Stops the iteration if the changes in the image increase.
+        Default is False.
+    wiener : float, optional
         `Wiener filter gamma` parameter for the Iterative Deconvolve 3D plugin.
-        <0.0001 to turn off, 0.0001 - 0.1 as tests. 
-    low : int
+        <0.0001 to turn off, 0.0001 - 0.1 as tests.
+        Default is 0.5.
+    low : int, optional
         `Low pass filter` parameter for the Iterative Deconvolve 3D plugin, pixels.
         The same value is used for low pass filter in xy and z.
-    terminate : float
+        Default is 1.
+    terminate : float, optional
         `Terminate iteration if mean delta < x%` parameter for the Iterative Deconvolve 3D plugin.
+        Stops the iteration if the changes in the image are less than the value of x.
         0 to turn off.
-    iterations : int
+        Default is 0.001.
+    iterations : int, optional
         Number of iterations in the Iterative Deconvolve 3D algorithm.
+        Default is 200.
     imagej_path : str
         Absolute path to the Fiji / ImageJ software
 

@@ -73,24 +73,6 @@ def generate_cells_batch(params_file, outputfolder, **kwargs):
     run_parallel(process=__generate_cells_batch_helper, process_name='Generation of cells', **kwargs)
 
 
-def generate_stack_parameters(outputfolder, **kwargs):
-    """
-    Generate random cell parameters for a given number of multicellular stacks and save them into individual csv files
-     in a given directory.
-     
-    Parameters
-    ----------
-    outputfolder : str
-        Output directory to save the cell parameters.
-    kwargs : key, value pairings
-        Keyword arguments passed to the `StackParams` class.
-    """
-    if not outputfolder.endswith('/'):
-        outputfolder += '/'
-    params = StackParams(**kwargs)
-    params.save(outputfolder)
-
-
 def generate_stacks_batch(params_folder, outputfolder, **kwargs):
     """
     Generate synthetic multicellular stacks with given parameters in a parallel mode and saves them in a given directory.

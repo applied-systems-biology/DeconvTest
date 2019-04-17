@@ -42,7 +42,7 @@ class CellParams(pd.DataFrame):
         super(CellParams, self).__init__()
         self.generate_parameters(**kwargs)
 
-    def generate_parameters(self, kind='ellipsoid', number_of_cells=1, coordinates=True, **kwargs):
+    def generate_parameters(self, kind='ellipsoid', number_of_stacks=None, number_of_cells=1, coordinates=True, **kwargs):
         """
         Generates random cells sizes and rotation angles.
 
@@ -52,6 +52,10 @@ class CellParams(pd.DataFrame):
             Name of the shape of the ground truth object from set of
             {ellipoid, spiky_cell}.
             Default is 'ellipsoid'
+        number_of_stacks : int, optional
+            Number of stacks to generate.
+            If None, parameters for single cells will be generated
+            Default is None.
         number_of_cells: int, optional
             Number of cells to generate.
             Default is 1.
@@ -63,17 +67,37 @@ class CellParams(pd.DataFrame):
         """
 
         if 'parameters_' + kind in dir(input_objects) and kind in input_objects.valid_shapes:
-            cells = pd.DataFrame()
-            for i in range(int(number_of_cells)):
-                cell = getattr(input_objects, 'parameters_' + kind)(**kwargs)
-                if coordinates:
-                    cell['z'], cell['y'], cell['x'] = np.random.uniform(0, 1, 3)
-                cell['kind'] = kind
+            data = pd.DataFrame()
+            number_of_cells = np.array([number_of_cells]).flatten()
+            if number_of_stacks is None:
+                if not len(number_of_cells) == 1:
+                    raise ValueError("Number of cells must be integer!")
+            else:
+                if len(number_of_cells) == 1:
+                    pass
+                elif len(number_of_cells) == 2:
+                    number_of_cells = np.random.randint(number_of_cells[0], number_of_cells[1], number_of_stacks)
+                else:
+                    raise ValueError("Number of cells must be integer or tuple of two integers!")
 
-                cells = pd.concat([cells, cell], ignore_index=True)
+            iterations = number_of_stacks
+            if iterations is None:
+                iterations = 1
+            for i_iter in range(iterations):
+                cells = pd.DataFrame()
+                for i_num in range(int(number_of_cells)):
+                    cell = getattr(input_objects, 'parameters_' + kind)(**kwargs)
+                    if coordinates:
+                        cell['z'], cell['y'], cell['x'] = np.random.uniform(0, 1, 3)
+                    cell['kind'] = kind
 
-            for col in cells.columns:
-                self[col] = cells[col]
+                    cells = pd.concat([cells, cell], ignore_index=True)
+
+                if number_of_stacks is not None:
+                    cells['stack'] = i_iter
+                data = pd.concat([data, cells], ignore_index=True)
+            for c in data.columns:
+                self[c] = data[c]
 
         else:
             raise AttributeError(kind + ' is not a valid object shape!')

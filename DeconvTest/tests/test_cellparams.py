@@ -10,35 +10,14 @@ from DeconvTest import CellParams
 @ddt
 class TestCellData(unittest.TestCase):
 
-    def test_cell_data(self):
-        celldata = CellParams()
-        celldata.save('data/celldata.csv')
-        pl = celldata.plot_size_distribution()
-        pl.savefig('data/celldata_size.png')
-        pl = celldata.plot_angle_distribution()
-        pl.savefig('data/celldata_angle.png')
-        shutil.rmtree('data/')
-
     @data(
         (8, 2),
         [10, 1]
     )
     def test_cell_data(self, size):
-        celldata = CellParams(size_mean_and_std=size)
+        celldata = CellParams(number_of_cells=1, size_mean_and_std=size)
         celldata.save('data/celldata.csv')
-        pl = celldata.plot_size_distribution()
-        pl.savefig('data/celldata_size.png')
-        pl = celldata.plot_angle_distribution()
-        pl.savefig('data/celldata_angle.png')
-        shutil.rmtree('data/')
-
-    def test_cell_data100(self):
-        celldata = CellParams(number_of_cells=100)
-        celldata.save('data/celldata1.csv')
-        pl = celldata.plot_size_distribution()
-        pl.savefig('data/celldata1_size.png')
-        pl = celldata.plot_angle_distribution()
-        pl.savefig('data/celldata1_angle.png')
+        celldata.plot_size_distribution()
         shutil.rmtree('data/')
 
     def test_read_write(self):

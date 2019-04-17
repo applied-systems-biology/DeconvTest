@@ -10,6 +10,7 @@ from DeconvTest import PSF
 
 @ddt
 class TestImageClass(unittest.TestCase):
+
     def test_empty_arguments(self):
         img = Image()
         for var in ['image', 'metadata', 'filename']:

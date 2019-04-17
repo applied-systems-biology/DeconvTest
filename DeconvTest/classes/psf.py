@@ -27,7 +27,8 @@ class PSF(Image):
 
         """
         super(PSF, self).__init__(filename=filename)
-        self.generate(**kwargs)
+        if self.image is None:
+            self.generate(**kwargs)
 
     def __repr__(self):
         return "Point spread function image"

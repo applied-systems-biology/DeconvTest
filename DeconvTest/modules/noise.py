@@ -34,7 +34,8 @@ def add_poisson_noise(img, snr=None):
         ratio = imgmax / img.max()
         img = img * 1. * ratio
         img = np.random.poisson(img)
-        img = img / ratio
+        if ratio > 0:
+            img = img / ratio
     return img
 
 

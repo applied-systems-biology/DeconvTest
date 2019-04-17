@@ -9,6 +9,7 @@ def generate_cells_with_given_parameter_combination(path, number_of_cells, size_
                                                     spikiness, spike_size, spike_smoothness):
 
     sim.generate_cell_parameters(outputfile=path + 'cell_parameters.csv',
+                                 kind='spiky_cell',
                                  number_of_cells=number_of_cells,
                                  size_mean_and_std=size_mean_and_std,
                                  equal_dimensions=equal_dimensions,

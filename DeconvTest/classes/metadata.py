@@ -55,17 +55,21 @@ class Metadata(pd.Series):
             The path used to read the cell metadata.
         """
         if os.path.exists(filename):
-            data = pd.read_csv(filename, sep='\t', index_col=0, header=-1).transpose().iloc[0].T.squeeze()
-            super(Metadata, self).__init__()
+            f = open(filename)
+            st = f.readlines()
+            f.close()
+            if len(st) > 0:
+                data = pd.read_csv(filename, sep='\t', index_col=0, header=-1).transpose().iloc[0].T.squeeze()
+                super(Metadata, self).__init__()
 
-            for c in data.index:
-                try:
-                    self[c] = float(data[c])
-                except ValueError:
-                    self[c] = data[c]
-            if 'Voxel size x' in data.index and 'Voxel size y' in data.index and 'Voxel size z' in data.index:
-                self['Voxel size'] = [self['Voxel size z'], self['Voxel size y'], self['Voxel size x']]
-            self.__convert_voxel_size()
+                for c in data.index:
+                    try:
+                        self[c] = float(data[c])
+                    except ValueError:
+                        self[c] = data[c]
+                if 'Voxel size x' in data.index and 'Voxel size y' in data.index and 'Voxel size z' in data.index:
+                    self['Voxel size'] = [self['Voxel size z'], self['Voxel size y'], self['Voxel size x']]
+                self.__convert_voxel_size()
 
     def __convert_voxel_size(self):
 

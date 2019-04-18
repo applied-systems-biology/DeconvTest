@@ -14,7 +14,7 @@ class Cell(Image):
 
     """
 
-    def __init__(self, filename=None, ind=None, position=None, resolution=None, **generate_kwargs):
+    def __init__(self, filename=None, ind=None, position=None, input_voxel_size=None, **generate_kwargs):
         """
         Initializes the cell image from a given list of indices or by reading from file.
 
@@ -34,7 +34,7 @@ class Cell(Image):
             Coordinates of the cell center in a multicellular stack in pixels. 
             The length of the sequence should correspond to the number of dimensions in the cell image
              (3 for 3D image).
-        resolution : scalar or sequence of scalars, optional
+        input_voxel_size : scalar or sequence of scalars, optional
             Voxel size in z, y and x used to generate the cell image.
             If not None, a cell image will be generated with the give voxel size and cell parameters specified 
              in `generate_kwargs`.
@@ -46,8 +46,8 @@ class Cell(Image):
         self.position = position
         if ind is not None:
             self.from_index(ind)
-        elif resolution is not None:
-            self.generate(resolution=resolution, **generate_kwargs)
+        elif input_voxel_size is not None:
+            self.generate(input_voxel_size=input_voxel_size, **generate_kwargs)
 
     def __repr__(self):
         if self.position is None:
@@ -98,13 +98,13 @@ class Cell(Image):
         ind = np.int_(np.round_(ind))
         self.image[tuple(ind)] = 255
 
-    def generate(self, resolution, kind='ellipsoid', **kwargs):
+    def generate(self, input_voxel_size, kind='ellipsoid', **kwargs):
         """
         Generates a synthetic object image from given parameters and stores the output in the `self.image` variable.
 
         Parameters
         ----------
-        resolution : scalar or sequence of scalars
+        input_voxel_size : scalar or sequence of scalars
             Voxel size in z, y and x used to generate the object image.
             If one value is provided, the voxel size is assumed to be equal along all axes.
         kind : string, optional
@@ -116,8 +116,14 @@ class Cell(Image):
         """
 
         if 'generate_' + kind in dir(input_objects) and kind in input_objects.valid_shapes:
-            self.metadata = Metadata(resolution=resolution)
-            self.image = getattr(input_objects, 'generate_' + kind)(self.metadata.resolution, **kwargs)
+            self.metadata = Metadata()
+            self.metadata.set_voxel_size(input_voxel_size)
+            input_voxel_size = np.array([input_voxel_size]).flatten()
+            if len(input_voxel_size) == 1:
+                input_voxel_size = [input_voxel_size[0]]*3
+            self.image = getattr(input_objects, 'generate_' + kind)(input_voxel_size, **kwargs)
+            for c in kwargs:
+                self.metadata[c] = kwargs[c]
         else:
             raise AttributeError(kind + ' is not a valid object shape!')
 

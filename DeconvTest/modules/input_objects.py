@@ -57,13 +57,13 @@ def parameters_ellipsoid(size_mean_and_std=(10, 2), equal_dimensions=False, **kw
     return cell
 
 
-def generate_ellipsoid(resolution, size=None, size_x=10, size_y=10, size_z=10, theta=0, phi=0, **kwargs_to_ignore):
+def generate_ellipsoid(input_voxel_size, size=None, size_x=10, size_y=10, size_z=10, theta=0, phi=0, **kwargs_to_ignore):
     """
     Generates a synthetic object of ellipsoidal shape.
 
     Parameters
     ----------
-    resolution : scalar or sequence of scalars
+    input_voxel_size : scalar or sequence of scalars
         Voxel size in z, y and x used to generate the object image.
         If one value is provided, the voxel size is assumed to be equal along all axes.
     size : scalar or sequence of scalars, optional
@@ -87,7 +87,7 @@ def generate_ellipsoid(resolution, size=None, size_x=10, size_y=10, size_z=10, t
     """
 
     sizes = __convert_size(size, size_x, size_y, size_z)
-    sizes = sizes / resolution  # convert the sizes into pixels
+    sizes = sizes / np.array(input_voxel_size)  # convert the sizes into pixels
 
     phi = phi * 180 / np.pi  # convert the angles from radians to degrees
     theta = theta * 180 / np.pi
@@ -160,14 +160,14 @@ def parameters_spiky_cell(size_mean_and_std=(10, 2), equal_dimensions=False,
     return cell
 
 
-def generate_spiky_cell(resolution, size=None, size_x=10, size_y=10, size_z=10, theta=0, phi=0,
+def generate_spiky_cell(input_voxel_size, size=None, size_x=10, size_y=10, size_z=10, theta=0, phi=0,
                         spikiness=0.1, spike_size=0.5, spike_smoothness=0.05, **kwargs_to_ignore):
     """
     Generates a synthetic object of ellipsoidal shape.
 
     Parameters
     ----------
-    resolution : scalar or sequence of scalars
+    input_voxel_size : scalar or sequence of scalars
         Voxel size in z, y and x used to generate the object image.
         If one value is provided, the voxel size is assumed to be equal along all axes.
     size : scalar or sequence of scalars, optional
@@ -252,7 +252,7 @@ def generate_spiky_cell(resolution, size=None, size_x=10, size_y=10, size_z=10, 
 
     # fill in the cell interior
     Grid = [grid]
-    n = int(round(np.max(sizes / resolution)))
+    n = int(round(np.max(sizes / np.array(input_voxel_size))))
     for i in range(n):
         Grid.append(i * grid / n)
 
@@ -263,7 +263,7 @@ def generate_spiky_cell(resolution, size=None, size_x=10, size_y=10, size_z=10, 
         coords = __spherical_to_cart(grid, Phi, Theta)
         coords = np.array(coords).reshape([3, len(coords[0])])
         for i in range(len(coords)):
-            coords[i] = np.int_(np.round_(coords[i] / resolution[i]))
+            coords[i] = np.int_(np.round_(coords[i] / input_voxel_size[i]))
         if mincoords is None:
             mincoords = np.min(coords, axis=1)
 

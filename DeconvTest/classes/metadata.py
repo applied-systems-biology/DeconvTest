@@ -2,7 +2,6 @@ from __future__ import division
 
 import os
 import numpy as np
-import re
 import pandas as pd
 
 from helper_lib import filelib
@@ -59,8 +58,11 @@ class Metadata(pd.Series):
             st = f.readlines()
             f.close()
             if len(st) > 0:
-                data = pd.read_csv(filename, sep='\t', index_col=0, header=-1).transpose().iloc[0].T.squeeze()
-                super(Metadata, self).__init__()
+                data = pd.read_csv(filename, sep='\t', index_col=0, header=-1).transpose()
+                if len(data.columns == 1):
+                    data = data.iloc[0]
+                else:
+                    data = data.iloc[0].T.squeeze()
 
                 for c in data.index:
                     try:
@@ -68,12 +70,34 @@ class Metadata(pd.Series):
                     except ValueError:
                         self[c] = data[c]
                 if 'Voxel size x' in data.index and 'Voxel size y' in data.index and 'Voxel size z' in data.index:
-                    self['Voxel size'] = [self['Voxel size z'], self['Voxel size y'], self['Voxel size x']]
-                self.__convert_voxel_size()
+                    self['Voxel size'] = str(np.float_([self['Voxel size z'],
+                                                        self['Voxel size y'], self['Voxel size x']]))
 
-    def __convert_voxel_size(self):
+    def set_voxel_size(self, voxel_size):
+        """
+        Converts voxel size
 
-        p = re.compile('\d*\.*\d+')
-        if 'Voxel size' in self.index and type(self['Voxel size']) is str:
-            self['Voxel size'] = np.float_(p.findall(self['Voxel size']))
+        Parameters
+        ----------
+        voxel_size : scalar or sequence of scalars
+            Voxel size in z, y and x used to generate the cell image.
+            If one number is provided, the same value will be used for all dimensions.
+        """
+        voxel_size = np.array([voxel_size]).flatten()
+        if len(voxel_size) == 1:
+            voxel_size = np.array([voxel_size[0], voxel_size[0], voxel_size[0]])
+        elif len(voxel_size) == 2:
+            voxel_size = np.array([voxel_size[0], voxel_size[1], voxel_size[1]])
+        elif len(voxel_size) == 3:
+            voxel_size = voxel_size
+        else:
+            raise ValueError('voxel size must be a number of a sequence of length 2 or 3!')
+        self['Voxel size'] = str(np.float_(voxel_size))
+
+        dimension_xyz = ['z', 'y', 'x']
+
+        for i, n in enumerate(voxel_size):
+            self['Voxel size ' + dimension_xyz[i]] = float(n)
+
+
 

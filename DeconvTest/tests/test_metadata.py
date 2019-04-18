@@ -18,7 +18,7 @@ class TestMetadataFromFilename(unittest.TestCase):
                           'aaa': 'afgw'})
         data.to_csv('test.csv', sep='\t')
         metadata = Metadata(filename='test.csv')
-        self.assertEqual(np.sum(np.abs(np.array([5, 3, 2]) - np.array(metadata['Voxel size']))), 0)
+        self.assertEqual(metadata['Voxel size'], '[5. 3. 2.]')
         os.remove('test.csv')
 
     def test_metadata2(self):
@@ -37,7 +37,7 @@ class TestMetadataFromFilename(unittest.TestCase):
                           'aaa': 'afgw'})
         data.to_csv('test.csv', sep='\t')
         metadata = Metadata(filename='test.csv')
-        self.assertEqual(np.sum(np.abs(np.array([5, 3, 2]) - np.array(metadata['Voxel size']))), 0)
+        self.assertEqual(metadata['Voxel size'], '[5, 3, 2]')
         os.remove('test.csv')
 
     def test_metadata4(self):
@@ -46,6 +46,7 @@ class TestMetadataFromFilename(unittest.TestCase):
         metadata = Metadata(filename='test.csv')
         self.assertNotIn('Voxel size', metadata.index)
         os.remove('test.csv')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,6 +1,7 @@
 from __future__ import division
 
 import os
+import pandas as pd
 import numpy as np
 from scipy import ndimage
 from scipy.signal import fftconvolve
@@ -38,7 +39,8 @@ class Image(object):
         """
         self.image = image
         self.filename = filename
-        self.metadata = None
+        self.metadata = Metadata()
+        self.metadata['Convolved'] = False
         if self.image is None and filename is not None and os.path.exists(filename):  # read the image from file
             self.from_file(filename)
 
@@ -57,9 +59,10 @@ class Image(object):
         if os.path.exists(filename):  # read the image from file
             self.image = io.imread(filename)
             self.filename = filename
-            self.metadata = Metadata()
             if os.path.exists(filename[:-4] + '.csv'):
                 self.metadata.read_from_csv(filename[:-4] + '.csv')
+            else:
+                warnings.warn("Metadata file is not found!", Warning)
         else:
             raise ValueError('File does not exist!')
 
@@ -86,7 +89,8 @@ class Image(object):
             if normalize_output:
                 io.imsave(outputfile, rescale_intensity(self.image, out_range=(0, 255)).astype(np.uint8))
             else:
-                io.imsave(outputfile, self.image.astype(np.uint8))
+                io.imsave(outputfile, self.image.astype(np.uint32))
+        self.metadata.to_csv(outputfile[:-4] + '.csv', sep='\t')
         self.filename = outputfile
 
     def show_2d_projections(self):
@@ -135,6 +139,7 @@ class Image(object):
             raise ValueError('Both images to convolve have to be initialized!')
         self.image = fftconvolve(self.image, psf.image, mode='full')
         self.image = rescale_intensity(self.image, out_range=(0, 255))
+        self.metadata['Convolved'] = True
         return self.image
 
     def resize(self, **kwargs):
@@ -167,6 +172,14 @@ class Image(object):
 
         if self.image.max() > 0:
             self.image = rescale_intensity(self.image, out_range=(0, 255))
+
+        if 'Voxel size x' in self.metadata.index and 'Voxel size y' in self.metadata.index \
+                and 'Voxel size z' in self.metadata.index:
+            new_voxel_size = np.array([self.metadata['Voxel size z'], self.metadata['Voxel size y'],
+                                                     self.metadata['Voxel size x']]) / kwargs['zoom']
+            self.metadata['Voxel size'] = str(new_voxel_size)
+            self.metadata['Voxel size z'], self.metadata['Voxel size y'], self.metadata['Voxel size x'] = new_voxel_size
+
         return self.image
 
     def add_noise(self, kind=None, snr=None):
@@ -203,6 +216,12 @@ class Image(object):
             for i, k in enumerate(kind):
                 if 'add_' + k + '_noise' in dir(noise) and k in noise.valid_noise_types:
                     self.image = getattr(noise, 'add_' + k + '_noise')(img=self.image, snr=snr[i])
+                    if i == 0:
+                        ind = ''
+                    else:
+                        ind = ' ' + str(i + 1)
+                    self.metadata['SNR' + ind] = snr[i]
+                    self.metadata['noise type' + ind] = k
                 else:
                     raise AttributeError(k + ' is not a valid noise type!')
 

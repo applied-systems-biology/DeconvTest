@@ -118,12 +118,10 @@ class Cell(Image):
         if 'generate_' + kind in dir(input_objects) and kind in input_objects.valid_shapes:
             self.metadata = Metadata()
             self.metadata.set_voxel_size(input_voxel_size)
-            input_voxel_size = np.array([input_voxel_size]).flatten()
-            if len(input_voxel_size) == 1:
-                input_voxel_size = [input_voxel_size[0]]*3
-            self.image = getattr(input_objects, 'generate_' + kind)(input_voxel_size, **kwargs)
+            self.image = getattr(input_objects, 'generate_' + kind)(self.metadata['Voxel size arr'], **kwargs)
             for c in kwargs:
                 self.metadata[c] = kwargs[c]
+            self.metadata['Convolved'] = False
         else:
             raise AttributeError(kind + ' is not a valid object shape!')
 

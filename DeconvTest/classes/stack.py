@@ -21,7 +21,7 @@ class Stack(Image):
     """
 
     def __init__(self, filename=None, is_segmented=False, is_labeled=False,
-                 resolution=None, stack_size=None, cell_params=None):
+                 input_voxel_size=None, stack_size=None, cell_params=None):
         """
         Initializes the Stack class.
 
@@ -39,7 +39,7 @@ class Stack(Image):
             If True it is assumed that individual connected regions are labeled by unique labels.
             If False individual cells are assumed not to be labeled.
             Default is False.
-        resolution : scalar or sequence of scalars, optional
+        input_voxel_size : scalar or sequence of scalars, optional
             Voxel size used to generate the stack.
             If None, no stack will be generated.
             Default is None.
@@ -57,13 +57,13 @@ class Stack(Image):
         self.cells = []
         self.is_segmented = is_segmented
         self.is_labeled = is_labeled
-        if resolution is not None and stack_size is not None and cell_params is not None:
-            self.generate(cell_params, resolution, stack_size)
+        if input_voxel_size is not None and stack_size is not None and cell_params is not None:
+            self.generate(cell_params, input_voxel_size, stack_size)
 
     def __repr__(self):
         return "Stack with " + str(len(self.cells)) + " cells"
 
-    def generate(self, cell_params, resolution, stack_size):
+    def generate(self, cell_params, input_voxel_size, stack_size):
         """
         Generates a multicellular stack image from cell parameters.
 
@@ -72,12 +72,12 @@ class Stack(Image):
         cell_params : pandas.DataFrame or CellParams
             Dictionary of cell parameters.
             The columns should include the keyword arguments passed though `Cell.generate`.
-        resolution : scalar or sequence of scalars
+        input_voxel_size : scalar or sequence of scalars
             Voxel size used to generate the stack.
         stack_size : sequence of scalars
             Dimensions of the image stack in micrometers.
         """
-        stack_size_pix = np.int_(np.round_(np.array(stack_size) / np.array(resolution)))
+        stack_size_pix = np.int_(np.round_(np.array(stack_size) / np.array(input_voxel_size)))
         if 'size' not in cell_params and \
                 ('size_x' not in cell_params or 'size_y' not in cell_params or 'size_z' not in cell_params):
             raise ValueError('Either `size` or `size_x`, `size_y` and `size_z` must be provided!')
@@ -85,7 +85,7 @@ class Stack(Image):
             shift = np.array([np.mean(cell_params['size'])]*3)
         else:
             shift = np.array([cell_params['size_z'].mean(), cell_params['size_y'].mean(), cell_params['size_x'].mean()])
-        shift = shift / np.array(resolution) / 2 / stack_size_pix
+        shift = shift / np.array(input_voxel_size) / 2 / stack_size_pix
         for i, c in enumerate(['z', 'y', 'x']):
             cell_params.loc[:, c] = np.array(cell_params[c])*(1 - 2*shift[i]) + shift[i]
         self.image = np.zeros(stack_size_pix)
@@ -96,7 +96,7 @@ class Stack(Image):
             x = p.pop('x', None)
             y = p.pop('y', None)
             z = p.pop('z', None)
-            c = Cell(resolution=resolution, **p)
+            c = Cell(input_voxel_size=input_voxel_size, **p)
             if x is None or y is None or z is None:  # position the cell randomly if the positions are not specified
                 c.position = np.random.rand(3) * stack_size_pix
             else:
@@ -107,7 +107,8 @@ class Stack(Image):
             self.position_cell(c)
         self.is_segmented = True
         self.is_labeled = False
-        self.metadata = Metadata(resolution=resolution)
+        self.metadata = Metadata()
+        self.metadata.set_voxel_size(input_voxel_size)
 
     def position_cell(self, cell):
         """

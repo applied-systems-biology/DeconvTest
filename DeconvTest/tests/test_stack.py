@@ -7,14 +7,14 @@ from scipy import ndimage
 
 from DeconvTest import Stack
 from DeconvTest import Cell
-from DeconvTest import StackParams
+from DeconvTest import CellParams
 
 
 @ddt
 class TestStackClass(unittest.TestCase):
     def test_empty_arguments(self):
         img = Stack()
-        for var in ['image', 'metadata', 'filename']:
+        for var in ['image','filename']:
             self.assertIn(var, img.__dict__)
             self.assertEqual(img.__dict__[var], None)
 
@@ -276,9 +276,8 @@ class TestStackClass(unittest.TestCase):
             self.assertEqual(errors.iloc[i]['Precision'], 0)
 
     def test_from_stack_params(self):
-        params = StackParams(number_of_stacks=1, number_of_cells=5,
-                             spikiness_range=(0, 50), spike_size_range=(0.1, 1))
-        stack = Stack(cell_params=params.stacks[0], resolution=0.5, stack_size=[10, 10, 10])
+        params = CellParams(number_of_stacks=1, number_of_cells=5)
+        stack = Stack(cell_params=params[params['stack'] == 0], input_voxel_size=0.5, stack_size=[10, 10, 10])
         self.assertIsNotNone(stack.image)
 
     def test_from_stack_params2(self):
@@ -293,13 +292,12 @@ class TestStackClass(unittest.TestCase):
                                'spikiness': [0, 0, 100],
                                'spike_size': [0, 0, 1],
                                'spike_smoothness': [0.05, 0.05, 0.05]})
-        stack = Stack(cell_params=params, resolution=0.5, stack_size=[50, 50, 50])
+        stack = Stack(cell_params=params, input_voxel_size=0.5, stack_size=[50, 50, 50])
         self.assertIsNotNone(stack.image)
 
     def test_range_for_number_of_cells(self):
-        params = StackParams(number_of_stacks=3, number_of_cells=[5, 10],
-                             spikiness_range=(0, 1), spike_size_range=(0.1, 1))
-        stack = Stack(cell_params=params.stacks[0], resolution=0.5, stack_size=[10, 10, 10])
+        params = CellParams(number_of_stacks=3, number_of_cells=[5, 10])
+        stack = Stack(cell_params=params[params['stack'] == 2], input_voxel_size=0.5, stack_size=[10, 10, 10])
         self.assertIsNotNone(stack.image)
 
 

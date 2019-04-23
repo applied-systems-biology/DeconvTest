@@ -85,7 +85,7 @@ class CellParams(pd.DataFrame):
                 iterations = 1
             for i_iter in range(iterations):
                 cells = pd.DataFrame()
-                for i_num in range(int(number_of_cells)):
+                for i_num in range(int(number_of_cells[i_iter])):
                     cell = getattr(input_objects, 'parameters_' + kind)(**kwargs)
                     if coordinates:
                         cell.loc[:, 'z'], cell.loc[:, 'y'], cell.loc[:, 'x'] = np.random.uniform(0, 1, 3)

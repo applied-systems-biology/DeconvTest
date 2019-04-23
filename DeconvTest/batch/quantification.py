@@ -120,13 +120,11 @@ def combine_log(inputfolder):
     if os.path.exists(inputfolder):
         subfolders = filelib.list_subfolders(inputfolder, extensions=['csv'])
         if len(subfolders) > 0:
-            data = pd.read_csv(inputfolder + subfolders[0], sep='\t', index_col=0)
-            data.to_csv(inputfolder[:-1] + '.csv', sep='\t')
-
-            for i, sf in enumerate(subfolders[1:]):
+            array = []
+            for i, sf in enumerate(subfolders):
                 data = pd.read_csv(inputfolder + sf, sep='\t', index_col=0)
-                data.to_csv(inputfolder[:-1] + '.csv', mode='a', header=False, sep='\t')
-            data = pd.read_csv(inputfolder[:-1] + '.csv', sep='\t', index_col=0).reset_index(drop=True)
+                array.append(data)
+            data = pd.concat(array, ignore_index=True, sort=True)
             data.to_csv(inputfolder[:-1] + '.csv', sep='\t')
 
 

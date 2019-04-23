@@ -16,12 +16,12 @@ class TestSimulation(unittest.TestCase):
         sim.generate_cell_parameters('data/params.csv', number_of_cells=2)
         sim.generate_cells_batch(params_file='data/params.csv',
                                  outputfolder='data/cells/',
-                                 resolution=1,
+                                 input_voxel_size=1,
                                  print_progress=False)
         sim.generate_psfs_batch('data/psfs',
                                 sigmas=[1.5],
                                 aspect_ratios=[4],
-                                resolution=1,
+                                input_voxel_size=1,
                                 print_progress=False)
         sim.convolve_batch('data/cells/',
                            'data/psfs',
@@ -56,12 +56,12 @@ class TestSimulation(unittest.TestCase):
 
         quant.extract_metadata('data/binary_accuracy.csv', 0.5)
         stat = pd.read_csv('data/binary_accuracy.csv', sep='\t', index_col=0)
-        for col in ['Kind', 'Voxel size y', 'resolution']:
+        for col in ['Voxel size y', 'Voxel size']:
             self.assertIn(col, stat.columns)
 
         quant.extract_metadata('data/log.csv', 0.5)
         stat = pd.read_csv('data/log.csv', sep='\t', index_col=0)
-        for col in ['Kind', 'Voxel size x', 'resolution']:
+        for col in ['Voxel size y', 'Voxel size']:
             self.assertIn(col, stat.columns)
 
         shutil.rmtree('data/')

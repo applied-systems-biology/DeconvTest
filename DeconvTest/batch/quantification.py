@@ -149,11 +149,8 @@ def extract_metadata(inputfile, default_resolution, outputfile=None):
 
     nstat = pd.DataFrame()
     for i in range(len(stat)):
-        metadata = Metadata(resolution=default_resolution, string=stat.iloc[i]['Name'])
-        if metadata['resolution'][0] == metadata['resolution'][1] == metadata['resolution'][2]:
-            metadata['resolution'] = str(metadata['resolution'][0])
-        else:
-            metadata['resolution'] = str(metadata['resolution'])
+        metadata = Metadata()
+        metadata.set_voxel_size(default_resolution)
         nstat = nstat.append(metadata, ignore_index=True)
     for c in nstat.columns:
         if c not in stat.columns:
@@ -217,7 +214,7 @@ def __compute_binary_accuracy_measures_batch_helper(item, inputfolder, reffolder
             raise ValueError('No ground truth found for cell ' + item + '!')
 
         start = time.time()
-        zoom = np.array(stack.metadata['resolution']) / np.array(refstack.metadata['resolution'])
+        zoom = np.array(stack.metadata['Voxel size arr']) / np.array(refstack.metadata['Voxel size arr'])
         stack.resize(zoom=zoom)
         stack.segment(**segmentation_kwargs)
         stats = stack.compute_binary_accuracy_measures(refstack)

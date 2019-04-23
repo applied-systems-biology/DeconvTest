@@ -99,5 +99,7 @@ class Metadata(pd.Series):
         for i, n in enumerate(voxel_size):
             self['Voxel size ' + dimension_xyz[i]] = float(n)
 
+        self['Voxel size arr'] = np.array([self['Voxel size z'], self['Voxel size y'], self['Voxel size x']])
+
 
 

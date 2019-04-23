@@ -128,37 +128,6 @@ def combine_log(inputfolder):
             data.to_csv(inputfolder[:-1] + '.csv', sep='\t')
 
 
-def extract_metadata(inputfile, default_resolution, outputfile=None):
-    """    
-    Extract metadata for each row of the csv file using the field `Name`.
-
-    Parameters
-    inputfile : str
-        Path to the csv file to extract metadata from.
-    default_resolution : scalar or sequence of scalars
-        Default voxel size in z, y and x that was used to generate the input cells.
-        If one value is provided, the voxel size is assume to be equal along all axes.
-    outputfile : str, optional
-        Path to a file where to store the output.
-        If None, the input file will be overwritten.
-        Default is None.
-    """
-    stat = pd.read_csv(inputfile, sep='\t', index_col=0)
-
-    nstat = pd.DataFrame()
-    for i in range(len(stat)):
-        metadata = Metadata()
-        metadata.set_voxel_size(default_resolution)
-        nstat = nstat.append(metadata, ignore_index=True)
-    for c in nstat.columns:
-        if c not in stat.columns:
-            stat[c] = nstat[c]
-
-    if outputfile is None:
-        outputfile = inputfile
-    stat.to_csv(outputfile, sep='\t')
-
-
 ####################################
 # private helper functions
 

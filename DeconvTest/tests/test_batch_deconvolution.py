@@ -15,9 +15,9 @@ class TestDeconvolution(unittest.TestCase):
     def test_simulate(self):
         sim.generate_cell_parameters('data/params.csv', number_of_cells=1)
         sim.generate_cells_batch(params_file='data/params.csv', outputfolder='data/cells/',
-                                 resolution=3, print_progress=False)
+                                 input_voxel_size=3, print_progress=False)
         sim.generate_psfs_batch('data/psfs', sigmas=[0.1], aspect_ratios=[1.5],
-                                resolution=3, print_progress=False)
+                                input_voxel_size=3, print_progress=False)
         sim.convolve_batch('data/cells/', 'data/psfs', 'data/convolved/', print_progress=False)
         deconvolve_batch(inputfolder='data/convolved/',
                          outputfolder='data/deconvolved/',

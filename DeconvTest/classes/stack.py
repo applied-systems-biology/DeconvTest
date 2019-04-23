@@ -91,7 +91,6 @@ class Stack(Image):
         self.image = np.zeros(stack_size_pix)
 
         for i in range(len(cell_params)):
-            # create an instance of the CellSimulation class for each line in cell_params
             p = dict(cell_params.iloc[i])
             x = p.pop('x', None)
             y = p.pop('y', None)
@@ -109,6 +108,9 @@ class Stack(Image):
         self.is_labeled = False
         self.metadata = Metadata()
         self.metadata.set_voxel_size(input_voxel_size)
+        self.metadata['Convolved'] = False
+        self.metadata['Number of cells'] = len(cell_params)
+        self.metadata['Stack size um'] = stack_size
 
     def position_cell(self, cell):
         """

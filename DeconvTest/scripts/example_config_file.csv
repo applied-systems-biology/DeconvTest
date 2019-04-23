@@ -1,9 +1,10 @@
 simulation_folder	../../../Data/simulation1
 max_threads	8
-simulation_steps:	['generate_cells', 'convolve', 'resize', 'add_noise', 'deconvolve', 'compute_binary_accuracy_measures'],
+simulation_steps:	['generate_cells', 'convolve', 'resize', 'add_noise', 'deconvolve', 'binary_accuracy'],
 cell_parameter_filename:	cell_parameters.csv,
 number_of_cells	5
 input_cell_kind	'spiky_cell'
+input_voxel_size	0.3
 spikiness_range	(0.5, 0.6)
 psf_aspect_ratios	[4.5]
 psf_sigmas	[1]

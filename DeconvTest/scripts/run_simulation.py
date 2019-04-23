@@ -9,8 +9,7 @@ import time
 from helper_lib import filelib
 
 from DeconvTest.batch import simulation as sim
-from DeconvTest.batch import quantification as quant
-from DeconvTest.batch import deconvolution as dec
+from DeconvTest import batch
 from DeconvTest.modules.deconvolution import save_fiji_version
 
 import mkl
@@ -73,8 +72,8 @@ def convert_args(**kwargs):
     for c in ['deconvolution_algorithm', 'noise_kind']:
         if c in kwargs:
             if type(kwargs[c]) is str:
-                stralg = str(kwargs[c])
-                p1 = re.compile('\'([A-Za-z0-9_,.]+)\'')
+                stralg = '[' + str(kwargs[c]) + ']'
+                p1 = re.compile('([A-Za-z0-9_]+)')
                 kwargs[c] = p1.findall(stralg)
 
     for c in ['iterative_deconvolve_3d_detect', 'iterative_deconvolve_3d_perform',
@@ -98,7 +97,6 @@ def run_simulation(**kwargs):
     if not simulation_folder.endswith('/'):
         simulation_folder += '/'
     filelib.make_folders([simulation_folder])
-    outputfolder = simulation_folder + kwargs['inputfolder']
 
     kwargs = convert_args(**kwargs)
     kwargs['Time of the simulation start'] = time.ctime()
@@ -112,14 +110,18 @@ def run_simulation(**kwargs):
             if not os.path.exists(inputfolder):
                 print 'Generating new cell parameters'
                 sim.generate_cell_parameters(outputfile=inputfolder, **kwargs)
-            sim.generate_cells_batch(params_file=inputfolder,
+            batch.generate_cells_batch(params_file=inputfolder,
                                      outputfolder=simulation_folder + kwargs['inputfolder'],
                                      **kwargs)
-            inputfolder = simulation_folder + kwargs['inputfolder']
-        if step == 'generate_psfs':
-            psffolder = simulation_folder + kwargs['psffolder']
-            sim.generate_psfs_batch(outputfolder=simulation_folder + kwargs['psffolder'], **kwargs)
-
+            kwargs['inputfolder'] = simulation_folder + kwargs['inputfolder']
+        elif step == 'generate_psfs':
+            kwargs['psffolder'] = simulation_folder + kwargs['psffolder']
+            batch.generate_psfs_batch(outputfolder=kwargs['psffolder'], **kwargs)
+        else:
+            kwargs['outputfolder'] = simulation_folder + kwargs[step + '_results_folder']
+            print kwargs['inputfolder'], kwargs['outputfolder']
+            getattr(batch, step + '_batch')(**kwargs)
+            kwargs['inputfolder'] = kwargs['outputfolder']
 
     #
     #
@@ -189,15 +191,15 @@ def run_simulation(**kwargs):
 
 default_parameters = dict({'simulation_folder': 'test_simulation',
                            'simulation_steps': ['generate_cells', 'generate_psfs', 'convolve', 'resize', 'add_noise',
-                                                'deconvolve', 'compute_binary_accuracy_measures'],
+                                                'deconvolve', 'binary_accuracy'],
                            'cell_parameter_filename': 'cell_parameters.csv',
                            'inputfolder': 'input',
                            'psffolder': 'psf',
-                           'convole_results_folder': 'convolved',
+                           'convolve_results_folder': 'convolved',
                            'resize_results_folder': 'resized',
                            'add_noise_results_folder': 'noise',
                            'deconvolve_results_folder': 'deconvolved',
-                           'folder_for_binary_accuracy_measures': 'binary_accuracy_measrues',
+                           'binary_accuracy_results_folder': 'binary_accuracy_measures',
                            'log_folder': 'timelog',
                            'max_threads': 4,
                            'print_progress': True,
@@ -211,8 +213,9 @@ default_parameters = dict({'simulation_folder': 'test_simulation',
                            'psf_sigmas': [0.1, 0.5],
                            'psf_aspect_ratios': [3],
                            'voxel_sizes_for_resizing': [[1, 0.5, 0.5]],
-                           'noise_kind': 'poisson',
+                           'noise_kind': ['poisson'],
                            'snr': [None, 5],
+                           'test_snr_combinations': False,
                            'deconvolution_algorithm': ['deconvolution_lab_rif', 'deconvolution_lab_rltv'],
                            'deconvolution_lab_rif_regularization_lambda': [0.001, 001],
                            'deconvolution_lab_rltv_regularization_lambda': 0.001,

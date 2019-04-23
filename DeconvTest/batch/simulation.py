@@ -204,7 +204,7 @@ def resize_batch(inputfolder, outputfolder, voxel_sizes_for_resizing, **kwargs):
     run_parallel(process=__resize_batch_helper, process_name='Resize', **kwargs)
 
 
-def add_noise_batch(inputfolder, outputfolder, kind, snr, test_snr_combinations=False, **kwargs):
+def add_noise_batch(inputfolder, outputfolder, noise_kind, snr, test_snr_combinations=False, **kwargs):
     """
     Adds synthetic noise to all images in a given input directory in a parallel mode and saves them in a given 
      output directory.
@@ -218,7 +218,7 @@ def add_noise_batch(inputfolder, outputfolder, kind, snr, test_snr_combinations=
         Input directory with cell images to which noise should be added.
     outputfolder : str
         Output directory to save the noisy images.
-    kind : string, sequence of strings or None
+    noise_kind : string, sequence of strings or None
         Name of the method to generate nose from set of {gaussian, poisson}.
         If a sequence is provided, several noise types will be added.
         If None, no noise will be added.
@@ -244,7 +244,7 @@ def add_noise_batch(inputfolder, outputfolder, kind, snr, test_snr_combinations=
         outputfolder += '/'
     inputfiles = filelib.list_subfolders(inputfolder)
 
-    kind = np.array([kind]).flatten()
+    kind = np.array([noise_kind]).flatten()
     snr = np.array([snr]).flatten()
     if len(kind) > 1 and test_snr_combinations:
         snr_items = list(itertools.product(*[snr]*len(kind)))
@@ -294,6 +294,7 @@ def __generate_psfs_batch_helper(item, outputfolder, input_voxel_size, **kwargs_
              normalize_output=True)
     metadata['PSF sigma xy um'] = sigma
     metadata['PSF aspect ratio'] = aspect_ratio
+    metadata['isPSF'] = True
     metadata.save(outputfolder + 'psf_sigma_' + str(sigma) + '_aspect_ratio_' + str(aspect_ratio) + '.csv')
 
 
@@ -305,7 +306,7 @@ def __convolve_batch_helper(item, inputfolder, psffolder, outputfolder, **kwargs
     stack.save(outputfolder + psffile[:-4] + '/' + inputfile)
     stack.metadata.save(outputfolder + psffile[:-4] + '/' + inputfile[:-4] + '.csv')
     psf.save(outputfolder + psffile)
-    stack.metadata.save(outputfolder + psffile[:-4] + '.csv')
+    psf.metadata.save(outputfolder + psffile[:-4] + '.csv')
 
 
 def __resize_batch_helper(item, inputfolder, outputfolder, order=1, append_resolution_to_filename=True,
@@ -316,7 +317,7 @@ def __resize_batch_helper(item, inputfolder, outputfolder, order=1, append_resol
     stack = Stack(filename=inputfolder + inputfile)
     zoom = np.array(stack.metadata['Voxel size arr']) / np.array(metadata['Voxel size arr'])
     stack.resize(zoom=zoom, order=order)
-    stack.metadata = metadata
+    stack.metadata.set_voxel_size(metadata['Voxel size arr'])
     path = os.path.dirname(inputfile)
     strres = str(metadata['Voxel size']).replace('  ', ' ').replace('  ', ' ').replace('[ ', '[').replace(' ', '_')
     if path == '':
@@ -334,8 +335,7 @@ def __add_noise_batch_helper(item, inputfolder, outputfolder, **kwargs_to_ignore
     inputfile, kind, snr = item
     stack = Stack(filename=inputfolder + inputfile)
     path = os.path.dirname(inputfile)
-    name = inputfile.split('/')[-1]
-    if len(name.split('psf')) == 1:
+    if 'isPSF' not in stack.metadata.index or str(stack.metadata['isPSF']) == 'False':
         stack.add_noise(kind=kind, snr=snr)
 
     if path == '':
@@ -343,6 +343,7 @@ def __add_noise_batch_helper(item, inputfolder, outputfolder, **kwargs_to_ignore
     else:
         outputname = outputfolder + path + '_noise'
         snr = np.array([snr]).flatten()
+        kind = np.array([kind]).flatten()
         if len(snr) == 1:
             snr = np.array([snr[0]] * len(kind))
         for i, k in enumerate(kind):

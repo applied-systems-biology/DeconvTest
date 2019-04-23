@@ -200,8 +200,8 @@ def __compute_binary_accuracy_measures_batch_helper(item, inputfolder, reffolder
         base = parts[-2]
     else:
         base = ''
-    if len(name.split('psf')) == 1:
-        stack = Stack(filename=inputfolder + item)
+    stack = Stack(filename=inputfolder + item)
+    if 'isPSF' not in stack.metadata.index or str(stack.metadata['isPSF']) == 'False':
         if os.path.exists(reffolder + item):
             refstack = Stack(filename=reffolder + item, is_segmented=True)
         elif os.path.exists(reffolder + name):
@@ -214,11 +214,20 @@ def __compute_binary_accuracy_measures_batch_helper(item, inputfolder, reffolder
             raise ValueError('No ground truth found for cell ' + item + '!')
 
         start = time.time()
+        input_voxel_size = stack.metadata['Voxel size arr']
         zoom = np.array(stack.metadata['Voxel size arr']) / np.array(refstack.metadata['Voxel size arr'])
         stack.resize(zoom=zoom)
         stack.segment(**segmentation_kwargs)
         stats = stack.compute_binary_accuracy_measures(refstack)
+
+        stack.metadata.set_voxel_size(input_voxel_size)
+        for c in stack.metadata.index:
+            try:
+                stats[c] = stack.metadata[c]
+            except ValueError:
+                stats[c] = str(stack.metadata[c])
         stats['Name'] = item
+
         filelib.make_folders([os.path.dirname(outputfolder + item)])
         stats.to_csv(outputfolder + item[:-4] + '.csv', sep='\t')
         elapsed_time = time.time() - start

@@ -123,7 +123,7 @@ def run_simulation(**kwargs):
             getattr(batch, step + '_batch')(**kwargs)
             kwargs['inputfolder'] = kwargs['outputfolder']
 
-    batch.combine_log(inputfolder=simulation_folder + kwargs['logfolder'])
+    batch.combine_log(inputfolder=kwargs['logfolder'])
 
 
 ########################################

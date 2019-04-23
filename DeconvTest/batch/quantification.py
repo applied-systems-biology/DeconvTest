@@ -185,6 +185,11 @@ def __segment_batch_helper(item, inputfolder, outputfolder, log_computing_time=F
             t = pd.DataFrame({'Step': ['Segmentation'],
                               'Computational time': [elapsed_time],
                               'Name': item})
+            for c in stack.metadata.index:
+                try:
+                    t[c] = stack.metadata[c]
+                except ValueError:
+                    t[c] = str(stack.metadata[c])
             t.to_csv(logfolder + item[:-4].replace('/', '_') + '.csv', sep='\t')
 
 
@@ -240,6 +245,11 @@ def __compute_binary_accuracy_measures_batch_helper(item, inputfolder, reffolder
             t = pd.DataFrame({'Step': ['Computing binary accuracy measures'],
                               'Computational time': [elapsed_time],
                               'Name': item})
+            for c in stack.metadata.index:
+                try:
+                    t[c] = stack.metadata[c]
+                except ValueError:
+                    t[c] = str(stack.metadata[c])
             t.to_csv(logfolder + item[:-4].replace('/', '_') + '.csv', sep='\t')
 
 

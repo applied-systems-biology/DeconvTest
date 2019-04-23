@@ -130,6 +130,11 @@ def __deconvolve_batch_helper(item, inputfolder, outputfolder, imagej_path,
                               'Computational time': [elapsed_time],
                               'Algorithm': algorithm,
                               'Name': subfolder[:-1] + '/' + filename})
+            for c in metadata.index:
+                try:
+                    t[c] = metadata[c]
+                except ValueError:
+                    t[c] = str(metadata[c])
             t.to_csv(logfolder + subfolder[:-1] + '_' + filename[:-4].replace('/', '_') + '.csv', sep='\t')
 
 

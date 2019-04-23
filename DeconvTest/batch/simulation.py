@@ -269,6 +269,7 @@ def __generate_cells_batch_helper(item, outputfolder, input_voxel_size, **kwargs
         outputfolder += '/'
     cell = Cell(input_voxel_size=input_voxel_size, **dict(params))
     cell.save(outputfolder + filename)
+    cell.metadata['CellID'] = filename[:-4].split('_')[-1]
     cell.metadata.save(outputfolder + filename[:-4] + '.csv')
 
 
@@ -279,6 +280,7 @@ def __generate_stacks_batch_helper(item, outputfolder, input_voxel_size,
         outputfolder += '/'
     stack = Stack(input_voxel_size=input_voxel_size, stack_size=stack_size_microns, cell_params=params)
     stack.save(outputfolder + filename[:-4] + '.tif')
+    stack.metadata['StackID'] = filename[:-4].split('_')[-1]
     stack.metadata.save(outputfolder + filename[:-4] + '.csv')
 
 

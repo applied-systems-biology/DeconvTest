@@ -102,9 +102,9 @@ def run_simulation(**kwargs):
     kwargs['Time of the simulation start'] = time.ctime()
     pd.Series(kwargs).to_csv(simulation_folder + 'simulation_parameters.csv', sep='\t')
     save_fiji_version(simulation_folder)
+    kwargs['logfolder'] = simulation_folder + kwargs['logfolder']
 
     for step in steps:
-        print step
         if step == 'generate_cells':
             inputfolder = simulation_folder + kwargs['cell_parameter_filename']
             if not os.path.exists(inputfolder):
@@ -120,14 +120,10 @@ def run_simulation(**kwargs):
             batch.generate_psfs_batch(outputfolder=kwargs['psffolder'], **kwargs)
         else:
             kwargs['outputfolder'] = simulation_folder + kwargs[step + '_results_folder']
-            print kwargs['inputfolder'], kwargs['outputfolder']
             getattr(batch, step + '_batch')(**kwargs)
             kwargs['inputfolder'] = kwargs['outputfolder']
 
-
-    #     quant.extract_metadata(inputfile=accuracy_folder[:-1] + '.csv', default_resolution=params.get('input_voxel_size'))
-    #     quant.combine_log(inputfolder=log_folder)
-    #     quant.extract_metadata(inputfile=log_folder[:-1] + '.csv', default_resolution=params.get('input_voxel_size'))
+    batch.combine_log(inputfolder=simulation_folder + kwargs['logfolder'])
 
 
 ########################################
@@ -143,7 +139,7 @@ default_parameters = dict({'simulation_folder': 'test_simulation',
                            'add_noise_results_folder': 'noise',
                            'deconvolve_results_folder': 'deconvolved',
                            'binary_accuracy_results_folder': 'binary_accuracy_measures',
-                           'log_folder': 'timelog',
+                           'logfolder': 'timelog',
                            'max_threads': 4,
                            'print_progress': True,
                            'number_of_stacks': None,

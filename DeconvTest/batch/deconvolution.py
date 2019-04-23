@@ -92,7 +92,9 @@ def __deconvolve_batch_helper(item, inputfolder, outputfolder, imagej_path,
     filename, algorithm, alg_kwargs = item
     name = filename.split('/')[-1]
     elapsed_time = None
-    if len(name.split('psf')) == 1:
+    metadata = Metadata()
+    metadata.read_from_csv(inputfolder + filename[:-4] + '.csv')
+    if 'isPSF' not in metadata.index or str(metadata['isPSF']) == 'False':
         psfname = filename[: -len(name)-1].split('_noise')[0] + '.tif'
         subfolder = algorithm
         for kw in alg_kwargs:

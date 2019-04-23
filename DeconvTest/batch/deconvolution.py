@@ -112,6 +112,11 @@ def __deconvolve_batch_helper(item, inputfolder, outputfolder, imagej_path,
                 elapsed_time = time.time() - start
             else:
                 raise AttributeError(algorithm + ' is not a valid algorithm!')
+            metadata = Metadata(filename=inputfolder + filename[:-4] + '.csv')
+            metadata['Deconvolution algorithm'] = algorithm
+            for c in alg_kwargs:
+                metadata[c] = alg_kwargs[c]
+            metadata.save(outputfolder + subfolder + filename[:-4] + '.csv')
 
         if log_computing_time is True and elapsed_time is not None:
             if logfolder is None:
@@ -126,9 +131,6 @@ def __deconvolve_batch_helper(item, inputfolder, outputfolder, imagej_path,
                               'Algorithm': algorithm,
                               'Name': subfolder[:-1] + '/' + filename})
             t.to_csv(logfolder + subfolder[:-1] + '_' + filename[:-4].replace('/', '_') + '.csv', sep='\t')
-        metadata = Metadata(filename=inputfolder + filename[:-4] + '.csv')
-        metadata.save(outputfolder + subfolder + filename[:-4] + '.csv')
-
 
 
 

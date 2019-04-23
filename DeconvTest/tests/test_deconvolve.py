@@ -11,7 +11,7 @@ from DeconvTest.modules.deconvolution import *
 class TestDeconvolve(unittest.TestCase):
 
     def test_rif(self):
-        cell = Cell(resolution=1, size=[10, 10, 10], phi=0, theta=0)
+        cell = Cell(input_voxel_size=1, size=[10, 10, 10], phi=0, theta=0)
         psf = PSF(sigma=0.1, aspect_ratio=2)
         psf.save('data/psf.tif')
         cell.convolve(psf)
@@ -25,7 +25,7 @@ class TestDeconvolve(unittest.TestCase):
         shutil.rmtree('data/')
 
     def test_rltv(self):
-        cell = Cell(resolution=1, size=[10, 10, 10], phi=0, theta=0)
+        cell = Cell(input_voxel_size=1, size=[10, 10, 10], phi=0, theta=0)
         psf = PSF(sigma=0.1, aspect_ratio=2)
         psf.save('data/psf.tif')
         cell.convolve(psf)
@@ -39,7 +39,7 @@ class TestDeconvolve(unittest.TestCase):
         shutil.rmtree('data/')
 
     def test_iterative(self):
-        cell = Cell(resolution=1, size=[10, 10, 10], phi=0, theta=0)
+        cell = Cell(input_voxel_size=1, size=[10, 10, 10], phi=0, theta=0)
         psf = PSF(sigma=0.1, aspect_ratio=2)
         psf.save('data/psf.tif')
         cell.convolve(psf)

@@ -112,7 +112,13 @@ def run_simulation(**kwargs):
             if not os.path.exists(inputfolder):
                 print 'Generating new cell parameters'
                 sim.generate_cell_parameters(outputfile=inputfolder, **kwargs)
-            sim.generate_cells_batch(params_file=inputfolder, outputfolder=outputfolder, **kwargs)
+            sim.generate_cells_batch(params_file=inputfolder,
+                                     outputfolder=simulation_folder + kwargs['inputfolder'],
+                                     **kwargs)
+            inputfolder = simulation_folder + kwargs['inputfolder']
+        if step == 'generate_psfs':
+            psffolder = simulation_folder + kwargs['psffolder']
+            sim.generate_psfs_batch(outputfolder=simulation_folder + kwargs['psffolder'], **kwargs)
 
 
     #
@@ -195,7 +201,7 @@ default_parameters = dict({'simulation_folder': 'test_simulation',
                            'log_folder': 'timelog',
                            'max_threads': 4,
                            'print_progress': True,
-                           'number_of_stacks': 2,
+                           'number_of_stacks': None,
                            'number_of_cells': 2,
                            'input_cell_kind': 'ellipsoid',
                            'size_mean_and_std': (10, 2),

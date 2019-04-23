@@ -5,7 +5,7 @@ cell_parameter_filename:	cell_parameters.csv,
 number_of_cells	5
 input_cell_kind	'spiky_cell'
 spikiness_range	(0.5, 0.6)
-psf_elongations	[4.5]
+psf_aspect_ratios	[4.5]
 psf_sigmas	[1]
 voxel_sizes_for_resizing	[0.3, [1, 0.3, 0.3]]
 deconvolution_algorithm	['deconvolution_lab_rif', 'deconvolution_lab_rltv', 'iterative_deconvolve_3d']

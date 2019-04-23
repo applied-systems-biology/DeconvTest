@@ -77,7 +77,7 @@ def generate_cells_batch(params_file, **kwargs):
         run_parallel(process=__generate_cells_batch_helper, process_name='Generation of cells', **kwargs)
 
 
-def generate_psfs_batch(outputfolder, sigmas, aspect_ratios, **kwargs):
+def generate_psfs_batch(outputfolder, psf_sigmas=None, psf_aspect_ratios=None, **kwargs):
     """
     Generate synthetic PSFs with given widths in a parallel mode and saves them in a given directory.
     
@@ -85,9 +85,9 @@ def generate_psfs_batch(outputfolder, sigmas, aspect_ratios, **kwargs):
     ----------
     outputfolder : str 
         Output directory to save the generated stacks.
-    sigmas : sequence of floats
+    psf_sigmas : sequence of floats
         Standard deviations of the PSF in xy in micrometers.
-    aspect_ratios : sequence of floats
+    psf_aspect_ratios : sequence of floats
         PSF aspect ratios.
 
     Keyword arguments
@@ -106,13 +106,14 @@ def generate_psfs_batch(outputfolder, sigmas, aspect_ratios, **kwargs):
     if not outputfolder.endswith('/'):
         outputfolder += '/'
     items = []
-    for sigma in sigmas:
-        for aspect_ratio in aspect_ratios:
-            items.append((sigma, aspect_ratio))
-    kwargs['items'] = items
-    kwargs['outputfolder'] = outputfolder
+    if psf_sigmas is not None and psf_aspect_ratios is not None:
+        for sigma in psf_sigmas:
+            for aspect_ratio in psf_aspect_ratios:
+                items.append((sigma, aspect_ratio))
+        kwargs['items'] = items
+        kwargs['outputfolder'] = outputfolder
 
-    run_parallel(process=__generate_psfs_batch_helper, process_name='Generation of PSFs', **kwargs)
+        run_parallel(process=__generate_psfs_batch_helper, process_name='Generation of PSFs', **kwargs)
 
 
 def convolve_batch(inputfolder, psffolder, outputfolder, **kwargs):
@@ -291,6 +292,8 @@ def __generate_psfs_batch_helper(item, outputfolder, input_voxel_size, **kwargs_
     psf = PSF(sigma=sigmax, aspect_ratio=sigmaz / sigmax)
     psf.save(outputfolder + 'psf_sigma_' + str(sigma) + '_aspect_ratio_' + str(aspect_ratio) + '.tif',
              normalize_output=True)
+    metadata['PSF sigma xy um'] = sigma
+    metadata['PSF aspect ratio'] = aspect_ratio
     metadata.save(outputfolder + 'psf_sigma_' + str(sigma) + '_aspect_ratio_' + str(aspect_ratio) + '.csv')
 
 

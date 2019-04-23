@@ -29,6 +29,7 @@ def add_poisson_noise(img, snr=None):
     if img is None:
         raise ValueError('self.image is None! The image has to be initialized!')
 
+    img = img.astype(np.float32)
     if snr is not None:
         imgmax = snr ** 2
         ratio = imgmax / img.max()
@@ -61,6 +62,7 @@ def add_gaussian_noise(img, snr=None):
     if img is None:
         raise ValueError('self.image is None! The image has to be initialized!')
 
+    img = img.astype(np.float32)
     if snr is not None:
         sig = img.max() * 1. / (10 ** (snr / 20.))
         noise = np.random.normal(0, sig, img.shape)

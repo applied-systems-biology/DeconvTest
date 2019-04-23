@@ -15,7 +15,7 @@ from helper_lib.parallel import run_parallel
 from helper_lib import filelib
 
 
-def deconvolve_batch(inputfolder, outputfolder, algorithm, **kwargs):
+def deconvolve_batch(inputfolder, outputfolder, deconvolution_algorithm, **kwargs):
     """
     Deconvolves all cell images in a given input directory with multiple algorithm and settings.
     
@@ -25,16 +25,16 @@ def deconvolve_batch(inputfolder, outputfolder, algorithm, **kwargs):
         Input directory with cell images to fiji.
     outputfolder : str
         Output directory to save the deconvolved images.
-    algorithm : string, sequence of strings
+    deconvolution_algorithm : string, sequence of strings
         Name of the deconvolution algorithm from set of
          {deconvolution_lab_rif, deconvolution_lab_rltv, iterative_deconvolve_3d}.
         If a sequence is provided, all algorithms from the sequence will be tested.
 
     Keyword arguments
     -----------------
-    <algorithm>_<parameter> : scalar or sequence
+    <deconvolution_algorithm>_<parameter> : scalar or sequence
         Values of the parameters for the deconvolution algorithms to be tested.
-        <algorithm> is the name of the algorithm from set of
+        <deconvolution_algorithm> is the name of the algorithm from set of
          {deconvolution_lab_rif, deconvolution_lab_rltv, iterative_deconvolve_3d}
          for which the parameters values refer to.
         <parameter> is the name of the parameter of the specified algorithm.
@@ -61,7 +61,7 @@ def deconvolve_batch(inputfolder, outputfolder, algorithm, **kwargs):
     if not outputfolder.endswith('/'):
         outputfolder += '/'
     inputfiles = filelib.list_subfolders(inputfolder)
-    algorithm = np.array([algorithm]).flatten()
+    algorithm = np.array([deconvolution_algorithm]).flatten()
 
     items = []
     for alg in algorithm:

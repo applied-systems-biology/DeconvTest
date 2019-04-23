@@ -111,9 +111,10 @@ def run_simulation(**kwargs):
                 print 'Generating new cell parameters'
                 sim.generate_cell_parameters(outputfile=inputfolder, **kwargs)
             batch.generate_cells_batch(params_file=inputfolder,
-                                     outputfolder=simulation_folder + kwargs['inputfolder'],
-                                     **kwargs)
+                                       outputfolder=simulation_folder + kwargs['inputfolder'],
+                                       **kwargs)
             kwargs['inputfolder'] = simulation_folder + kwargs['inputfolder']
+            kwargs['reffolder'] = kwargs['inputfolder']
         elif step == 'generate_psfs':
             kwargs['psffolder'] = simulation_folder + kwargs['psffolder']
             batch.generate_psfs_batch(outputfolder=kwargs['psffolder'], **kwargs)
@@ -123,65 +124,7 @@ def run_simulation(**kwargs):
             getattr(batch, step + '_batch')(**kwargs)
             kwargs['inputfolder'] = kwargs['outputfolder']
 
-    #
-    #
-    # if step is None or step == 1:
-    #     number_of_stacks = params.get('number_of_stacks')
-    #     if number_of_stacks is None:
-    #         sim.generate_cell_parameters(outputfile=cell_parameter_filename,
-    #                                      number_of_cells=params.get('number_of_cells'),
-    #                                      size_mean_and_std=params.get('size_mean_and_std'),
-    #                                      equal_dimensions=params.get('equal_dimensions'),
-    #                                      spikiness_range=params.get('spikiness_range'),
-    #                                      spike_size_range=params.get('spike_size_range'),
-    #                                      spike_smoothness_range=params.get('spike_smoothness_range'))
-    #         sim.generate_cells_batch(params_file=cell_parameter_filename, outputfolder=inputfolder,
-    #                                  resolution=params.get('input_voxel_size'),
-    #                                  max_threads=params.get('max_threads'), print_progress=params.get('print_progress'))
-    #     else:
-    #         number_of_stacks = int(float(number_of_stacks))
-    #         sim.generate_stack_parameters(outputfolder=cell_parameter_folder, number_of_stacks=number_of_stacks,
-    #                                       number_of_cells=params.get('number_of_cells'),
-    #                                       size_mean_and_std=params.get('size_mean_and_std'),
-    #                                       equal_dimensions=params.get('equal_dimensions'),
-    #                                       spikiness_range=params.get('spikiness_range'),
-    #                                       spike_size_range=params.get('spike_size_range'),
-    #                                       spike_smoothness_range=params.get('spike_smoothness_range'))
-    #         sim.generate_stacks_batch(params_folder=cell_parameter_folder, outputfolder=inputfolder,
-    #                                   resolution=params.get('input_voxel_size'),
-    #                                   stack_size_microns=params.get('stack_size_microns'),
-    #                                   max_threads=params.get('max_threads'), print_progress=params.get('print_progress'))
-    #
-    #     sim.generate_psfs_batch(outputfolder=psffolder, sigmas=params.get('psf_sigmas'),
-    #                             elongations=params.get('psf_elongations'), resolution=params.get('input_voxel_size'),
-    #                             max_threads=params.get('max_threads'), print_progress=params.get('print_progress'))
-    #     sim.convolve_batch(inputfolder=inputfolder, psffolder=psffolder, outputfolder=convolution_folder,
-    #                        max_threads=int(params.get('max_threads')/3), print_progress=params.get('print_progress'))
-    #     sim.resize_batch(inputfolder=convolution_folder, outputfolder=resizing_folder,
-    #                      resolutions=params.get('voxel_sizes_for_resizing'),
-    #                      max_threads=params.get('max_threads'), print_progress=params.get('print_progress'))
-    #     sim.add_noise_batch(inputfolder=resizing_folder, outputfolder=noise_folder,
-    #                         gaussian_snrs=params.get('gaussian_snrs'), poisson_snrs=params.get('poisson_snrs'),
-    #                         max_threads=params.get('max_threads'), print_progress=params.get('print_progress'))
-    #
-    # if step is None or step == 2:
-    #     dec.deconvolve_batch(inputfolder=noise_folder, outputfolder=deconvolution_folder,
-    #                          algorithm=params.get('algorithm'), rif_lambda=params.get('rif_lambda'),
-    #                          rltv_lambda=params.get('rltv_lambda'), iterations=params.get('iterations'),
-    #                          normalize=params.get('normalize'), perform=params.get('perform'),
-    #                          detect=params.get('detect'), wiener=params.get('wiener'), low=params.get('low'),
-    #                          terminate=params.get('terminate'), log_computing_time=True,
-    #                          logfolder=log_folder, print_progress=params.get('print_progress'))
-    #
-    # if step is None or step == 3:
-    #     quant.segment_batch(inputfolder=deconvolution_folder, outputfolder=segmentation_folder,
-    #                         preprocess=params.get('preprocess'), thr=params.get('thr'),
-    #                         relative_thr=params.get('relative_thr'), postprocess=params.get('postprocess'),
-    #                         max_threads=params.get('max_threads'), print_progress=params.get('print_progress'),
-    #                         log_computing_time=False, logfolder=log_folder)
-    #     quant.compare_to_ground_truth_batch(inputfolder=segmentation_folder, reffolder=inputfolder,
-    #                                         outputfolder=accuracy_folder, max_threads=params.get('max_threads'),
-    #                                         print_progress=params.get('print_progress'))
+
     #     quant.extract_metadata(inputfile=accuracy_folder[:-1] + '.csv', default_resolution=params.get('input_voxel_size'))
     #     quant.combine_log(inputfolder=log_folder)
     #     quant.extract_metadata(inputfile=log_folder[:-1] + '.csv', default_resolution=params.get('input_voxel_size'))
@@ -219,7 +162,7 @@ default_parameters = dict({'simulation_folder': 'test_simulation',
                            'deconvolution_algorithm': ['deconvolution_lab_rif', 'deconvolution_lab_rltv'],
                            'deconvolution_lab_rif_regularization_lambda': [0.001, 001],
                            'deconvolution_lab_rltv_regularization_lambda': 0.001,
-                           'deconvolution_lab_rltv_iterations': [2, 5],
+                           'deconvolution_lab_rltv_iterations': [2, 3],
                            'log_computing_time': True,
                            'preprocess': False,
                            'thr': None,

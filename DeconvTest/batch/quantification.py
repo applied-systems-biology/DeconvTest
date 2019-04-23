@@ -65,7 +65,7 @@ def segment_batch(inputfolder, **kwargs):
     run_parallel(process=__segment_batch_helper, process_name='Segment', **kwargs)
 
 
-def compute_binary_accuracy_measures_batch(inputfolder, outputfolder, combine_stat=True, **kwargs):
+def binary_accuracy_batch(inputfolder, outputfolder, combine_stat=True, **kwargs):
     """
     Compares all images in a given input directory to corresponding ground truth images in a give reference directory.
     
@@ -99,7 +99,7 @@ def compute_binary_accuracy_measures_batch(inputfolder, outputfolder, combine_st
     kwargs['inputfolder'] = inputfolder
     kwargs['outputfolder'] = outputfolder
     run_parallel(process=__compute_binary_accuracy_measures_batch_helper,
-                 process_name='Compare to ground truth', **kwargs)
+                 process_name='Compute binary accuracy measures', **kwargs)
 
     if os.path.exists(outputfolder) and combine_stat is True:
         filelib.combine_statistics(outputfolder)

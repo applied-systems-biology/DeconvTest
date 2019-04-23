@@ -155,7 +155,7 @@ def convolve_batch(inputfolder, psffolder, outputfolder, **kwargs):
     run_parallel(process=__convolve_batch_helper, process_name='Convolution', **kwargs)
 
 
-def resize_batch(inputfolder, outputfolder, resolutions, **kwargs):
+def resize_batch(inputfolder, outputfolder, voxel_sizes_for_resizing, **kwargs):
     """
     Resizes all cell images in a given input directory in a parallel mode and saves them in a given output directory.
     
@@ -165,7 +165,7 @@ def resize_batch(inputfolder, outputfolder, resolutions, **kwargs):
         Input directory with cell images to resize.
     outputfolder : str
         Output directory to save the resized images.
-    resolutions : list
+    voxel_sizes_for_resizing : list
         List of new voxel sizes to which the input images should be resized.
         Each item of the list is a scalar (for the same voxels size along all axes)
          or sequence of scalars (voxel size in z, y and x).
@@ -196,7 +196,7 @@ def resize_batch(inputfolder, outputfolder, resolutions, **kwargs):
     if not outputfolder.endswith('/'):
         outputfolder += '/'
     inputfiles = filelib.list_subfolders(inputfolder)
-    items = [(inputfile, resolution) for inputfile in inputfiles for resolution in resolutions]
+    items = [(inputfile, resolution) for inputfile in inputfiles for resolution in voxel_sizes_for_resizing]
     kwargs['items'] = items
     kwargs['outputfolder'] = outputfolder
     kwargs['inputfolder'] = inputfolder
@@ -262,36 +262,36 @@ def add_noise_batch(inputfolder, outputfolder, kind, snr, test_snr_combinations=
 # private helper functions
 
 
-def __generate_cells_batch_helper(item, outputfolder, resolution, **kwargs_to_ignore):
+def __generate_cells_batch_helper(item, outputfolder, input_voxel_size, **kwargs_to_ignore):
     filename, params = item
     if not outputfolder.endswith('/'):
         outputfolder += '/'
-    cell = Cell(resolution=resolution, **dict(params))
+    cell = Cell(input_voxel_size=input_voxel_size, **dict(params))
     cell.save(outputfolder + filename)
     cell.metadata.save(outputfolder + filename[:-4] + '.csv')
 
 
-def __generate_stacks_batch_helper(item, outputfolder, resolution,
+def __generate_stacks_batch_helper(item, outputfolder, input_voxel_size,
                                    stack_size_microns, **kwargs_to_ignore):
     filename, params = item
     if not outputfolder.endswith('/'):
         outputfolder += '/'
-    stack = Stack(resolution=resolution, stack_size=stack_size_microns, cell_params=params)
+    stack = Stack(input_voxel_size=input_voxel_size, stack_size=stack_size_microns, cell_params=params)
     stack.save(outputfolder + filename[:-4] + '.tif')
     stack.metadata.save(outputfolder + filename[:-4] + '.csv')
 
 
-def __generate_psfs_batch_helper(item, outputfolder, resolution, **kwargs_to_ignore):
-    metadata = Metadata(resolution)
-    resolution = metadata['resolution']
-    sigma, elongation = item
-    sigmaz = sigma * elongation
-    sigmax = sigma / resolution[1]
-    sigmaz = sigmaz / resolution[0]
+def __generate_psfs_batch_helper(item, outputfolder, input_voxel_size, **kwargs_to_ignore):
+    metadata = Metadata()
+    metadata.set_voxel_size(input_voxel_size)
+    sigma, aspect_ratio = item
+    sigmaz = sigma * aspect_ratio
+    sigmax = sigma / metadata['Voxel size x']
+    sigmaz = sigmaz / metadata['Voxel size z']
     psf = PSF(sigma=sigmax, aspect_ratio=sigmaz / sigmax)
-    psf.save(outputfolder + 'psf_sigma_' + str(sigma) + '_aspect_ratio_' + str(elongation) + '.tif',
+    psf.save(outputfolder + 'psf_sigma_' + str(sigma) + '_aspect_ratio_' + str(aspect_ratio) + '.tif',
              normalize_output=True)
-    metadata.save(outputfolder + 'psf_sigma_' + str(sigma) + '_aspect_ratio_' + str(elongation) + '.csv')
+    metadata.save(outputfolder + 'psf_sigma_' + str(sigma) + '_aspect_ratio_' + str(aspect_ratio) + '.csv')
 
 
 def __convolve_batch_helper(item, inputfolder, psffolder, outputfolder, **kwargs_to_ignore):
@@ -305,16 +305,17 @@ def __convolve_batch_helper(item, inputfolder, psffolder, outputfolder, **kwargs
     stack.metadata.save(outputfolder + psffile[:-4] + '.csv')
 
 
-def __resize_batch_helper(item, inputfolder, outputfolder, order=1, append_resolution_to_filename=True, **kwargs_to_ignore):
-    inputfile, resolution = item
-    metadata = Metadata(resolution)
-    resolution = metadata['resolution']
+def __resize_batch_helper(item, inputfolder, outputfolder, order=1, append_resolution_to_filename=True,
+                          **kwargs_to_ignore):
+    inputfile, voxel_size = item
+    metadata = Metadata()
+    metadata.set_voxel_size(voxel_size)
     stack = Stack(filename=inputfolder + inputfile)
-    zoom = np.array(stack.metadata['resolution']) / np.array(resolution)
+    zoom = np.array(stack.metadata['Voxel size arr']) / np.array(metadata['Voxel size arr'])
     stack.resize(zoom=zoom, order=order)
     stack.metadata = metadata
     path = os.path.dirname(inputfile)
-    strres = str(resolution).replace('  ', ' ').replace('  ', ' ').replace('[ ', '[').replace(' ', '_')
+    strres = str(metadata['Voxel size']).replace('  ', ' ').replace('  ', ' ').replace('[ ', '[').replace(' ', '_')
     if path == '':
         if append_resolution_to_filename:
             outputname = outputfolder + inputfile[:-4] + '_voxel_size_' + strres + '.tif'

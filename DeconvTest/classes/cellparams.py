@@ -74,7 +74,7 @@ class CellParams(pd.DataFrame):
                     raise ValueError("Number of cells must be integer!")
             else:
                 if len(number_of_cells) == 1:
-                    pass
+                    number_of_cells = np.ones(number_of_stacks) * number_of_cells
                 elif len(number_of_cells) == 2:
                     number_of_cells = np.random.randint(number_of_cells[0], number_of_cells[1], number_of_stacks)
                 else:

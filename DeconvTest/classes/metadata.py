@@ -72,6 +72,8 @@ class Metadata(pd.Series):
                 if 'Voxel size x' in data.index and 'Voxel size y' in data.index and 'Voxel size z' in data.index:
                     self['Voxel size'] = str(np.float_([self['Voxel size z'],
                                                         self['Voxel size y'], self['Voxel size x']]))
+                    self['Voxel size arr'] = np.array([self['Voxel size z'], self['Voxel size y'],
+                                                       self['Voxel size x']])
 
     def set_voxel_size(self, voxel_size):
         """

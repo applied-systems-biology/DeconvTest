@@ -6,13 +6,12 @@ from __future__ import division
 
 import os
 import time
+import warnings
 import numpy as np
 import pandas as pd
-import seaborn as sns
-import pylab as plt
+
 
 from DeconvTest import Stack
-from DeconvTest import Metadata
 from helper_lib.parallel import run_parallel
 from helper_lib import filelib
 
@@ -95,7 +94,13 @@ def binary_accuracy_batch(inputfolder, outputfolder, combine_stat=True, **kwargs
         inputfolder += '/'
     if not outputfolder.endswith('/'):
         outputfolder += '/'
-    kwargs['items'] = filelib.list_subfolders(inputfolder)
+    if os.path.exists(inputfolder):
+        kwargs['items'] = filelib.list_subfolders(inputfolder)
+    else:
+        kwargs['items'] = []
+        warnings.warn('Input directory ' + inputfolder +
+                      ' does not exist!')
+
     kwargs['inputfolder'] = inputfolder
     kwargs['outputfolder'] = outputfolder
     run_parallel(process=__compute_binary_accuracy_measures_batch_helper,

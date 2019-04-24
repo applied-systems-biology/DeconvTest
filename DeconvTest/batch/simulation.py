@@ -5,6 +5,7 @@ Includes functions for generating synthetic cells and PSFs, convolution, resizin
 from __future__ import division
 
 import os
+import warnings
 import numpy as np
 import itertools
 
@@ -145,8 +146,19 @@ def convolve_batch(inputfolder, psffolder, outputfolder, **kwargs):
         psffolder += '/'
     if not outputfolder.endswith('/'):
         outputfolder += '/'
-    inputfiles = filelib.list_subfolders(inputfolder)
-    psffiles = filelib.list_subfolders(psffolder)
+    if os.path.exists(inputfolder):
+        inputfiles = filelib.list_subfolders(inputfolder)
+    else:
+        inputfiles = []
+        warnings.warn('Input directory ' + inputfolder +
+                      ' does not exist! Run the "generate_cells" step to create input cells')
+
+    if os.path.exists(psffolder):
+        psffiles = filelib.list_subfolders(psffolder)
+    else:
+        psffiles = []
+        warnings.warn('PSF directory ' + psffolder +
+                      ' does not exist! Run the "generate_psfs" step to create PSF images')
 
     items = [(inputfile, psffile) for inputfile in inputfiles for psffile in psffiles]
     kwargs['items'] = items
@@ -196,7 +208,13 @@ def resize_batch(inputfolder, outputfolder, voxel_sizes_for_resizing, **kwargs):
         inputfolder += '/'
     if not outputfolder.endswith('/'):
         outputfolder += '/'
-    inputfiles = filelib.list_subfolders(inputfolder)
+    if os.path.exists(inputfolder):
+        inputfiles = filelib.list_subfolders(inputfolder)
+    else:
+        inputfiles = []
+        warnings.warn('Input directory ' + inputfolder +
+                      ' does not exist!')
+
     items = [(inputfile, resolution) for inputfile in inputfiles for resolution in voxel_sizes_for_resizing]
     kwargs['items'] = items
     kwargs['outputfolder'] = outputfolder
@@ -242,7 +260,12 @@ def add_noise_batch(inputfolder, outputfolder, noise_kind, snr, test_snr_combina
         inputfolder += '/'
     if not outputfolder.endswith('/'):
         outputfolder += '/'
-    inputfiles = filelib.list_subfolders(inputfolder)
+    if os.path.exists(inputfolder):
+        inputfiles = filelib.list_subfolders(inputfolder)
+    else:
+        inputfiles = []
+        warnings.warn('Input directory ' + inputfolder +
+                      ' does not exist!')
 
     kind = np.array([noise_kind]).flatten()
     snr = np.array([snr]).flatten()

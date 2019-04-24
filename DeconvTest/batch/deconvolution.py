@@ -5,6 +5,7 @@ from __future__ import division
 
 import time
 import os
+import warnings
 import numpy as np
 import pandas as pd
 import itertools
@@ -60,7 +61,12 @@ def deconvolve_batch(inputfolder, outputfolder, deconvolution_algorithm, **kwarg
         inputfolder += '/'
     if not outputfolder.endswith('/'):
         outputfolder += '/'
-    inputfiles = filelib.list_subfolders(inputfolder)
+    if os.path.exists(inputfolder):
+        inputfiles = filelib.list_subfolders(inputfolder)
+    else:
+        inputfiles = []
+        warnings.warn('Input directory ' + inputfolder +
+                      ' does not exist!')
     algorithm = np.array([deconvolution_algorithm]).flatten()
 
     items = []

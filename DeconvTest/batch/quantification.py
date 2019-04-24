@@ -101,6 +101,9 @@ def binary_accuracy_batch(inputfolder, outputfolder, combine_stat=True, **kwargs
         warnings.warn('Input directory ' + inputfolder +
                       ' does not exist!')
 
+    if not os.path.exists(kwargs['reffolder']):
+        kwargs['items'] = filelib.list_subfolders(inputfolder)
+        warnings.warn('Reference directory ' + kwargs['reffolder'] + ' does not exist!')
     kwargs['inputfolder'] = inputfolder
     kwargs['outputfolder'] = outputfolder
     run_parallel(process=__compute_binary_accuracy_measures_batch_helper,

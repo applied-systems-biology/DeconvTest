@@ -65,11 +65,11 @@ def convert_args(**kwargs):
         for arr in arrays:
             voxel_sizes.append(np.float_(p.findall(arr)))
             strvox = strvox.replace('['+arr+']', '')
-        nums = np.float_(p.findall(strvox))
+        nums = np.array(np.float_(p.findall(strvox)))
         for n in nums:
             voxel_sizes.append(round(n, 7))
         kwargs['voxel_sizes_for_resizing'] = voxel_sizes
-    for c in ['deconvolution_algorithm', 'noise_kind']:
+    for c in ['deconvolution_algorithm', 'noise_kind', 'simulation_steps']:
         if c in kwargs:
             if type(kwargs[c]) is str:
                 stralg = '[' + str(kwargs[c]) + ']'
@@ -92,7 +92,6 @@ def convert_args(**kwargs):
 
 
 def run_simulation(**kwargs):
-    steps = kwargs['simulation_steps']
     simulation_folder = kwargs.get('simulation_folder')
     if not simulation_folder.endswith('/'):
         simulation_folder += '/'
@@ -100,26 +99,35 @@ def run_simulation(**kwargs):
 
     kwargs = convert_args(**kwargs)
     kwargs['Time of the simulation start'] = time.ctime()
-    pd.Series(kwargs).to_csv(simulation_folder + 'simulation_parameters.csv', sep='\t')
+    pd.Series(kwargs).to_csv(simulation_folder + 'simulation_parameters.csv', sep='\t', header=False)
     save_fiji_version(simulation_folder)
     kwargs['logfolder'] = simulation_folder + kwargs['logfolder']
+    steps = kwargs['simulation_steps']
 
     for step in steps:
+        print "Run the step '" + step + "'"
         if step == 'generate_cells':
-            inputfolder = simulation_folder + kwargs['cell_parameter_filename']
-            if not os.path.exists(inputfolder):
+            params_file = simulation_folder + kwargs['cell_parameter_filename']
+            if not os.path.exists(params_file):
                 print 'Generating new cell parameters'
-                sim.generate_cell_parameters(outputfile=inputfolder, **kwargs)
-            batch.generate_cells_batch(params_file=inputfolder,
-                                       outputfolder=simulation_folder + kwargs['inputfolder'],
-                                       **kwargs)
+                print 'Output file' + params_file
+                sim.generate_cell_parameters(outputfile=params_file, **kwargs)
             kwargs['inputfolder'] = simulation_folder + kwargs['inputfolder']
+            print 'Generating cells'
+            print 'Input file:', params_file, 'Output folder:', kwargs['inputfolder']
+            batch.generate_cells_batch(params_file=params_file,
+                                       outputfolder=kwargs['inputfolder'],
+                                       **kwargs)
             kwargs['reffolder'] = kwargs['inputfolder']
         elif step == 'generate_psfs':
             kwargs['psffolder'] = simulation_folder + kwargs['psffolder']
+            print 'Output folder:', kwargs['psffolder']
             batch.generate_psfs_batch(outputfolder=kwargs['psffolder'], **kwargs)
         else:
             kwargs['outputfolder'] = simulation_folder + kwargs[step + '_results_folder']
+            print 'Input folder:', kwargs['inputfolder'], 'Output folder:', kwargs['outputfolder']
+            if step == 'binary_accuracy':
+                print 'Reference folder:', kwargs['reffolder']
             getattr(batch, step + '_batch')(**kwargs)
             kwargs['inputfolder'] = kwargs['outputfolder']
 
@@ -170,7 +178,6 @@ default_parameters = dict({'simulation_folder': 'test_simulation',
 if __name__ == '__main__':
 
     args = sys.argv[1:]
-    step = None
     if len(args) > 0:
         params = dict(pd.read_csv(args[0], sep='\t', index_col=0, header=-1).transpose().iloc[0].T.squeeze())
         for c in default_parameters:

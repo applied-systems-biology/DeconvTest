@@ -329,6 +329,8 @@ def __convolve_batch_helper(item, inputfolder, psffolder, outputfolder, **kwargs
     psf = PSF(filename=psffolder + psffile)
     stack.convolve(psf)
     stack.save(outputfolder + psffile[:-4] + '/' + inputfile)
+    for c in ['PSF sigma xy um', 'PSF aspect ratio']:
+        stack.metadata[c] = psf.metadata[c]
     stack.metadata.save(outputfolder + psffile[:-4] + '/' + inputfile[:-4] + '.csv')
     psf.save(outputfolder + psffile)
     psf.metadata.save(outputfolder + psffile[:-4] + '.csv')

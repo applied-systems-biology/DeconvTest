@@ -49,7 +49,7 @@ class TestSimulation(unittest.TestCase):
         files = os.listdir('data/psfs')
         self.assertEqual(len(files), 12)
         shutil.rmtree('data/')
-    #
+
     def test_simulate(self):
         sim.generate_cell_parameters('data/params.csv', number_of_cells=2)
         sim.generate_cells_batch(params_file='data/params.csv', outputfolder='data/cells/',
@@ -76,7 +76,7 @@ class TestSimulation(unittest.TestCase):
                            'voxel_size_[4._4._4.]_noise_gaussian_snr=10_poisson_snr=None')
         self.assertEqual(len(files), 4)
         shutil.rmtree('data/')
-    #
+
     def test_simulate_stack(self):
         sim.generate_cell_parameters('data/stack_params.csv', number_of_stacks=2)
         sim.generate_cells_batch(params_file='data/stack_params.csv', outputfolder='data/stacks',

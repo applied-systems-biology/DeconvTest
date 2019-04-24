@@ -64,7 +64,7 @@ def generate_cells_batch(params_file, **kwargs):
     if 'stack' in params.columns:
         items = []
         for st in params['stack'].unique():
-            items.append(('stack_%03d.tif' % st, params[params['stack'] == st]))
+            items.append(('stack_%03d.tif' % st, params[params['stack'] == st].reset_index()))
         kwargs['items'] = items
         run_parallel(process=__generate_stacks_batch_helper, process_name='Generation of stacks', **kwargs)
 

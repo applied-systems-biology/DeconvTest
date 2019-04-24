@@ -297,7 +297,7 @@ class TestStackClass(unittest.TestCase):
 
     def test_range_for_number_of_cells(self):
         params = CellParams(number_of_stacks=3, number_of_cells=[5, 10])
-        stack = Stack(cell_params=params[params['stack'] == 2], input_voxel_size=0.5, stack_size=[10, 10, 10])
+        stack = Stack(cell_params=params[params['stack'] == 2].reset_index(), input_voxel_size=0.5, stack_size=[10, 10, 10])
         self.assertIsNotNone(stack.image)
 
 

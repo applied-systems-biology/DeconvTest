@@ -44,7 +44,7 @@ class TestSimulation(unittest.TestCase):
         quant.binary_accuracy_batch(inputfolder='data/convolved',
                                     reffolder='data/cells',
                                     outputfolder='data/binary_accuracy',
-                                    rint_progress=False)
+                                    print_progress=False)
         files = os.listdir('data/binary_accuracy')
         self.assertEqual(len(files), 1)
         files = os.listdir('data/binary_accuracy/psf_sigma_1.5_aspect_ratio_4')

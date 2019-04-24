@@ -90,7 +90,7 @@ class Image(object):
                 io.imsave(outputfile, rescale_intensity(self.image, out_range=(0, 255)).astype(np.uint8))
             else:
                 io.imsave(outputfile, self.image.astype(np.uint32))
-        self.metadata.to_csv(outputfile[:-4] + '.csv', sep='\t')
+        self.metadata.to_csv(outputfile[:-4] + '.csv', sep='\t', header=False)
         self.filename = outputfile
 
     def show_2d_projections(self):

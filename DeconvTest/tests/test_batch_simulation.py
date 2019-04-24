@@ -44,17 +44,17 @@ class TestSimulation(unittest.TestCase):
         shutil.rmtree('data/')
 
     def test_generate_psfs(self):
-        sim.generate_psfs_batch('data/psfs', sigmas=[2, 1.5], aspect_ratios=[1.5, 3, 5],
+        sim.generate_psfs_batch('data/psfs', psf_sigmas=[2, 1.5], psf_aspect_ratios=[1.5, 3, 5],
                                 input_voxel_size=0.8, print_progress=False)
         files = os.listdir('data/psfs')
         self.assertEqual(len(files), 12)
         shutil.rmtree('data/')
-
+    #
     def test_simulate(self):
         sim.generate_cell_parameters('data/params.csv', number_of_cells=2)
         sim.generate_cells_batch(params_file='data/params.csv', outputfolder='data/cells/',
                                  input_voxel_size=1, print_progress=False)
-        sim.generate_psfs_batch('data/psfs', sigmas=[1.5], aspect_ratios=[1.5],
+        sim.generate_psfs_batch('data/psfs', psf_sigmas=[1.5], psf_aspect_ratios=[1.5],
                                 input_voxel_size=1, print_progress=False)
         sim.convolve_batch('data/cells/', 'data/psfs', 'data/convolved/', print_progress=False)
         files = os.listdir('data/convolved')
@@ -68,7 +68,7 @@ class TestSimulation(unittest.TestCase):
         files = os.listdir('data/resized/psf_sigma_1.5_aspect_ratio_1.5_voxel_size_[4._4._4.]')
         self.assertEqual(len(files), 4)
 
-        sim.add_noise_batch('data/resized/', 'data/noise/', kind=['gaussian', 'poisson'],
+        sim.add_noise_batch('data/resized/', 'data/noise/', noise_kind=['gaussian', 'poisson'],
                             snr=[None, 10], test_snr_combinations=True, print_progress=False)
         files = os.listdir('data/noise/')
         self.assertEqual(len(files), 6)
@@ -76,12 +76,12 @@ class TestSimulation(unittest.TestCase):
                            'voxel_size_[4._4._4.]_noise_gaussian_snr=10_poisson_snr=None')
         self.assertEqual(len(files), 4)
         shutil.rmtree('data/')
-
+    #
     def test_simulate_stack(self):
         sim.generate_cell_parameters('data/stack_params.csv', number_of_stacks=2)
         sim.generate_cells_batch(params_file='data/stack_params.csv', outputfolder='data/stacks',
                                  input_voxel_size=1, stack_size_microns=[10, 30, 30], print_progress=False)
-        sim.generate_psfs_batch('data/psfs', sigmas=[1.5], aspect_ratios=[1.5],
+        sim.generate_psfs_batch('data/psfs', psf_sigmas=[1.5], psf_aspect_ratios=[1.5],
                                 input_voxel_size=1, print_progress=False)
         sim.convolve_batch('data/stacks/', 'data/psfs', 'data/convolved/', print_progress=False)
         files = os.listdir('data/convolved')
@@ -95,7 +95,7 @@ class TestSimulation(unittest.TestCase):
         files = os.listdir('data/resized/psf_sigma_1.5_aspect_ratio_1.5_voxel_size_[3._3._3.]')
         self.assertEqual(len(files), 4)
 
-        sim.add_noise_batch('data/resized/', 'data/noise/', kind='gaussian', snr=[5, 2], print_progress=False)
+        sim.add_noise_batch('data/resized/', 'data/noise/', noise_kind='gaussian', snr=[5, 2], print_progress=False)
         files = os.listdir('data/noise/')
         self.assertEqual(len(files), 4)
         files = os.listdir('data/noise/psf_sigma_1.5_aspect_ratio_1.5_voxel_size_'

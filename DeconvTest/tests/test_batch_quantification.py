@@ -19,8 +19,8 @@ class TestSimulation(unittest.TestCase):
                                  input_voxel_size=1,
                                  print_progress=False)
         sim.generate_psfs_batch('data/psfs',
-                                sigmas=[1.5],
-                                aspect_ratios=[4],
+                                psf_sigmas=[1.5],
+                                psf_aspect_ratios=[4],
                                 input_voxel_size=1,
                                 print_progress=False)
         sim.convolve_batch('data/cells/',
@@ -41,10 +41,10 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(len(files), 4)
         self.assertEqual(os.path.exists('data/log/psf_sigma_1.5_aspect_ratio_4_cell_000.csv'), True)
 
-        quant.compute_binary_accuracy_measures_batch(inputfolder='data/convolved',
-                                                     reffolder='data/cells',
-                                                     outputfolder='data/binary_accuracy',
-                                                     print_progress=False)
+        quant.binary_accuracy_batch(inputfolder='data/convolved',
+                                    reffolder='data/cells',
+                                    outputfolder='data/binary_accuracy',
+                                    rint_progress=False)
         files = os.listdir('data/binary_accuracy')
         self.assertEqual(len(files), 1)
         files = os.listdir('data/binary_accuracy/psf_sigma_1.5_aspect_ratio_4')
@@ -54,12 +54,10 @@ class TestSimulation(unittest.TestCase):
         quant.combine_log('data/log')
         self.assertEqual(os.path.exists('data/log.csv'), True)
 
-        quant.extract_metadata('data/binary_accuracy.csv', 0.5)
         stat = pd.read_csv('data/binary_accuracy.csv', sep='\t', index_col=0)
         for col in ['Voxel size y', 'Voxel size']:
             self.assertIn(col, stat.columns)
 
-        quant.extract_metadata('data/log.csv', 0.5)
         stat = pd.read_csv('data/log.csv', sep='\t', index_col=0)
         for col in ['Voxel size y', 'Voxel size']:
             self.assertIn(col, stat.columns)

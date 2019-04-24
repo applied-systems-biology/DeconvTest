@@ -42,7 +42,7 @@ class Metadata(pd.Series):
             The path used to save the cell metadata.
         """
         filelib.make_folders([os.path.dirname(outputfile)])
-        self.to_csv(outputfile, sep='\t')
+        self.to_csv(outputfile, sep='\t', header=False)
 
     def read_from_csv(self, filename):
         """

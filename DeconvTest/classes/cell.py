@@ -98,7 +98,7 @@ class Cell(Image):
         ind = np.int_(np.round_(ind))
         self.image[tuple(ind)] = 255
 
-    def generate(self, input_voxel_size, kind='ellipsoid', **kwargs):
+    def generate(self, input_voxel_size, input_cell_kind='ellipsoid', **kwargs):
         """
         Generates a synthetic object image from given parameters and stores the output in the `self.image` variable.
 
@@ -107,7 +107,7 @@ class Cell(Image):
         input_voxel_size : scalar or sequence of scalars
             Voxel size in z, y and x used to generate the object image.
             If one value is provided, the voxel size is assumed to be equal along all axes.
-        kind : string, optional
+        input_cell_kind : string, optional
             Name of the shape of the ground truth object from set of
             {ellipoid, spiky_cell}.
             Default is 'ellipsoid'
@@ -115,15 +115,17 @@ class Cell(Image):
             Keyword arguments passed to corresponding methods to generate synthetic objects.
         """
 
-        if 'generate_' + kind in dir(input_objects) and kind in input_objects.valid_shapes:
+        if 'generate_' + input_cell_kind in dir(input_objects) and input_cell_kind in input_objects.valid_shapes:
             self.metadata = Metadata()
             self.metadata.set_voxel_size(input_voxel_size)
-            self.image = getattr(input_objects, 'generate_' + kind)(self.metadata['Voxel size arr'], **kwargs)
+            self.image = getattr(input_objects, 'generate_' + input_cell_kind)(self.metadata['Voxel size arr'],
+                                                                               **kwargs)
             for c in kwargs:
                 self.metadata[c] = kwargs[c]
+            self.metadata['kind'] = input_cell_kind
             self.metadata['Convolved'] = False
         else:
-            raise AttributeError(kind + ' is not a valid object shape!')
+            raise AttributeError(input_cell_kind + ' is not a valid object shape!')
 
     def volume(self):
         """

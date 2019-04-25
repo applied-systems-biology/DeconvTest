@@ -42,13 +42,13 @@ class CellParams(pd.DataFrame):
         super(CellParams, self).__init__()
         self.generate_parameters(**kwargs)
 
-    def generate_parameters(self, kind='ellipsoid', number_of_stacks=None, number_of_cells=1, coordinates=True, **kwargs):
+    def generate_parameters(self, input_cell_kind='ellipsoid', number_of_stacks=None, number_of_cells=1, coordinates=True, **kwargs):
         """
         Generates random cells sizes and rotation angles.
 
         Parameters:
         -----------
-        kind : string, optional
+        input_cell_kind : string, optional
             Name of the shape of the ground truth object from set of
             {ellipoid, spiky_cell}.
             Default is 'ellipsoid'
@@ -65,7 +65,7 @@ class CellParams(pd.DataFrame):
         kwargs : key, value pairings
             Keyword arguments passed to corresponding methods to generate cell parameters.
         """
-        if 'parameters_' + kind in dir(input_objects) and kind in input_objects.valid_shapes:
+        if 'parameters_' + input_cell_kind in dir(input_objects) and input_cell_kind in input_objects.valid_shapes:
             data = pd.DataFrame()
             number_of_cells = np.array([number_of_cells]).flatten()
             if number_of_stacks is None:
@@ -86,10 +86,10 @@ class CellParams(pd.DataFrame):
             for i_iter in range(iterations):
                 cells = pd.DataFrame()
                 for i_num in range(int(number_of_cells[i_iter])):
-                    cell = getattr(input_objects, 'parameters_' + kind)(**kwargs)
+                    cell = getattr(input_objects, 'parameters_' + input_cell_kind)(**kwargs)
                     if coordinates:
                         cell.loc[:, 'z'], cell.loc[:, 'y'], cell.loc[:, 'x'] = np.random.uniform(0, 1, 3)
-                    cell.loc[:, 'kind'] = kind
+                    cell.loc[:, 'input_cell_kind'] = input_cell_kind
 
                     cells = pd.concat([cells, cell], ignore_index=True)
 
@@ -100,7 +100,7 @@ class CellParams(pd.DataFrame):
                 self.loc[:, c] = data[c]
 
         else:
-            raise AttributeError(kind + ' is not a valid object shape!')
+            raise AttributeError(input_cell_kind + ' is not a valid object shape!')
 
     def save(self, outputfile):
         """

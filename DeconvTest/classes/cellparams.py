@@ -65,7 +65,6 @@ class CellParams(pd.DataFrame):
         kwargs : key, value pairings
             Keyword arguments passed to corresponding methods to generate cell parameters.
         """
-        number_of_stacks = int(number_of_stacks)
         if 'parameters_' + kind in dir(input_objects) and kind in input_objects.valid_shapes:
             data = pd.DataFrame()
             number_of_cells = np.array([number_of_cells]).flatten()
@@ -73,6 +72,7 @@ class CellParams(pd.DataFrame):
                 if not len(number_of_cells) == 1:
                     raise ValueError("Number of cells must be integer!")
             else:
+                number_of_stacks = int(number_of_stacks)
                 if len(number_of_cells) == 1:
                     number_of_cells = np.ones(number_of_stacks) * number_of_cells
                 elif len(number_of_cells) == 2:

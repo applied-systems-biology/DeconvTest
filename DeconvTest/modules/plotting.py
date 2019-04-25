@@ -3,6 +3,7 @@ from __future__ import division
 import os
 import seaborn as sns
 import pylab as plt
+import numpy as np
 from scipy.stats import linregress
 
 from helper_lib import filelib
@@ -34,13 +35,13 @@ def plot(stat, columns, outputname, labels=None, logscale=False, dpi=300, **kwar
     figsize = kwargs.pop('figsize', None)
     hue = kwargs.get('hue', None)
     normalize = kwargs.pop('normalize', True)
-    for c in ['Poisson_SNR', 'Gaussian_SNR']:
+    for c in ['SNR', 'SNR2', 'SNR3', 'SNR4']:
         if x == c or hue == c:
+            stat[c] = np.array(stat[c]).astype(str)
             for snr in stat[c].unique():
-                if snr == 'None':
-                    stat.at[stat[c] == snr, c] = 10000
-                else:
-                    stat.at[stat[c] == snr, c] = int(float(snr))
+                if snr == 'nan':
+                    stat.at[stat[c] == snr, c] = '10000'
+            stat[c] = np.array(stat[c]).astype(float).astype(int)
     if hue is not None:
         stat = stat.sort_values([x, hue])
     else:

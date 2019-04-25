@@ -134,13 +134,13 @@ def __deconvolve_batch_helper(item, inputfolder, outputfolder, imagej_path,
             filelib.make_folders([logfolder])
             t = pd.DataFrame({'Step': ['Deconvolution'],
                               'Computational time': [elapsed_time],
-                              'Algorithm': algorithm,
-                              'Name': subfolder[:-1] + '/' + filename})
+                              'Algorithm': algorithm})
             for c in metadata.index:
                 try:
                     t[c] = metadata[c]
                 except ValueError:
                     t[c] = str(metadata[c])
+            t['Name'] = subfolder[:-1] + '/' + filename
             t.to_csv(logfolder + subfolder[:-1] + '_' + filename[:-4].replace('/', '_') + '.csv', sep='\t')
 
 

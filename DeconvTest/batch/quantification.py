@@ -167,6 +167,7 @@ def __segment_batch_helper(item, inputfolder, outputfolder, log_computing_time=F
                     t[c] = stack.metadata[c]
                 except ValueError:
                     t[c] = str(stack.metadata[c])
+            t['Name'] = item
             t.to_csv(logfolder + item[:-4].replace('/', '_') + '.csv', sep='\t')
 
 
@@ -227,6 +228,7 @@ def __compute_binary_accuracy_measures_batch_helper(item, inputfolder, reffolder
                     t[c] = stack.metadata[c]
                 except ValueError:
                     t[c] = str(stack.metadata[c])
+            t['Name'] = item
             t.to_csv(logfolder + item[:-4].replace('/', '_') + '.csv', sep='\t')
 
 

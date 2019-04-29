@@ -64,10 +64,10 @@ def segment_batch(inputfolder, **kwargs):
     run_parallel(process=__segment_batch_helper, process_name='Segment', **kwargs)
 
 
-def binary_accuracy_batch(inputfolder, outputfolder, combine_stat=True, **kwargs):
+def accuracy_batch(inputfolder, outputfolder, combine_stat=True, **kwargs):
     """
     Compares all images in a given input directory to corresponding ground truth images in a give reference directory.
-    
+
     Parameters
     ----------
     inputfolder : str
@@ -106,8 +106,12 @@ def binary_accuracy_batch(inputfolder, outputfolder, combine_stat=True, **kwargs
         warnings.warn('Reference directory ' + kwargs['reffolder'] + ' does not exist!')
     kwargs['inputfolder'] = inputfolder
     kwargs['outputfolder'] = outputfolder
-    run_parallel(process=__compute_binary_accuracy_measures_batch_helper,
-                 process_name='Compute binary accuracy measures', **kwargs)
+    if kwargs.get('binary', False):
+        run_parallel(process=__compute_binary_accuracy_measures_batch_helper,
+                     process_name='Compute binary accuracy measures', **kwargs)
+    else:
+        run_parallel(process=__compute_accuracy_measures_batch_helper,
+                     process_name='Compute accuracy measures', **kwargs)
 
     if os.path.exists(outputfolder) and combine_stat is True:
         filelib.combine_statistics(outputfolder)
@@ -232,3 +236,61 @@ def __compute_binary_accuracy_measures_batch_helper(item, inputfolder, reffolder
             t.to_csv(logfolder + item[:-4].replace('/', '_') + '.csv', sep='\t')
 
 
+def __compute_accuracy_measures_batch_helper(item, inputfolder, reffolder, outputfolder,
+                                                    log_computing_time=False, logfolder=None, **segmentation_kwargs):
+    if not reffolder.endswith('/'):
+        reffolder += '/'
+    parts = item.split('/')
+    name = parts[-1]
+    if len(parts) > 1:
+        base = parts[-2]
+    else:
+        base = ''
+    stack = Stack(filename=inputfolder + item)
+    if 'isPSF' not in stack.metadata.index or str(stack.metadata['isPSF']) == 'False':
+        if os.path.exists(reffolder + item):
+            refstack = Stack(filename=reffolder + item, is_segmented=True)
+        elif os.path.exists(reffolder + name):
+            refstack = Stack(filename=reffolder + name, is_segmented=True)
+        elif os.path.exists(reffolder + base + '/' + name):
+            refstack = Stack(filename=reffolder + base + '/' + name, is_segmented=True)
+        elif os.path.exists(reffolder + name.split('_voxel_size')[0] + '.tif'):
+            refstack = Stack(filename=reffolder + name.split('_voxel_size')[0] + '.tif', is_segmented=True)
+        else:
+            raise ValueError('No ground truth found for cell ' + item + '!')
+
+        start = time.time()
+        input_voxel_size = stack.metadata['Voxel size arr']
+        zoom = np.array(stack.metadata['Voxel size arr']) / np.array(refstack.metadata['Voxel size arr'])
+        stack.resize(zoom=zoom)
+        stats = stack.compute_accuracy_measures(refstack)
+
+        stack.metadata.set_voxel_size(input_voxel_size)
+        for c in stack.metadata.index:
+            try:
+                stats[c] = stack.metadata[c]
+            except ValueError:
+                stats[c] = str(stack.metadata[c])
+        stats['Name'] = item
+
+        filelib.make_folders([os.path.dirname(outputfolder + item)])
+        stats.to_csv(outputfolder + item[:-4] + '.csv', sep='\t')
+        elapsed_time = time.time() - start
+        if log_computing_time is True:
+            if logfolder is None:
+                logfolder = outputfolder + '../log/'
+            else:
+                if not logfolder.endswith('/'):
+                    logfolder += '/'
+
+            filelib.make_folders([logfolder])
+            t = pd.DataFrame({'Step': ['Computing binary accuracy measures'],
+                              'Computational time': [elapsed_time],
+                              'Name': item})
+            for c in stack.metadata.index:
+                try:
+                    t[c] = stack.metadata[c]
+                except ValueError:
+                    t[c] = str(stack.metadata[c])
+            t['Name'] = item
+            t.to_csv(logfolder + item[:-4].replace('/', '_') + '.csv', sep='\t')

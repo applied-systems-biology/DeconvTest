@@ -126,10 +126,14 @@ def run_simulation(**kwargs):
         else:
             kwargs['outputfolder'] = simulation_folder + kwargs[step + '_results_folder']
             print 'Input folder:', kwargs['inputfolder'], 'Output folder:', kwargs['outputfolder']
-            if step == 'binary_accuracy':
+            if step in ['binary_accuracy', 'accuracy']:
                 print 'Reference folder:', kwargs['reffolder']
+            if step == 'binary_accuracy':
+                step = 'accuracy'
+                kwargs['binary'] = True
             getattr(batch, step + '_batch')(**kwargs)
-            kwargs['inputfolder'] = kwargs['outputfolder']
+            if step not in ['binary_accuracy', 'accuracy']:
+                kwargs['inputfolder'] = kwargs['outputfolder']
 
     batch.combine_log(inputfolder=kwargs['logfolder'])
 
@@ -147,6 +151,7 @@ default_parameters = dict({'simulation_folder': 'test_simulation',
                            'add_noise_results_folder': 'noise',
                            'deconvolve_results_folder': 'deconvolved',
                            'binary_accuracy_results_folder': 'binary_accuracy_measures',
+                           'accuracy_results_folder': 'accuracy_measures',
                            'logfolder': 'timelog',
                            'max_threads': 4,
                            'print_progress': True,

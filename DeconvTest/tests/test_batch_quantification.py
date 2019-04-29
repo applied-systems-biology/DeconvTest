@@ -41,10 +41,11 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(len(files), 4)
         self.assertEqual(os.path.exists('data/log/psf_sigma_1.5_aspect_ratio_4_cell_000.csv'), True)
 
-        quant.binary_accuracy_batch(inputfolder='data/convolved',
-                                    reffolder='data/cells',
-                                    outputfolder='data/binary_accuracy',
-                                    print_progress=False)
+        quant.accuracy_batch(inputfolder='data/convolved',
+                             reffolder='data/cells',
+                             outputfolder='data/binary_accuracy',
+                             print_progress=False,
+                             binary=True)
         files = os.listdir('data/binary_accuracy')
         self.assertEqual(len(files), 1)
         files = os.listdir('data/binary_accuracy/psf_sigma_1.5_aspect_ratio_4')

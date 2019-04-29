@@ -45,7 +45,7 @@ class TestCellData(unittest.TestCase):
         'invalid_shape'
     )
     def test_invalid_types(self, kind):
-        self.assertRaises(AttributeError, CellParams, kind=kind)
+        self.assertRaises(AttributeError, CellParams, input_cell_kind=kind)
 
 
 if __name__ == '__main__':

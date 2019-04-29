@@ -12,6 +12,7 @@ import warnings
 
 from metadata import Metadata
 from DeconvTest.modules import noise
+from DeconvTest.modules import quantification
 from helper_lib import filelib
 
 
@@ -227,3 +228,19 @@ class Image(object):
 
         return self.image
 
+    def compute_accuracy_measures(self, gt):
+        """
+        Computes the root mean square error (RMSE) and it normalized versions
+
+        Parameters
+        ----------
+        gt : Image or Cell
+            Ground truth image.
+
+        Returns
+        -------
+        pandas.DataFrame()
+            Data frame containing the values for the computed accuracy measures.
+        """
+        data = quantification.compute_accuracy_measures(self.image, gt.image)
+        return data

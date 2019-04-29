@@ -149,7 +149,14 @@ class TestCellClass(unittest.TestCase):
         'invalid_shape'
     )
     def test_invalid_types(self, kind):
-        self.assertRaises(AttributeError, CellParams, kind=kind)
+        self.assertRaises(AttributeError, CellParams, input_cell_kind=kind)
+
+    def test_accuracy(self):
+        cell = Cell()
+        cell.generate(size=[5, 6, 5], input_voxel_size=0.5)
+        errors = cell.compute_accuracy_measures(cell)
+        for c in ['RMSE', 'RMSE norm range', 'RMSE norm mean', 'RMSE norm ref']:
+            self.assertEqual(errors[c].iloc[0], 0)
 
 
 if __name__ == '__main__':

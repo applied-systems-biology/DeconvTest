@@ -92,3 +92,36 @@ def compute_binary_accuracy_measures(image, gt_image):
                          'Underdetection error': (a - overlap) / a,
                          'Overlap error': (union - overlap) / a})
     return data
+
+
+def compute_accuracy_measures(image, gt_image):
+    """
+    Computes accuracy measures between the current image and a given ground truth image.
+
+    Parameters
+    ----------
+    image : ndarray
+       Image to evaluate.
+    gt : ndarray
+        Ground truth image.
+
+    Returns
+    -------
+    pandas.DataFrame()
+        Data frame containing the values for the computed accuracy measures.
+    """
+    image, gt_image = unify_shape(image, gt_image)  # convert cell images to the same shape
+    data = pd.DataFrame()
+    data['RMSE'] = [np.sqrt(np.sum((image - gt_image)**2) / (np.product(image.shape)))]
+    data['RMSE norm range'] = data['RMSE'] / (np.max(gt_image) - np.min(gt_image))
+    data['RMSE norm mean'] = data['RMSE'] / np.mean(gt_image)
+    gt_image = gt_image.astype(np.float)
+    rmse_norm = image - gt_image
+    rmse_norm = np.where(gt_image > 0, rmse_norm / gt_image, 0)
+    data['RMSE norm ref'] = np.sqrt(np.sum(rmse_norm**2) / (np.product(image.shape)))
+    return data
+
+
+
+
+

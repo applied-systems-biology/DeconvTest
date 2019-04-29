@@ -134,6 +134,7 @@ def run_simulation(**kwargs):
             getattr(batch, step + '_batch')(**kwargs)
             if step not in ['binary_accuracy', 'accuracy']:
                 kwargs['inputfolder'] = kwargs['outputfolder']
+            kwargs['binary'] = False
 
     batch.combine_log(inputfolder=kwargs['logfolder'])
 

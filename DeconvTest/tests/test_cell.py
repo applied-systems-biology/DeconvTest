@@ -155,7 +155,7 @@ class TestCellClass(unittest.TestCase):
         cell = Cell()
         cell.generate(size=[5, 6, 5], input_voxel_size=0.5)
         errors = cell.compute_accuracy_measures(cell)
-        for c in ['RMSE', 'RMSE norm range', 'RMSE norm mean', 'RMSE norm ref']:
+        for c in ['RMSE', 'RMSE norm range', 'RMSE norm mean']:
             self.assertEqual(errors[c].iloc[0], 0)
 
 

@@ -48,14 +48,8 @@ class Stack(Image):
             Default is None.
         """
         super(Stack, self).__init__(filename=filename)
-        self.cells = []
-        self.is_segmented = is_segmented
-        self.is_labeled = is_labeled
         if input_voxel_size is not None and stack_size is not None and cell_params is not None:
             self.generate(cell_params, input_voxel_size, stack_size)
-
-    def __repr__(self):
-        return "Stack with " + str(len(self.cells)) + " cells"
 
     def generate(self, cell_params, input_voxel_size, stack_size):
         """
@@ -98,8 +92,6 @@ class Stack(Image):
                 c.position = np.array([z, y, x]) * stack_size_pix
 
             self.position_cell(c)
-        self.is_segmented = True
-        self.is_labeled = False
         self.metadata = Metadata()
         self.metadata.set_voxel_size(input_voxel_size)
         self.metadata['Convolved'] = False

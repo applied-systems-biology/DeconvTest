@@ -102,34 +102,38 @@ def run_simulation(**kwargs):
     save_fiji_version(simulation_folder)
     kwargs['logfolder'] = simulation_folder + kwargs['logfolder']
     steps = kwargs['simulation_steps']
+    valid_steps = ['generate_cells', 'generate_psfs', 'convolve', 'resize', 'add_noise', 'deconvolve', 'accuracy']
 
     for step in steps:
-        print "Run the step '" + step + "'"
-        if step == 'generate_cells':
-            params_file = simulation_folder + kwargs['cell_parameter_filename']
-            if not os.path.exists(params_file):
-                print 'Generating new cell parameters'
-                print 'Output file' + params_file
-                sim.generate_cell_parameters(outputfile=params_file, **kwargs)
-            kwargs['inputfolder'] = simulation_folder + kwargs['inputfolder']
-            print 'Generating cells'
-            print 'Input file:', params_file, 'Output folder:', kwargs['inputfolder']
-            batch.generate_cells_batch(params_file=params_file,
-                                       outputfolder=kwargs['inputfolder'],
-                                       **kwargs)
-            kwargs['reffolder'] = kwargs['inputfolder']
-        elif step == 'generate_psfs':
-            kwargs['psffolder'] = simulation_folder + kwargs['psffolder']
-            print 'Output folder:', kwargs['psffolder']
-            batch.generate_psfs_batch(outputfolder=kwargs['psffolder'], **kwargs)
+        if step in valid_steps:
+            print "Run the step '" + step + "'"
+            if step == 'generate_cells':
+                params_file = simulation_folder + kwargs['cell_parameter_filename']
+                if not os.path.exists(params_file):
+                    print 'Generating new cell parameters'
+                    print 'Output file' + params_file
+                    sim.generate_cell_parameters(outputfile=params_file, **kwargs)
+                kwargs['inputfolder'] = simulation_folder + kwargs['inputfolder']
+                print 'Generating cells'
+                print 'Input file:', params_file, 'Output folder:', kwargs['inputfolder']
+                batch.generate_cells_batch(params_file=params_file,
+                                           outputfolder=kwargs['inputfolder'],
+                                           **kwargs)
+                kwargs['reffolder'] = kwargs['inputfolder']
+            elif step == 'generate_psfs':
+                kwargs['psffolder'] = simulation_folder + kwargs['psffolder']
+                print 'Output folder:', kwargs['psffolder']
+                batch.generate_psfs_batch(outputfolder=kwargs['psffolder'], **kwargs)
+            else:
+                kwargs['outputfolder'] = simulation_folder + kwargs[step + '_results_folder']
+                print 'Input folder:', kwargs['inputfolder'], 'Output folder:', kwargs['outputfolder']
+                if step == 'accuracy':
+                    print 'Reference folder:', kwargs['reffolder']
+                getattr(batch, step + '_batch')(**kwargs)
+                if step != 'accuracy':
+                    kwargs['inputfolder'] = kwargs['outputfolder']
         else:
-            kwargs['outputfolder'] = simulation_folder + kwargs[step + '_results_folder']
-            print 'Input folder:', kwargs['inputfolder'], 'Output folder:', kwargs['outputfolder']
-            if step == 'accuracy':
-                print 'Reference folder:', kwargs['reffolder']
-            getattr(batch, step + '_batch')(**kwargs)
-            if step != 'accuracy':
-                kwargs['inputfolder'] = kwargs['outputfolder']
+            raise ValueError('"' + step + '" is not a valid simulation step! Valid simulation steps are: ' + str(valid_steps))
 
     batch.combine_log(inputfolder=kwargs['logfolder'])
 

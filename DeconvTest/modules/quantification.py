@@ -113,8 +113,7 @@ def compute_accuracy_measures(image, gt_image):
     image, gt_image = unify_shape(image, gt_image)  # convert cell images to the same shape
     data = pd.DataFrame()
     data['RMSE'] = [np.sqrt(np.sum((image - gt_image)**2) / (np.product(image.shape)))]
-    data['RMSE norm range'] = data['RMSE'] / np.max(gt_image) - np.min(gt_image)
-    data['RMSE norm mean'] = data['RMSE'] / np.mean(gt_image)
+    data['NRMSE'] = data['RMSE'] / np.max(gt_image) - np.min(gt_image)
     return data
 
 

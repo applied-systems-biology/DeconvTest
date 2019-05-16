@@ -5,7 +5,6 @@ import numpy as np
 from image import Image
 from metadata import Metadata
 from DeconvTest.modules import input_objects
-from DeconvTest.modules import quantification
 
 
 class Cell(Image):
@@ -138,78 +137,5 @@ class Cell(Image):
 
         """
         return np.sum((self.image > 0) * 1.)
-
-    def segment(self, preprocess=False, thr=None, relative_thr=False, postprocess=False):
-        """
-        Segments the current image by thresholding with optional preprocessing.
-        
-        Parameters
-        ----------
-        preprocess : bool, optional
-            If True, the image will be preprocessed with a median filter (size 3) prior to segmentation.
-            Default is False.
-        thr : scalar, optional
-            Threshold value for image segmentation.
-            If None, automatic Otsu threshold will be computed.
-            Default is None.
-        relative_thr : bool, optional
-            If True, the value of `thr` is multiplied by the maximum intensity of the image.
-            Default is False.
-        postprocess bool, optional
-            If True, morphological opening and closing and binary holes filling will be applied after theresholding.
-            Default is False.
-
-        Returns
-        -------
-        ndarray
-            Segmented binary mask.
-        """
-        self.image = quantification.segment(self.image, preprocess, thr, relative_thr, postprocess, label=False)
-
-        return self.image
-
-    def dimensions(self):
-        """
-        Computes the size of the object represented by the current binary mask.
-        
-        Returns
-        -------
-        sequence of int
-            Dimensions / sizes of the object in pixels along all axes.
-        """
-        if self.image is None:
-            raise ValueError
-        if len(np.unique(self.image)) > 2:
-            raise ValueError('Cannot measure dimensions: image is not binary!')
-        dim = []
-        ind = np.where(self.image > 0)
-        for i in ind:
-            if len(i) > 0:
-                dim.append(np.max(i) - np.min(i) + 1)
-            else:
-                dim.append(0)
-        return np.array(dim)
-
-    def compute_binary_accuracy_measures(self, gt):
-        """
-        Computes the overlap errors, Jaccard index, and other accuracy measures between each connected region 
-         in the current image and a given ground truth image.
-         
-        Parameters
-        ----------
-        gt : Image or Cell 
-            Ground truth image.
-
-        Returns
-        -------
-        pandas.DataFrame()
-            Data frame containing the values for the computed accuracy measures.
-        """
-        data = quantification.compute_binary_accuracy_measures(self.image, gt.image)
-        return data
-
-
-
-
 
 

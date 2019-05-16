@@ -17,7 +17,7 @@ mkl.set_num_threads(1)
 
 
 def convert_args(**kwargs):
-    for c in ['max_threads', 'number_of_stacks', 'thr']:
+    for c in ['max_threads', 'number_of_stacks']:
         if c in kwargs:
             if type(kwargs[c]) is str:
                 if kwargs[c] == 'None':
@@ -49,8 +49,7 @@ def convert_args(**kwargs):
                     nums = np.concatenate((nums, np.array([None])))
                 kwargs[c] = nums
 
-    for c in ['print_progress', 'equal_dimensions', 'preprocess', 'relative_thr',
-              'postprocess', 'log_computing_time']:
+    for c in ['print_progress', 'equal_dimensions', 'log_computing_time']:
         if str(kwargs[c]).upper() == 'FALSE':
             kwargs[c] = False
         else:
@@ -126,15 +125,11 @@ def run_simulation(**kwargs):
         else:
             kwargs['outputfolder'] = simulation_folder + kwargs[step + '_results_folder']
             print 'Input folder:', kwargs['inputfolder'], 'Output folder:', kwargs['outputfolder']
-            if step in ['binary_accuracy', 'accuracy']:
+            if step == 'accuracy':
                 print 'Reference folder:', kwargs['reffolder']
-            if step == 'binary_accuracy':
-                step = 'accuracy'
-                kwargs['binary'] = True
             getattr(batch, step + '_batch')(**kwargs)
-            if step not in ['binary_accuracy', 'accuracy']:
+            if step != 'accuracy':
                 kwargs['inputfolder'] = kwargs['outputfolder']
-            kwargs['binary'] = False
 
     batch.combine_log(inputfolder=kwargs['logfolder'])
 
@@ -143,7 +138,7 @@ def run_simulation(**kwargs):
 
 default_parameters = dict({'simulation_folder': 'test_simulation',
                            'simulation_steps': ['generate_cells', 'generate_psfs', 'convolve', 'resize', 'add_noise',
-                                                'deconvolve', 'binary_accuracy'],
+                                                'deconvolve', 'accuracy'],
                            'cell_parameter_filename': 'cell_parameters.csv',
                            'inputfolder': 'input',
                            'psffolder': 'psf',
@@ -151,7 +146,6 @@ default_parameters = dict({'simulation_folder': 'test_simulation',
                            'resize_results_folder': 'resized',
                            'add_noise_results_folder': 'noise',
                            'deconvolve_results_folder': 'deconvolved',
-                           'binary_accuracy_results_folder': 'binary_accuracy_measures',
                            'accuracy_results_folder': 'accuracy_measures',
                            'logfolder': 'timelog',
                            'max_threads': 4,
@@ -173,11 +167,7 @@ default_parameters = dict({'simulation_folder': 'test_simulation',
                            'deconvolution_lab_rif_regularization_lambda': [0.001, 001],
                            'deconvolution_lab_rltv_regularization_lambda': 0.001,
                            'deconvolution_lab_rltv_iterations': [2, 3],
-                           'log_computing_time': True,
-                           'preprocess': False,
-                           'thr': None,
-                           'relative_thr': False,
-                           'postprocess': False
+                           'log_computing_time': True
                             })
 
 

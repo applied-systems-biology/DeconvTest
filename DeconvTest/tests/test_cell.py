@@ -76,59 +76,6 @@ class TestCellClass(unittest.TestCase):
         Cell(kind='spiky_cell', input_voxel_size=0.8, size=[5, 5, 5], phi=np.pi/4, theta=np.pi/2,
              spikiness=0.5, spike_size=0.1, spike_smoothness=0.1)
 
-    def test_segment(self):
-        img = Cell()
-        arr = np.zeros([50, 50, 50])
-        arr[10:-10, 10:-10, 10:-10] = 255
-        img.image = arr
-        img.segment()
-        self.assertEqual(np.sum(np.abs(img.image - arr)), 0)
-
-    @data(
-        (np.ones([10, 10, 10]), [10, 10, 10]),
-        (np.zeros([10, 10, 10]), [0, 0, 0]),
-        (np.array([[[0, 0, 0, 0],
-                    [0, 1, 1, 1],
-                    [0, 0, 0, 0]],
-                  [[0, 0, 0, 0],
-                   [0, 1, 0, 0],
-                   [0, 0, 0, 0]],
-                  [[0, 0, 0, 0],
-                   [0, 0, 0, 0],
-                   [0, 0, 0, 0]]]
-                  ), [2, 1, 3]),
-        (np.array([[[0, 0, 1, 1],
-                    [0, 1, 1, 0],
-                    [1, 1, 0, 0]],
-                  [[0, 0, 1, 1],
-                   [0, 0, 1, 0],
-                   [1, 0, 0, 0]]]
-                  ), [2, 3, 4])
-    )
-    def test_dimensions(self, case):
-        img, dim = case
-        cell = Cell()
-        cell.image = img
-        self.assertEqual(tuple(cell.dimensions()), tuple(dim))
-
-    def test_dimensions_input_is_binary(self):
-        cell = Cell()
-        cell.image = np.arange(8).reshape((2, 2, 2))
-        self.assertRaises(ValueError, cell.dimensions)
-
-    def test_dimensions_image_is_None(self):
-        cell = Cell()
-        self.assertRaises(ValueError, cell.dimensions)
-
-    def test_overlap_error(self):
-        cell = Cell()
-        cell.generate(size=[5, 6, 5], input_voxel_size=0.5)
-        errors = cell.compute_binary_accuracy_measures(cell)
-        for c in ['Overdetection error', 'Underdetection error', 'Overlap error']:
-            self.assertEqual(errors[c].iloc[0], 0)
-        for c in ['Jaccard index', 'Sensitivity', 'Precision']:
-            self.assertEqual(errors[c].iloc[0], 1)
-
     def test_cell_from_params(self):
         celldata = CellParams(number_of_cells=5, spikiness_range=(0, 1), spike_size_range=(0.1, 1),
                               coordinates=False)
@@ -155,7 +102,7 @@ class TestCellClass(unittest.TestCase):
         cell = Cell()
         cell.generate(size=[5, 6, 5], input_voxel_size=0.5)
         errors = cell.compute_accuracy_measures(cell)
-        for c in ['RMSE', 'RMSE norm range', 'RMSE norm mean']:
+        for c in ['RMSE', 'NRMSE']:
             self.assertEqual(errors[c].iloc[0], 0)
 
 

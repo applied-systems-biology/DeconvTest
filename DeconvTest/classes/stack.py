@@ -1,18 +1,12 @@
 from __future__ import division
 
-import warnings
 import numpy as np
-import pandas as pd
 from scipy import ndimage
 
-from skimage.measure import label as lbl
 
 from cell import Cell
 from image import Image
 from metadata import Metadata
-from DeconvTest.modules import quantification
-
-from helper_lib.image import unify_shape
 
 
 class Stack(Image):
@@ -136,139 +130,6 @@ class Stack(Image):
 
         self.image[ind] = 255  # add the new cell to the stack
 
-    def segment(self, preprocess=False, thr=None, relative_thr=False,
-                postprocess=False, label=True, **kwargs_to_ignore):
-        """
-        Segments the current image by thresholding with optional preprocessing and finding connected regions.
-        
-        Parameters
-        ----------
-        preprocess : bool, optional
-            If True, the image will be preprocessed with a median filter (size 3) prior to segmentation.
-            Default is False.
-        thr : scalar, optional
-            Threshold value for image segmentation.
-            If None, automatic Otsu threshold will be computed.
-            Default is None.
-        relative_thr : bool, optional
-            If True, the value of `thr` is multiplied by the maximum intensity of the image.
-            Default is False.
-        postprocess bool, optional
-            If True, morphological opening and closing and binary holes filling will be applied after theresholding.
-            Default is False.
-        label : bool, optional
-            If True, connected region will be labeled by unique labels.
-            Default is True.
-
-        Returns
-        -------
-        ndarray
-            Segmented binary mask or labeled image.
-        """
-        self.image = quantification.segment(self.image, preprocess, thr, relative_thr, postprocess, label)
-        self.is_segmented = True
-
-        if label is True:
-            self.is_labeled = True
-            self.split_to_cells()
-        else:
-            self.image = (self.image > 0)*255
-
-        return self.image
-
-    def split_to_cells(self):
-        """
-        Creates an instance of the `Cell` class for each connected region in the current image.
-
-        """
-        if self.image is None:
-            raise ValueError('Cannot split into cells: image is None')
-        if not self.is_segmented:
-            raise ValueError('Cannot split into cells: image is not segmented')
-        if not self.is_labeled:
-            self.image = lbl(self.image)
-            self.is_labeled = True
-
-        llist = np.unique(self.image)
-        llist = llist[llist > 0]
-        centers = np.round_(ndimage.center_of_mass(self.image, self.image, llist), 1)
-        for i, l in enumerate(llist):
-            c = Cell(ind=np.where(self.image == l), position=centers[i])
-            self.cells.append(c)
-
-    def dimensions(self, **kwargs):
-        """
-        Computes the sizes of the objects represented by individual connected regions in the current image.
-        
-        Parameters
-        ----------
-        kwargs : key, value pairings
-            Keyword arguments passed to the `dimensions` function of the `Cell` class.
-        
-        Returns
-        -------
-        ndarray
-            NxM array of the object sizes. 
-            N is the number of individual connected regions.
-            M is the number of dimensions in the image (M=3 for 3D).
-
-        """
-        if len(self.cells) == 0:
-            warnings.warn("No cells were found in the stack!", Warning)
-            dims = [np.zeros(3)]
-        else:
-            dims = []
-            for c in self.cells:
-                dims.append(c.dimensions(**kwargs))
-        return np.int_(np.round_(dims))
-
-    def compute_binary_accuracy_measures(self, gt):
-        """   
-        Computes the overlap errors, Jaccard index, and other accuracy measures between each connected region 
-         in the current image and a given ground truth image.
-         
-        Parameters
-        ----------
-        gt : Image or Cell 
-            Ground truth image.            
-
-        Returns
-        -------
-        pandas.DataFrame()
-            Dictionary with the computed accuracy measures for all individual connected regions.
-            The length of the data frame equals to the number of connected regions in the ground truth image.
-
-        """
-        self.image, gt.image = unify_shape(self.image, gt.image)  # convert cell images to the same shape
-
-        data = pd.DataFrame()
-        if len(gt.cells) == 0:
-            gt.segment()
-            if len(gt.cells) == 0:
-                raise ValueError("No cells were found in the ground truth stack")
-
-        if len(self.cells) == 0:
-            warnings.warn("No cells were found in the stack!", Warning)
-            data = pd.DataFrame({'CellID': np.arange(len(gt.cells)),
-                                 'Overlap error': np.ones(len(gt.cells)),
-                                 'Overdetection error': np.zeros(len(gt.cells)),
-                                 'Underdetection error': np.ones(len(gt.cells)),
-                                 'Jaccard index': np.zeros(len(gt.cells)),
-                                 'Sensitivity': np.zeros(len(gt.cells)),
-                                 'Precision': np.zeros(len(gt.cells))})
-        else:
-            centers = []
-            for c in self.cells:
-                centers.append(c.position)
-
-            for i in range(len(gt.cells)):  # compare each cell to the closest one in the ground truth Stack
-                center = np.reshape(gt.cells[i].position, (1, 3))
-                dist = np.sum((centers - center) ** 2, axis=1)
-                curdata = self.cells[dist.argmin()].compute_binary_accuracy_measures(gt.cells[i])
-                curdata['CellID'] = i
-                data = pd.concat([data, curdata], ignore_index=True)
-
-        return data
 
 
 

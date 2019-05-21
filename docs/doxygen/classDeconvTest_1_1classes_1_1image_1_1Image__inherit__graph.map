@@ -1,6 +1,0 @@
-<map id="DeconvTest.classes.image.Image" name="DeconvTest.classes.image.Image">
-<area shape="rect" id="node3" href="$classDeconvTest_1_1classes_1_1cell_1_1Cell.html" title="{DeconvTest.classes.cell.Cell\n|+ position\l+ image\l+ metadata\l|+ __init__()\l+ __repr__()\l+ from_index()\l+ generate()\l+ volume()\l}" alt="" coords="5,447,199,612"/>
-<area shape="rect" id="node4" href="$classDeconvTest_1_1classes_1_1psf_1_1PSF.html" title="{DeconvTest.classes.psf.PSF\n|+ image\l|+ __init__()\l+ __repr__()\l+ generate()\l+ measure_psf_sigma()\l}" alt="" coords="223,469,418,590"/>
-<area shape="rect" id="node5" href="$classDeconvTest_1_1classes_1_1stack_1_1Stack.html" title="{DeconvTest.classes.stack.\lStack\n|+ image\l+ metadata\l|+ __init__()\l+ generate()\l+ position_cell()\l}" alt="" coords="443,461,625,597"/>
-<area shape="rect" id="node2" href="$classobject.html" title="{object\n||}" alt="" coords="292,5,349,83"/>
-</map>

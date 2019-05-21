@@ -74,15 +74,11 @@ $(function() {
 Inheritance diagram for DeconvTest.classes.cellparams.CellParams:</div>
 <div class="dyncontent">
 <div class="center"><img src="classDeconvTest_1_1classes_1_1cellparams_1_1CellParams__inherit__graph.png" border="0" usemap="#DeconvTest_8classes_8cellparams_8CellParams_inherit__map" alt="Inheritance graph"/></div>
-<map name="DeconvTest_8classes_8cellparams_8CellParams_inherit__map" id="DeconvTest_8classes_8cellparams_8CellParams_inherit__map">
-</map>
 </div>
 <div class="dynheader">
 Collaboration diagram for DeconvTest.classes.cellparams.CellParams:</div>
 <div class="dyncontent">
 <div class="center"><img src="classDeconvTest_1_1classes_1_1cellparams_1_1CellParams__coll__graph.png" border="0" usemap="#DeconvTest_8classes_8cellparams_8CellParams_coll__map" alt="Collaboration graph"/></div>
-<map name="DeconvTest_8classes_8cellparams_8CellParams_coll__map" id="DeconvTest_8classes_8cellparams_8CellParams_coll__map">
-</map>
 </div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -131,23 +127,23 @@ Public Member Functions</h2></td></tr>
 <pre class="fragment">Initializes the class for CellParams and generate random cell parameters with given properties.
 
 Keyword arguments:
------------    
-number_of_cells: int
+-----------
+input_cell_kind : string, optional
+    Name of the shape of the ground truth object from set of
+    {ellipsoid, spiky_cell}.
+    Default is 'ellipsoid'
+number_of_stacks : int, optional
+    Number of stacks to generate.
+    If None, parameters for single cells will be generated
+    Default is None.
+number_of_cells: int, optional
     Number of cells to generate.
-size_mean_and_std: tuple
-    Mean value and standard deviation for the cell size in micrometers.
-    The cell size is drawn randomly from a Gaussian distribution with the given mean and standard deviation.
-equal_dimensions: bool
-    If True, generates parameters for a sphere.
-    If False, generate parameters for an ellipsoid with sizes for all three axes chosen independently.
-coordinates : bool
-    If True, relative cell coordinates will be generated in the range from 0 to 1.
-spikiness_range : tuple
-    Range for the fraction of cell surface area covered by spikes.
-spike_size_range : tuple
-    Range for the standard deviation for the spike amplitude relative to the cell radius.
-spike_smoothness_range : tuple
-    Range for the width of the Gaussian filter that is used to smooth the spikes.</pre> <div class="dynheader">
+    Default is 1.
+coordinates : bool, optional
+    If True, relative cell coordinates will be generated.
+    Default is True.
+kwargs : key, value pairings
+    Further keyword arguments passed to corresponding methods to generate cell parameters.</pre> <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="classDeconvTest_1_1classes_1_1cellparams_1_1CellParams_ad06d3ce4dca35be340adc4ce85b234d5_cgraph.png" border="0" usemap="#classDeconvTest_1_1classes_1_1cellparams_1_1CellParams_ad06d3ce4dca35be340adc4ce85b234d5_cgraph" alt=""/></div>
@@ -223,7 +219,7 @@ Parameters:
 -----------
 input_cell_kind : string, optional
     Name of the shape of the ground truth object from set of
-    {ellipoid, spiky_cell}.
+    {ellipsoid, spiky_cell}.
     Default is 'ellipsoid'
 number_of_stacks : int, optional
     Number of stacks to generate.
@@ -389,7 +385,7 @@ outputfile: str
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue May 21 2019 15:13:16 for DeconvTest by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue May 21 2019 15:50:13 for DeconvTest by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

@@ -91,13 +91,9 @@ $(function() {
 <p>The <a class="el" href="namespaceDeconvTest.html">DeconvTest</a> package contains several subpackages.</p>
 <ul>
 <li><code>classes</code>: implementation of all classes needed to conveniently work with synthetic image data.</li>
-<li><code>deconvolve</code>: interfaces to integrated ImageJ plugins.</li>
-<li><code>batch</code>: implementation of the main modules of the framework:<ul>
-<li><code>simulation</code>: the <em>in silico</em> microscopy module; contains functions for simulating a microscopy process in a batch mode.</li>
-<li><code>deconvolution</code>: the deconvolution module; contains functions for deconvolving images with ImageJ plugins in a batch mode.</li>
-<li><code>quantification</code>: the performance quantification module; contains functions for evaluating deconvolution accuracy in a batch mode.</li>
-</ul>
-</li>
+<li><code>modules</code>: functions to generate synthetic images, deconvolve and quantify the data.</li>
+<li><code>batch</code>: functions to run the framework in a batch mode running multiple processes in parallel.</li>
+<li><code>fiji</code>: ImageJ macros to run the integrated Fiji plugins.</li>
 <li><code>scripts</code>: exemplary scripts and configuration files.</li>
 <li><code>tests</code>: unit tests.</li>
 </ul>
@@ -105,7 +101,7 @@ $(function() {
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue May 21 2019 15:13:16 for DeconvTest by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue May 21 2019 15:50:13 for DeconvTest by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

@@ -1,4 +1,5 @@
 <map id="DeconvTest.modules.input_objects.parameters_spiky_cell" name="DeconvTest.modules.input_objects.parameters_spiky_cell">
 <area shape="rect" id="node2" href="$namespaceDeconvTest_1_1modules_1_1input__objects.html#aadef11c91aa116ee5ddccb572b8118b0" title="DeconvTest.modules.input\l_objects.parameters_ellipsoid" alt="" coords="259,5,453,47"/>
-<area shape="rect" id="node3" href="$namespaceDeconvTest_1_1modules_1_1input__objects.html#a75a297603e92a7e62df8d7b0dc977d93" title="DeconvTest.modules.input\l_objects.generate_spiky_cell" alt="" coords="261,71,451,112"/>
+<area shape="rect" id="node4" href="$namespaceDeconvTest_1_1modules_1_1input__objects.html#a75a297603e92a7e62df8d7b0dc977d93" title="DeconvTest.modules.input\l_objects.generate_spiky_cell" alt="" coords="261,71,451,112"/>
+<area shape="rect" id="node3" href="$namespaceDeconvTest_1_1modules_1_1input__objects.html#a259babc8498f7c72c2bc3420134a83a8" title="DeconvTest.modules.input\l_objects.generate_ellipsoid" alt="" coords="501,68,680,109"/>
 </map>

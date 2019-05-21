@@ -141,11 +141,18 @@ stat : pandas.DataFrame
     Table containing the statistics to plot.
 columns : list of str
     List of data columns to plot.
-outputfolder : str 
+labels : list of str, optional
+    Names to lable the y axis instead of column names.
+    If None, the column names will be used.
+    Default is None.
+outputname : str
     Path to the output directory where to store the plots.
 logscale : bool, optional
     If True, the data will be plotted in a semi-logarithmic scale.
     Default is False.
+dpi : int, optional
+    Image resolution.
+    Default is 300.
 kwargs : key, value pairings
     Keyword arguments passed to the `seaborn.boxplot` and `seaborn.pointplot` functions.
 </pre> <div class="dynheader">
@@ -214,13 +221,35 @@ Here is the caller graph for this function:</div>
         </tr>
       </table>
 </div><div class="memdoc">
+<pre class="fragment">Plots a linear model plot from given statistics from a given DataFrame.
 
+Parameters
+----------
+stat : pandas.DataFrame
+    Table containing the statistics to plot.
+columns : list of str
+    List of data columns to plot.
+labels : list of str, optional
+    Names to lable the y axis instead of column names.
+    If None, the column names will be used.
+    Default is None.
+outputname : str
+    Path to the output directory where to store the plots.
+logscale : bool, optional
+    If True, the data will be plotted in a semi-logarithmic scale.
+    Default is False.
+dpi : int, optional
+    Image resolution.
+    Default is 300.
+kwargs : key, value pairings
+    Keyword arguments passed to the `seaborn.boxplot` and `seaborn.pointplot` functions.
+</pre> 
 </div>
 </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue May 21 2019 15:13:16 for DeconvTest by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue May 21 2019 15:50:13 for DeconvTest by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

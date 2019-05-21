@@ -92,8 +92,8 @@ Collaboration diagram for DeconvTest.classes.stack.Stack:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:af44c1ceb3e2454540acdd2b59c4d774b"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDeconvTest_1_1classes_1_1stack_1_1Stack.html#af44c1ceb3e2454540acdd2b59c4d774b">__init__</a> (self, <a class="el" href="classDeconvTest_1_1classes_1_1image_1_1Image.html#a69bc06c0b91802f9aae6b8aa65c94b39">filename</a>=None, is_segmented=False, is_labeled=False, input_voxel_size=None, stack_size=None, cell_params=None)</td></tr>
-<tr class="separator:af44c1ceb3e2454540acdd2b59c4d774b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace2f5cc3dd2c103c2d1059688b76977b"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDeconvTest_1_1classes_1_1stack_1_1Stack.html#ace2f5cc3dd2c103c2d1059688b76977b">__init__</a> (self, <a class="el" href="classDeconvTest_1_1classes_1_1image_1_1Image.html#a69bc06c0b91802f9aae6b8aa65c94b39">filename</a>=None, input_voxel_size=None, stack_size=None, cell_params=None)</td></tr>
+<tr class="separator:ace2f5cc3dd2c103c2d1059688b76977b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56897bed2a582712adb4dbd04c436ac7"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDeconvTest_1_1classes_1_1stack_1_1Stack.html#a56897bed2a582712adb4dbd04c436ac7">generate</a> (self, cell_params, input_voxel_size, stack_size)</td></tr>
 <tr class="separator:a56897bed2a582712adb4dbd04c436ac7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a76549b18fd1dac5bed7e17e2e61eece9"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDeconvTest_1_1classes_1_1stack_1_1Stack.html#a76549b18fd1dac5bed7e17e2e61eece9">position_cell</a> (self, cell)</td></tr>
@@ -139,8 +139,8 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">Class for a 3D multicellular stack.
 </pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="af44c1ceb3e2454540acdd2b59c4d774b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af44c1ceb3e2454540acdd2b59c4d774b">&#9670;&nbsp;</a></span>__init__()</h2>
+<a id="ace2f5cc3dd2c103c2d1059688b76977b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace2f5cc3dd2c103c2d1059688b76977b">&#9670;&nbsp;</a></span>__init__()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -156,18 +156,6 @@ Public Attributes</h2></td></tr>
           <td></td>
           <td class="paramtype">&#160;</td>
           <td class="paramname"><em>filename</em> = <code>None</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>is_segmented</em> = <code>False</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>is_labeled</em> = <code>False</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -202,14 +190,6 @@ filename: str, optional
     Path used to load the cell image.
     If None or non-existent, no image will be loaded.
     Default is None.
-is_segmented : bool, optional
-    If True the cell stack is assumed to be already segmented (binary mask or array of labeled objects).
-    If False the cell stack is assumed to be not segmented yet.
-    Default is False.
-is_labeled : bool, optional
-    If True it is assumed that individual connected regions are labeled by unique labels.
-    If False individual cells are assumed not to be labeled.
-    Default is False.
 input_voxel_size : scalar or sequence of scalars, optional
     Voxel size used to generate the stack.
     If None, no stack will be generated.
@@ -226,8 +206,8 @@ cell_params : pandas.DataFrame or CellParams
 </pre> <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="classDeconvTest_1_1classes_1_1stack_1_1Stack_af44c1ceb3e2454540acdd2b59c4d774b_cgraph.png" border="0" usemap="#classDeconvTest_1_1classes_1_1stack_1_1Stack_af44c1ceb3e2454540acdd2b59c4d774b_cgraph" alt=""/></div>
-<map name="classDeconvTest_1_1classes_1_1stack_1_1Stack_af44c1ceb3e2454540acdd2b59c4d774b_cgraph" id="classDeconvTest_1_1classes_1_1stack_1_1Stack_af44c1ceb3e2454540acdd2b59c4d774b_cgraph">
+<div class="center"><img src="classDeconvTest_1_1classes_1_1stack_1_1Stack_ace2f5cc3dd2c103c2d1059688b76977b_cgraph.png" border="0" usemap="#classDeconvTest_1_1classes_1_1stack_1_1Stack_ace2f5cc3dd2c103c2d1059688b76977b_cgraph" alt=""/></div>
+<map name="classDeconvTest_1_1classes_1_1stack_1_1Stack_ace2f5cc3dd2c103c2d1059688b76977b_cgraph" id="classDeconvTest_1_1classes_1_1stack_1_1Stack_ace2f5cc3dd2c103c2d1059688b76977b_cgraph">
 <area shape="rect" id="node2" href="classDeconvTest_1_1classes_1_1cell_1_1Cell.html#a8c45922c9b00140cba44279ce54228a1" title="DeconvTest.classes.cell.\lCell.generate" alt="" coords="275,5,445,47"/>
 <area shape="rect" id="node3" href="classDeconvTest_1_1classes_1_1psf_1_1PSF.html#ab6bb0c90200c94c2049449264821dd34" title="DeconvTest.classes.psf.PSF.generate" alt="" coords="236,71,484,98"/>
 <area shape="rect" id="node4" href="classDeconvTest_1_1classes_1_1stack_1_1Stack.html#a56897bed2a582712adb4dbd04c436ac7" title="DeconvTest.classes.stack.\lStack.generate" alt="" coords="269,123,451,164"/>
@@ -290,7 +270,7 @@ Here is the caller graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="classDeconvTest_1_1classes_1_1stack_1_1Stack_a56897bed2a582712adb4dbd04c436ac7_icgraph.png" border="0" usemap="#classDeconvTest_1_1classes_1_1stack_1_1Stack_a56897bed2a582712adb4dbd04c436ac7_icgraph" alt=""/></div>
 <map name="classDeconvTest_1_1classes_1_1stack_1_1Stack_a56897bed2a582712adb4dbd04c436ac7_icgraph" id="classDeconvTest_1_1classes_1_1stack_1_1Stack_a56897bed2a582712adb4dbd04c436ac7_icgraph">
-<area shape="rect" id="node2" href="classDeconvTest_1_1classes_1_1stack_1_1Stack.html#af44c1ceb3e2454540acdd2b59c4d774b" title="DeconvTest.classes.stack.\lStack.__init__" alt="" coords="236,5,419,47"/>
+<area shape="rect" id="node2" href="classDeconvTest_1_1classes_1_1stack_1_1Stack.html#ace2f5cc3dd2c103c2d1059688b76977b" title="DeconvTest.classes.stack.\lStack.__init__" alt="" coords="236,5,419,47"/>
 </map>
 </div>
 
@@ -366,7 +346,7 @@ cell : Cell
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue May 21 2019 15:13:16 for DeconvTest by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue May 21 2019 15:50:13 for DeconvTest by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

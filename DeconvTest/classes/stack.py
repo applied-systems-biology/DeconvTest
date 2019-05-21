@@ -14,8 +14,7 @@ class Stack(Image):
     Class for a 3D multicellular stack.
     """
 
-    def __init__(self, filename=None, is_segmented=False, is_labeled=False,
-                 input_voxel_size=None, stack_size=None, cell_params=None):
+    def __init__(self, filename=None, input_voxel_size=None, stack_size=None, cell_params=None):
         """
         Initializes the Stack class.
 
@@ -25,14 +24,6 @@ class Stack(Image):
             Path used to load the cell image.
             If None or non-existent, no image will be loaded.
             Default is None.
-        is_segmented : bool, optional
-            If True the cell stack is assumed to be already segmented (binary mask or array of labeled objects).
-            If False the cell stack is assumed to be not segmented yet.
-            Default is False.
-        is_labeled : bool, optional
-            If True it is assumed that individual connected regions are labeled by unique labels.
-            If False individual cells are assumed not to be labeled.
-            Default is False.
         input_voxel_size : scalar or sequence of scalars, optional
             Voxel size used to generate the stack.
             If None, no stack will be generated.

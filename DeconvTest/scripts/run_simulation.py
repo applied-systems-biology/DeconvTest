@@ -126,14 +126,21 @@ def run_simulation(**kwargs):
                 batch.generate_psfs_batch(outputfolder=kwargs['psffolder'], **kwargs)
             else:
                 kwargs['outputfolder'] = simulation_folder + kwargs[step + '_results_folder']
+                if len(kwargs['inputfolder'].split(simulation_folder)) == 1:
+                    kwargs['inputfolder'] = simulation_folder + kwargs['inputfolder']
                 print 'Input folder:', kwargs['inputfolder'], 'Output folder:', kwargs['outputfolder']
                 if step == 'accuracy':
+                    if 'reffolder' not in kwargs:
+                        kwargs['reffolder'] = kwargs['inputfolder']
+                    if len(kwargs['reffolder'].split(simulation_folder)) == 1:
+                        kwargs['reffolder'] = simulation_folder + kwargs['reffolder']
                     print 'Reference folder:', kwargs['reffolder']
                 getattr(batch, step + '_batch')(**kwargs)
                 if step != 'accuracy':
                     kwargs['inputfolder'] = kwargs['outputfolder']
         else:
-            raise ValueError('"' + step + '" is not a valid simulation step! Valid simulation steps are: ' + str(valid_steps))
+            raise ValueError('"' + step + '" is not a valid simulation step! Valid simulation steps are: '
+                             + str(valid_steps))
 
     batch.combine_log(inputfolder=kwargs['logfolder'])
 

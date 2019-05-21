@@ -12,7 +12,8 @@ from helper_lib import filelib
 valid_algorithms = ['deconvolution_lab_rif', 'deconvolution_lab_rltv', 'iterative_deconvolve_3d']
 
 
-def deconvolution_lab_rif(inputfile, psffile, outputfile, regularization_lambda=0.01, imagej_path=None, **kwargs_to_ignore):
+def deconvolution_lab_rif(inputfile, psffile, outputfile, regularization_lambda=0.01,
+                          imagej_path=None, **kwargs_to_ignore):
     """
     Runs Regularized Inverse Filter (RIF) from DeconvolutionLab2 plugin with given parameters.
     

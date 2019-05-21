@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='deconvtest',    # This is the name of your PyPI-package.
-    version='1.0',                          # python versioneer
+    version='2.0',                          # python versioneer
     url="https://github.com/applied-systems-biology/DeconvTest",
     author="Anna Medyukhina",
     packages=['DeconvTest', 'DeconvTest.classes', 'DeconvTest.batch', 'DeconvTest.fiji', 'DeconvTest.modules'],

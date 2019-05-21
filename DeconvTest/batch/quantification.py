@@ -92,8 +92,8 @@ def combine_log(inputfolder):
 # private helper functions
 
 
-def __compute_accuracy_measures_batch_helper(item, inputfolder, reffolder, outputfolder,
-                                                    log_computing_time=False, logfolder=None, **segmentation_kwargs):
+def __compute_accuracy_measures_batch_helper(item, inputfolder, reffolder, outputfolder, log_computing_time=False,
+                                             logfolder=None, **segmentation_kwargs):
     if not reffolder.endswith('/'):
         reffolder += '/'
     parts = item.split('/')
@@ -105,13 +105,13 @@ def __compute_accuracy_measures_batch_helper(item, inputfolder, reffolder, outpu
     stack = Stack(filename=inputfolder + item)
     if 'isPSF' not in stack.metadata.index or str(stack.metadata['isPSF']) == 'False':
         if os.path.exists(reffolder + item):
-            refstack = Stack(filename=reffolder + item, is_segmented=True)
+            refstack = Stack(filename=reffolder + item)
         elif os.path.exists(reffolder + name):
-            refstack = Stack(filename=reffolder + name, is_segmented=True)
+            refstack = Stack(filename=reffolder + name)
         elif os.path.exists(reffolder + base + '/' + name):
-            refstack = Stack(filename=reffolder + base + '/' + name, is_segmented=True)
+            refstack = Stack(filename=reffolder + base + '/' + name)
         elif os.path.exists(reffolder + name.split('_voxel_size')[0] + '.tif'):
-            refstack = Stack(filename=reffolder + name.split('_voxel_size')[0] + '.tif', is_segmented=True)
+            refstack = Stack(filename=reffolder + name.split('_voxel_size')[0] + '.tif')
         else:
             raise ValueError('No ground truth found for cell ' + item + '!')
 

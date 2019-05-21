@@ -42,12 +42,12 @@ def generate_cells_batch(params_file, **kwargs):
     ----------
     params_file : str
         Path to a csv file with cell parameters.
-    outputfolder : str 
-        Output directory to save the generated cells.
 
     Keyword arguments
     -----------------
-    resolution : scalar or sequence of scalars, optional
+    outputfolder : str
+        Output directory to save the generated cells.
+    input_voxel_size : scalar or sequence of scalars, optional
         Voxel size in z, y and x used to generate the cell image.
         If one value is provided, the voxel size is assume to be equal along all axes.
     max_threads : int, optional
@@ -93,7 +93,7 @@ def generate_psfs_batch(outputfolder, psf_sigmas=None, psf_aspect_ratios=None, *
 
     Keyword arguments
     -----------------
-    resolution : scalar or sequence of scalars, optional
+    input_voxel_size : scalar or sequence of scalars, optional
         Voxel size in z, y and x used to generate the PSF image.
         If one value is provided, the voxel size is assume to be equal along all axes.
     max_threads : int, optional
@@ -243,9 +243,10 @@ def add_noise_batch(inputfolder, outputfolder, noise_kind, snr, test_snr_combina
     snr : float or sequence of floats
         Target signal-to-noise ratio(s) (SNR) for each noise type.
         If None, no noise is added.
-    test_snr_combinations : bool
+    test_snr_combinations : bool, optional
         If True and several noise types in the `kind` argument are provided, all combinations of the values
          provided in `snr` will be tested for each noise type.
+        Default is False.
 
     Keyword arguments
     -----------------

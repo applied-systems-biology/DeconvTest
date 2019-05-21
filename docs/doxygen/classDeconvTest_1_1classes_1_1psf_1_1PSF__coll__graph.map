@@ -1,0 +1,4 @@
+<map id="DeconvTest.classes.psf.PSF" name="DeconvTest.classes.psf.PSF">
+<area shape="rect" id="node2" href="$classDeconvTest_1_1classes_1_1image_1_1Image.html" title="{DeconvTest.classes.image.\lImage\n|+ image\l+ filename\l+ metadata\l|+ __init__()\l+ __repr__()\l+ from_file()\l+ normalize()\l+ save()\l+ show_2d_projections()\l+ save_projection()\l+ convolve()\l+ resize()\l+ add_noise()\l+ compute_accuracy_measures()\l}" alt="" coords="5,131,221,399"/>
+<area shape="rect" id="node3" href="$classobject.html" title="{object\n||}" alt="" coords="85,5,142,83"/>
+</map>

@@ -1,0 +1,12 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classDeconvTest_1_1tests_1_1test__batch__deconvolution_1_1TestDeconvolution.html" title="DeconvTest.tests.test\l_batch_deconvolution.TestDeconvolution" alt="" coords="5,267,267,308"/>
+<area shape="rect" id="node2" href="$classDeconvTest_1_1tests_1_1test__batch__quantification_1_1TestSimulation.html" title="DeconvTest.tests.test\l_batch_quantification.TestSimulation" alt="" coords="322,5,558,47"/>
+<area shape="rect" id="node3" href="$classDeconvTest_1_1tests_1_1test__batch__simulation_1_1TestSimulation.html" title="DeconvTest.tests.test\l_batch_simulation.TestSimulation" alt="" coords="331,71,549,112"/>
+<area shape="rect" id="node4" href="$classDeconvTest_1_1tests_1_1test__cell_1_1TestCellClass.html" title="DeconvTest.tests.test\l_cell.TestCellClass" alt="" coords="364,136,516,177"/>
+<area shape="rect" id="node5" href="$classDeconvTest_1_1tests_1_1test__cellparams_1_1TestCellData.html" title="DeconvTest.tests.test\l_cellparams.TestCellData" alt="" coords="353,201,527,243"/>
+<area shape="rect" id="node6" href="$classDeconvTest_1_1tests_1_1test__deconvolve_1_1TestDeconvolve.html" title="DeconvTest.tests.test\l_deconvolve.TestDeconvolve" alt="" coords="343,267,537,308"/>
+<area shape="rect" id="node7" href="$classDeconvTest_1_1tests_1_1test__image_1_1TestImageClass.html" title="DeconvTest.tests.test\l_image.TestImageClass" alt="" coords="358,332,522,373"/>
+<area shape="rect" id="node8" href="$classDeconvTest_1_1tests_1_1test__metadata_1_1TestMetadataFromFilename.html" title="DeconvTest.tests.test\l_metadata.TestMetadataFromFilename" alt="" coords="315,397,565,439"/>
+<area shape="rect" id="node9" href="$classDeconvTest_1_1tests_1_1test__psf_1_1TestPSFClass.html" title="DeconvTest.tests.test\l_psf.TestPSFClass" alt="" coords="364,463,516,504"/>
+<area shape="rect" id="node10" href="$classDeconvTest_1_1tests_1_1test__stack_1_1TestStackClass.html" title="DeconvTest.tests.test\l_stack.TestStackClass" alt="" coords="361,528,519,569"/>
+</map>

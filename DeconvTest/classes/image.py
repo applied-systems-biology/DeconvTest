@@ -68,6 +68,9 @@ class Image(object):
             raise ValueError('File does not exist!')
 
     def normalize(self):
+        """
+        Normalized the current image between 0 and 255.
+        """
         self.image = rescale_intensity(self.image, out_range=(0, 255))
 
     def save(self, outputfile, normalize_output=False):

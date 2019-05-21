@@ -108,8 +108,8 @@ def __deconvolve_batch_helper(item, inputfolder, outputfolder, imagej_path,
         subfolder += '/'
         if not os.path.exists(outputfolder + subfolder + filename):
             filelib.make_folders([outputfolder + subfolder + os.path.dirname(filename)])
-            start = time.time()
             if algorithm in dir(deconvolution) and algorithm in deconvolution.valid_algorithms:
+                start = time.time()
                 getattr(deconvolution, algorithm)(imagej_path=imagej_path,
                                                   inputfile=os.getcwd() + '/' + inputfolder + filename,
                                                   psffile=os.getcwd() + '/' + inputfolder + psfname,

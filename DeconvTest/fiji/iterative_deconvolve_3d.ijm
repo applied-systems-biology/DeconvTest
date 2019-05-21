@@ -59,9 +59,3 @@ selectWindow("psf");
 close();
 saveAs("tiff", path_output);
 close();
-for (i=0; i<1000; i++){
-    if (File.exists(path_output)){
-        eval("script", "System.exit(0);");
-    }
-    wait(500);
-}

@@ -16,7 +16,7 @@ def compute_accuracy_measures(image, gt_image):
     ----------
     image : ndarray
        Image to evaluate.
-    gt : ndarray
+    gt_image : ndarray
         Ground truth image.
 
     Returns

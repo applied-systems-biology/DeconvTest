@@ -20,29 +20,30 @@ class CellParams(pd.DataFrame):
         Initializes the class for CellParams and generate random cell parameters with given properties.
 
         Keyword arguments:
-        -----------    
-        number_of_cells: int
+        -----------
+        input_cell_kind : string, optional
+            Name of the shape of the ground truth object from set of
+            {ellipsoid, spiky_cell}.
+            Default is 'ellipsoid'
+        number_of_stacks : int, optional
+            Number of stacks to generate.
+            If None, parameters for single cells will be generated
+            Default is None.
+        number_of_cells: int, optional
             Number of cells to generate.
-        size_mean_and_std: tuple
-            Mean value and standard deviation for the cell size in micrometers.
-            The cell size is drawn randomly from a Gaussian distribution with the given mean and standard deviation.
-        equal_dimensions: bool
-            If True, generates parameters for a sphere.
-            If False, generate parameters for an ellipsoid with sizes for all three axes chosen independently.
-        coordinates : bool
-            If True, relative cell coordinates will be generated in the range from 0 to 1.
-        spikiness_range : tuple
-            Range for the fraction of cell surface area covered by spikes.
-        spike_size_range : tuple
-            Range for the standard deviation for the spike amplitude relative to the cell radius.
-        spike_smoothness_range : tuple
-            Range for the width of the Gaussian filter that is used to smooth the spikes.
+            Default is 1.
+        coordinates : bool, optional
+            If True, relative cell coordinates will be generated.
+            Default is True.
+        kwargs : key, value pairings
+            Further keyword arguments passed to corresponding methods to generate cell parameters.
         
         """
         super(CellParams, self).__init__()
         self.generate_parameters(**kwargs)
 
-    def generate_parameters(self, input_cell_kind='ellipsoid', number_of_stacks=None, number_of_cells=1, coordinates=True, **kwargs):
+    def generate_parameters(self, input_cell_kind='ellipsoid', number_of_stacks=None, number_of_cells=1,
+                            coordinates=True, **kwargs):
         """
         Generates random cells sizes and rotation angles.
 
@@ -50,7 +51,7 @@ class CellParams(pd.DataFrame):
         -----------
         input_cell_kind : string, optional
             Name of the shape of the ground truth object from set of
-            {ellipoid, spiky_cell}.
+            {ellipsoid, spiky_cell}.
             Default is 'ellipsoid'
         number_of_stacks : int, optional
             Number of stacks to generate.

@@ -108,7 +108,7 @@ class Cell(Image):
             If one value is provided, the voxel size is assumed to be equal along all axes.
         input_cell_kind : string, optional
             Name of the shape of the ground truth object from set of
-            {ellipoid, spiky_cell}.
+            {ellipsoid, spiky_cell}.
             Default is 'ellipsoid'
         kwargs : key, value pairings
             Keyword arguments passed to corresponding methods to generate synthetic objects.

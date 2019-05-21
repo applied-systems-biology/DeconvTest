@@ -57,7 +57,8 @@ def parameters_ellipsoid(size_mean_and_std=(10, 2), equal_dimensions=False, **kw
     return cell
 
 
-def generate_ellipsoid(input_voxel_size, size=None, size_x=10, size_y=10, size_z=10, theta=0, phi=0, **kwargs_to_ignore):
+def generate_ellipsoid(input_voxel_size, size=None, size_x=10, size_y=10, size_z=10, theta=0, phi=0,
+                       **kwargs_to_ignore):
     """
     Generates a synthetic object of ellipsoidal shape.
 

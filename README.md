@@ -19,13 +19,10 @@ quantitative comparison and consists of three main modules: (1) *in silico* micr
 
 ## Installation
 
-1. Install [Fiji](https://fiji.sc/#download); note the Fiji installation path: you will have to provide it later when installing the DeconvTest packge 
+1. Download [Fiji](https://fiji.sc/#download), make sure that the Fiji installation path does not contain spaces; note the Fiji installation path: you will have to provide it later when installing the DeconvTest packge
 1. Download the [DeconvolutionLab_2.jar](http://bigwww.epfl.ch/deconvolution/deconvolutionlab2/) and [Iterative_Deconvolve_3D.class](https://imagej.net/Iterative_Deconvolve_3D) and copy them to the plugins folder of Fiji
 1. Install [python 2.7 Anaconda](https://www.anaconda.com/distribution/)
-1. Download [HelperLib package](https://github.com/applied-systems-biology/HelperLib)
-1. Enter the HelperLib directory and install the HelperLib package by running ``python setup.py install`` withing the Anaconda environment
-1. Download the DeconvTest package
-1. Enter the DeconvTest directory and install the DeconvTest by running ``python setup.py install`` withing the Anaconda environment
+1. Download the [DeconvTest](https://github.com/applied-systems-biology/DeconvTest/releases) package, enter the package directory and install the package by running ``python setup.py install`` withing the Anaconda environment
 1. Provide the path to Fiji when prompted
 
 ## License
@@ -37,14 +34,9 @@ The source code of this framework is released under the <a href="/LICENSE">3-cla
 The DeconvTest package contains several subpackages.
 
 - `classes`: implementation of all classes needed to conveniently work with synthetic image data.
-- `deconvolve`: interfaces to integrated ImageJ plugins.
-- `batch`: implementation of the main modules of the framework:
-    - `simulation`: the *in silico* microscopy module; contains functions for simulating a microscopy process 
-    in a batch mode.
-    - `deconvolution`: the deconvolution module; contains functions for deconvolving images with ImageJ plugins in 
-    a batch mode. 
-    - `quantification`: the performance quantification module; contains functions for evaluating deconvolution 
-    accuracy in a batch mode.
+- `modules`: functions to generate synthetic images, deconvolve and quantify the data.
+- `batch`: functions to run the framework in a batch mode running multiple processes in parallel.
+- `fiji`: ImageJ macros to run the integrated Fiji plugins.
 - `scripts`: exemplary scripts and configuration files.
 - `tests`: unit tests.
 

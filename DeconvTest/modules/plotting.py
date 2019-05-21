@@ -3,6 +3,7 @@ from __future__ import division
 import os
 import seaborn as sns
 import pylab as plt
+import numpy as np
 from scipy.stats import linregress
 
 from helper_lib import filelib
@@ -18,11 +19,18 @@ def plot(stat, columns, outputname, labels=None, logscale=False, dpi=300, **kwar
         Table containing the statistics to plot.
     columns : list of str
         List of data columns to plot.
-    outputfolder : str 
+    labels : list of str, optional
+        Names to lable the y axis instead of column names.
+        If None, the column names will be used.
+        Default is None.
+    outputname : str
         Path to the output directory where to store the plots.
     logscale : bool, optional
         If True, the data will be plotted in a semi-logarithmic scale.
         Default is False.
+    dpi : int, optional
+        Image resolution.
+        Default is 300.
     kwargs : key, value pairings
         Keyword arguments passed to the `seaborn.boxplot` and `seaborn.pointplot` functions.
     """
@@ -34,13 +42,13 @@ def plot(stat, columns, outputname, labels=None, logscale=False, dpi=300, **kwar
     figsize = kwargs.pop('figsize', None)
     hue = kwargs.get('hue', None)
     normalize = kwargs.pop('normalize', True)
-    for c in ['Poisson_SNR', 'Gaussian_SNR']:
+    for c in ['SNR', 'SNR2', 'SNR3', 'SNR4']:
         if x == c or hue == c:
+            stat[c] = np.array(stat[c]).astype(str)
             for snr in stat[c].unique():
-                if snr == 'None':
-                    stat.at[stat[c] == snr, c] = 10000
-                else:
-                    stat.at[stat[c] == snr, c] = int(float(snr))
+                if snr == 'nan':
+                    stat.at[stat[c] == snr, c] = '10000'
+            stat[c] = np.array(stat[c]).astype(float).astype(int)
     if hue is not None:
         stat = stat.sort_values([x, hue])
     else:
@@ -72,7 +80,6 @@ def plot(stat, columns, outputname, labels=None, logscale=False, dpi=300, **kwar
             plt.savefig(outputname + name + '_boxplot.svg')
             plt.close()
 
-
             if figsize is not None:
                 plt.figure(figsize=figsize)
             ax = sns.pointplot(y=c, data=stat, **kwargs)
@@ -95,6 +102,30 @@ def plot(stat, columns, outputname, labels=None, logscale=False, dpi=300, **kwar
 
 
 def plot_lmplot(stat, columns, outputname, labels=None, logscale=False, dpi=300, **kwargs):
+    """
+    Plots a linear model plot from given statistics from a given DataFrame.
+
+    Parameters
+    ----------
+    stat : pandas.DataFrame
+        Table containing the statistics to plot.
+    columns : list of str
+        List of data columns to plot.
+    labels : list of str, optional
+        Names to lable the y axis instead of column names.
+        If None, the column names will be used.
+        Default is None.
+    outputname : str
+        Path to the output directory where to store the plots.
+    logscale : bool, optional
+        If True, the data will be plotted in a semi-logarithmic scale.
+        Default is False.
+    dpi : int, optional
+        Image resolution.
+        Default is 300.
+    kwargs : key, value pairings
+        Keyword arguments passed to the `seaborn.boxplot` and `seaborn.pointplot` functions.
+    """
     filelib.make_folders([os.path.dirname(outputname)])
     margins = kwargs.pop('margins', None)
     title = kwargs.pop('title', None)

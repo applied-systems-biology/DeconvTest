@@ -1,16 +1,19 @@
 from __future__ import division
 
 import os
+import pandas as pd
 import numpy as np
 from scipy import ndimage
 from scipy.signal import fftconvolve
 from skimage import io
 import pylab as plt
+from skimage.exposure import rescale_intensity
 import warnings
 
 from metadata import Metadata
+from DeconvTest.modules import noise
+from DeconvTest.modules import quantification
 from helper_lib import filelib
-from skimage.exposure import rescale_intensity
 
 
 class Image(object):
@@ -19,7 +22,7 @@ class Image(object):
 
     """
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, image=None):
         """
         Initializes the Image class
 
@@ -28,12 +31,18 @@ class Image(object):
         filename: str, optional
             The path used to load the image.
             If None, an empty class is created.
+            If `image` argument is provided, the image will be initialized from the `image` argument.
+            Default is None.
+        image : ndarray, optional
+            3D array to initiate the image.
+            If None, an empty class is created.
             Default is None.
         """
-        self.image = None
+        self.image = image
         self.filename = filename
-        self.metadata = None
-        if filename is not None and os.path.exists(filename):  # read the image from file
+        self.metadata = Metadata()
+        self.metadata['Convolved'] = False
+        if self.image is None and filename is not None and os.path.exists(filename):  # read the image from file
             self.from_file(filename)
 
     def __repr__(self):
@@ -51,13 +60,17 @@ class Image(object):
         if os.path.exists(filename):  # read the image from file
             self.image = io.imread(filename)
             self.filename = filename
-            self.metadata = Metadata()
             if os.path.exists(filename[:-4] + '.csv'):
                 self.metadata.read_from_csv(filename[:-4] + '.csv')
+            else:
+                warnings.warn("Metadata file is not found!", Warning)
         else:
             raise ValueError('File does not exist!')
 
     def normalize(self):
+        """
+        Normalized the current image between 0 and 255.
+        """
         self.image = rescale_intensity(self.image, out_range=(0, 255))
 
     def save(self, outputfile, normalize_output=False):
@@ -80,7 +93,8 @@ class Image(object):
             if normalize_output:
                 io.imsave(outputfile, rescale_intensity(self.image, out_range=(0, 255)).astype(np.uint8))
             else:
-                io.imsave(outputfile, self.image.astype(np.uint8))
+                io.imsave(outputfile, self.image.astype(np.uint32))
+        self.metadata.to_csv(outputfile[:-4] + '.csv', sep='\t', header=False)
         self.filename = outputfile
 
     def show_2d_projections(self):
@@ -94,6 +108,22 @@ class Image(object):
             for i in range(3):
                 plt.sca(axs[i])
                 io.imshow(self.image.max(i), cmap='viridis')
+
+    def save_projection(self, outputfile, axis=1):
+        """
+        Saves the maximum intensity projection of the stack.
+
+        Parameters
+        ----------
+        outputfile : str
+            The path used to save the maximum intensity projection.
+        axis : int, optional
+            Axis along which the projection should be made.
+            Default is 1 (xz).
+        """
+        filelib.make_folders([os.path.dirname(outputfile)])
+        maxproj = np.max(self.image, axis=axis)
+        io.imsave(outputfile, maxproj.astype(np.uint8))
 
     def convolve(self, psf):
         """
@@ -113,6 +143,7 @@ class Image(object):
             raise ValueError('Both images to convolve have to be initialized!')
         self.image = fftconvolve(self.image, psf.image, mode='full')
         self.image = rescale_intensity(self.image, out_range=(0, 255))
+        self.metadata['Convolved'] = True
         return self.image
 
     def resize(self, **kwargs):
@@ -145,16 +176,30 @@ class Image(object):
 
         if self.image.max() > 0:
             self.image = rescale_intensity(self.image, out_range=(0, 255))
+
+        if 'Voxel size x' in self.metadata.index and 'Voxel size y' in self.metadata.index \
+                and 'Voxel size z' in self.metadata.index:
+            new_voxel_size = np.array([self.metadata['Voxel size z'], self.metadata['Voxel size y'],
+                                                     self.metadata['Voxel size x']]) / kwargs['zoom']
+            self.metadata['Voxel size'] = str(new_voxel_size)
+            self.metadata['Voxel size z'], self.metadata['Voxel size y'], self.metadata['Voxel size x'] = new_voxel_size
+
         return self.image
 
-    def add_poisson_noise(self, snr=None):
+    def add_noise(self, kind=None, snr=None):
         """
         Adds random Poisson noise to the current image.
 
         Parameters
         ----------
-        snr : float, optional
-            Target signal-to-noise ratio (SNR) after adding the noise.
+        kind : string, sequence of strings or None, optional
+            Name of the method to generate nose from set of {gaussian, poisson}.
+            If a sequence is provided, several noise types will be added.
+            If None, no noise will be added.
+            Default is None.
+        snr : float or sequence of floats, optional
+            Target signal-to-noise ratio (SNR) for each noise type.
+            Must be the same shape as the `kind` argument.
             If None, no noise is added.
             Default is None
 
@@ -163,40 +208,42 @@ class Image(object):
         ndarray
             Output noisy image of the same shape as the current image.
         """
+        if kind is not None:
+            if type(kind) is str:
+                kind = [kind]
+            snr = np.array([snr]).flatten()
+            if len(kind) != len(snr):
+                if len(snr) == 1:
+                    snr = np.ones(len(kind)) * snr
+                else:
+                    raise TypeError("The length of the array for SNR must be the same as for the noise type!")
+            for i, k in enumerate(kind):
+                if 'add_' + k + '_noise' in dir(noise) and k in noise.valid_noise_types:
+                    self.image = getattr(noise, 'add_' + k + '_noise')(img=self.image, snr=snr[i])
+                    if i == 0:
+                        ind = ''
+                    else:
+                        ind = ' ' + str(i + 1)
+                    self.metadata['SNR' + ind] = snr[i]
+                    self.metadata['noise type' + ind] = k
+                else:
+                    raise AttributeError(k + ' is not a valid noise type!')
 
-        if self.image is None:
-            raise ValueError('self.image is None! The image has to be initialized!')
-
-        if snr is not None:
-            imgmax = snr ** 2
-            ratio = imgmax / self.image.max()
-            self.image = self.image * 1. * ratio
-            self.image = np.random.poisson(self.image)
-            self.image = self.image / ratio
         return self.image
 
-    def add_gaussian_noise(self, snr=None):
+    def compute_accuracy_measures(self, gt):
         """
-        Adds random Gaussian noise to the current image.
+        Computes the root mean square error (RMSE) and it normalized versions
 
         Parameters
         ----------
-        snr : float, optional
-            Target signal-to-noise ratio (SNR) after adding the noise.
-            If None, no noise is added.
-            Default is None
+        gt : Image or Cell
+            Ground truth image.
 
         Returns
         -------
-        ndarray
-            Output noisy image of the same shape as the current image.
+        pandas.DataFrame()
+            Data frame containing the values for the computed accuracy measures.
         """
-
-        if self.image is None:
-            raise ValueError('self.image is None! The image has to be initialized!')
-
-        if snr is not None:
-            sig = self.image.max() * 1. / (10 ** (snr / 20.))
-            noise = np.random.normal(0, sig, self.image.shape)
-            self.image = self.image + noise
-        return self.image
+        data = quantification.compute_accuracy_measures(self.image, gt.image)
+        return data

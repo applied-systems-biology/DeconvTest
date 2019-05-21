@@ -34,14 +34,9 @@ The source code of this framework is released under the <a href="/LICENSE">3-cla
 The DeconvTest package contains several subpackages.
 
 - `classes`: implementation of all classes needed to conveniently work with synthetic image data.
-- `deconvolve`: interfaces to integrated ImageJ plugins.
-- `batch`: implementation of the main modules of the framework:
-    - `simulation`: the *in silico* microscopy module; contains functions for simulating a microscopy process 
-    in a batch mode.
-    - `deconvolution`: the deconvolution module; contains functions for deconvolving images with ImageJ plugins in 
-    a batch mode. 
-    - `quantification`: the performance quantification module; contains functions for evaluating deconvolution 
-    accuracy in a batch mode.
+- `modules`: functions to generate synthetic images, deconvolve and quantify the data.
+- `batch`: functions to run the framework in a batch mode running multiple processes in parallel.
+- `fiji`: ImageJ macros to run the integrated Fiji plugins.
 - `scripts`: exemplary scripts and configuration files.
 - `tests`: unit tests.
 

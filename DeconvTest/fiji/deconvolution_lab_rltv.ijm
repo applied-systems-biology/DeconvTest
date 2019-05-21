@@ -20,7 +20,7 @@ command = "-image file " + path_input +
           " -path " + path_output;
 
 run("DeconvolutionLab2 Run", command);
-for (i=0; i<1000; i++){
+for (i=0; i<10000; i++){
 if (File.exists(path_output + '/' + filename_output + '.tif')){
         eval("script", "System.exit(0);");
     }

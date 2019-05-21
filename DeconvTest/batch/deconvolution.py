@@ -1,89 +1,47 @@
 """
-Module containing functions for deconvolving images with ImageJ plugins in a batch mode.
-Includes the following ImageJ plugins / algorithms:
-- Iterative deconvolve 3D
-- DeconvolutionLab2: Regularized Inverse Filter (RIF)
-- DeconvolutionLab2: Richardson-Lucy with Total Variance (RLTV)
+Module containing functions for deconvolving images in a batch mode.
 """
 from __future__ import division
 
 import time
+import os
+import warnings
 import numpy as np
 import pandas as pd
+import itertools
 
-from DeconvTest.deconvolve.fiji import get_fiji_path
-from DeconvTest.deconvolve.devonvolve_imagej import *
+from DeconvTest.modules import deconvolution
 from DeconvTest.classes.metadata import Metadata
 from helper_lib.parallel import run_parallel
 from helper_lib import filelib
 
 
-def deconvolve_batch(inputfolder, outputfolder, algorithm, rif_lambda=0.01, rltv_lambda=0.01, iterations=20,
-                     normalize=True, perform=True, detect=True, wiener=0.001, low=1,
-                     terminate=0.001, log_computing_time=True, logfolder=None, print_progress=False, max_threads=8):
+def deconvolve_batch(inputfolder, outputfolder, deconvolution_algorithm, **kwargs):
     """
     Deconvolves all cell images in a given input directory with multiple algorithm and settings.
     
     Parameters
     ----------
     inputfolder : str
-        Input directory with cell images to deconvolve.
+        Input directory with cell images to fiji.
     outputfolder : str
         Output directory to save the deconvolved images.
-    algorithm : str or sequence of str
-        Deconvolution algorithm that will be applied to deconvolve the input images.
-        If a sequence of algorithms is provided, all algorithms from the sequence will be applied.
-        The valid values are as follows:
-        
-        'deconvolution_lab_rif'
-            Regularized Inverse Filter (RIF) from DeconvolutionLab2 plugin (ImageJ) will be applied.
-        
-        'deconvolution_lab_rltv'
-            Richardson-Lucy with Total Variance (RLTV) from DeconvolutionLab2 plugin (ImageJ) will be applied.
-        
-        'iterative_deconvolve_3d'
-            Iterative Deconvolve 3D plugin (ImageJ) will be applied.
-    rif_lambda : float or sequence of floats, optional
-        Regularization parameter for the RIF algorithm.
-        If a sequence is provided, all values from the sequence will be tested.
-        Default is 0.01.
-    rltv_lambda : float or sequence of floats, optional
-        Regularization parameter for the RLTV algorithm.
-        If a sequence is provided, all values from the sequence will be tested in combination with 
-         the `iterations` parameter.
-        Default is 0.01.
-    iterations : int or sequence of ints, optional
-        Number of iterations in the RLTV algorithm.
-        If a sequence is provided, all values from the sequence will be tested in combination with 
-         the `rltv_lambda` parameter.
-        Default is 20.
-    normalize : bool or sequence of bools, optional
-        `Normalize PSF` parameter for the Iterative Deconvolve 3D plugin. 
-        If a sequence is provided, all values from the sequence will be tested in combination with other parameters.
-        Default is True.
-    perform : bool or sequence of bools, optional
-        `Perform anti-ringig step` parameter for the Iterative Deconvolve 3D plugin. 
-        If a sequence is provided, all values from the sequence will be tested in combination with other parameters.
-        Default is True.
-    detect : bool or sequence of bools, optional
-        `Detect divergence` parameter for the Iterative Deconvolve 3D plugin. 
-        If a sequence is provided, all values from the sequence will be tested in combination with other parameters.
-        Default is True.
-    wiener : float or sequence of floats, optional
-        `Wiener filter gamma` parameter for the Iterative Deconvolve 3D plugin.
-        <0.0001 to turn off, 0.0001 - 0.1 as tests. 
-        If a sequence is provided, all values from the sequence will be tested in combination with other parameters.
-        Default is 0.001.
-    low : int or sequence of ints, optional
-        `Low pass filter` parameter for the Iterative Deconvolve 3D plugin, pixels.
-        The same value is used for low pass filter in xy and z.
-        If a sequence is provided, all values from the sequence will be tested in combination with other parameters.
-        Default is 1.
-    terminate : float or sequence of floats, optional
-        `Terminate iteration if mean delta < x%` parameter for the Iterative Deconvolve 3D plugin.
-        0 to turn off.
-        If a sequence is provided, all values from the sequence will be tested in combination with other parameters.
-        Default is 0.001.
+    deconvolution_algorithm : string, sequence of strings
+        Name of the deconvolution algorithm from set of
+         {deconvolution_lab_rif, deconvolution_lab_rltv, iterative_deconvolve_3d}.
+        If a sequence is provided, all algorithms from the sequence will be tested.
+
+    Keyword arguments
+    -----------------
+    <deconvolution_algorithm>_<parameter> : scalar or sequence
+        Values of the parameters for the deconvolution algorithms to be tested.
+        <deconvolution_algorithm> is the name of the algorithm from set of
+         {deconvolution_lab_rif, deconvolution_lab_rltv, iterative_deconvolve_3d}
+         for which the parameters values refer to.
+        <parameter> is the name of the parameter of the specified algorithm.
+        For instance, 'deconvolution_lab_rltv_iterations' specifies the value(s) for the number of iterations of the
+         'deconvolution_lab_rltv' algorithm.
+        If a sequence of parameter values is provided, all values from the sequence will be tested.
     log_computing_time : bool, optional
         If True, computing time spent on deconvolution will be recorded and stored in a given folder.
         Default is False.
@@ -103,95 +61,68 @@ def deconvolve_batch(inputfolder, outputfolder, algorithm, rif_lambda=0.01, rltv
         inputfolder += '/'
     if not outputfolder.endswith('/'):
         outputfolder += '/'
-    inputfiles = filelib.list_subfolders(inputfolder)
-    algorithm = np.array([algorithm]).flatten()
-    rif_lambda = np.array([rif_lambda]).flatten()
-    rltv_lambda = np.array([rltv_lambda]).flatten()
-    iterations = np.array([iterations]).flatten()
-    normalize = np.array([normalize]).flatten()
-    perform = np.array([perform]).flatten()
-    detect = np.array([detect]).flatten()
-    wiener = np.array([wiener]).flatten()
-    low = np.array([low]).flatten()
-    terminate = np.array([terminate]).flatten()
-
-    for alg in algorithm:
-        if alg not in ['deconvolution_lab_rif', 'deconvolution_lab_rltv', 'iterative_deconvolve_3d']:
-            raise ValueError(alg + ' is invalid value for the algorithm! '
-                             'Must be \'deconvolution_lab_rif\', \'deconvolution_lab_rltv\','
-                             ' \'iterative_deconvolve_3d\', or a list these')
-
-    if 'iterative_deconvolve_3d' in algorithm:
-        items = [(inputfile, 'iterative_deconvolve_3d', norm, perf, det, wien, lo, term)
-                      for inputfile in inputfiles for norm in normalize for perf in perform for det in detect
-                      for wien in wiener for lo in low for term in terminate]
+    if os.path.exists(inputfolder):
+        inputfiles = filelib.list_subfolders(inputfolder)
     else:
-        items = []
-    if 'deconvolution_lab_rif' in algorithm:
-        for inputfile in inputfiles:
-            for rl in rif_lambda:
-                items.append((inputfile, 'deconvolution_lab_rif', rl))
-    if 'deconvolution_lab_rltv' in algorithm:
-        for inputfile in inputfiles:
-            for rl in rltv_lambda:
-                for it in iterations:
-                    items.append((inputfile, 'deconvolution_lab_rltv', rl, it))
+        inputfiles = []
+        warnings.warn('Input directory ' + inputfolder +
+                      ' does not exist!')
+    algorithm = np.array([deconvolution_algorithm]).flatten()
 
-    # filelib.make_folders([outputfolder])
-    # f = open(outputfolder + 'items.txt', 'w')
-    # f.write(str(items))
-    # f.close()
-
-    imagej_path = get_fiji_path()
-    if imagej_path is None:
+    items = []
+    for alg in algorithm:
+        alg_params = []
+        alg_param_names = []
+        for kw in kwargs:
+            if kw.startswith(alg):
+                alg_param_names.append(kw)
+                alg_params.append(np.array([kwargs[kw]]).flatten())
+        alg_params = list(itertools.product(*alg_params))
+        for cur_params in alg_params:
+            param_args = dict()
+            for i in range(len(alg_param_names)):
+                param_args[alg_param_names[i].split(alg)[-1][1:]] = cur_params[i]
+            items.append((alg, param_args))
+    kwargs['items'] = [(inputfile,) + item for inputfile in inputfiles for item in items]
+    kwargs['outputfolder'] = outputfolder
+    kwargs['inputfolder'] = inputfolder
+    kwargs['imagej_path'] = deconvolution.get_fiji_path()
+    if deconvolution.get_fiji_path() is None:
         raise TypeError("Fiji path is not specified! Run the `python setup.py install` and specify the Fiji path")
 
-    kwargs = {'items': items, 'inputfolder': inputfolder, 'outputfolder': outputfolder,
-              'log_computing_time': log_computing_time, 'logfolder': logfolder, 'imagej_path': imagej_path,
-              'max_threads': max_threads, 'print_progress': print_progress}
     run_parallel(process=__deconvolve_batch_helper, process_name='Deconvolve', **kwargs)
 
 
-def __deconvolve_batch_helper(item, inputfolder, outputfolder, imagej_path, log_computing_time=True, logfolder=None):
-    filename, algorithm = item[:2]
+def __deconvolve_batch_helper(item, inputfolder, outputfolder, imagej_path,
+                              log_computing_time=True, logfolder=None, **kwargs_to_ignore):
+    filename, algorithm, alg_kwargs = item
     name = filename.split('/')[-1]
     elapsed_time = None
-    if len(name.split('psf')) == 1:
-        psfname = filename[: -len(name)-1].split('_gaussian')[0] + '.tif'
-        if algorithm == 'deconvolution_lab_rif':
-            rif_lambda = item[2]
-            subfolder = 'DeconvolutionLab-RIF_lambda=' + str(rif_lambda) + '/'
-            if not os.path.exists(outputfolder + subfolder + filename):
-                filelib.make_folders([outputfolder + subfolder + os.path.dirname(filename)])
+    metadata = Metadata()
+    metadata.read_from_csv(inputfolder + filename[:-4] + '.csv')
+    if 'isPSF' not in metadata.index or str(metadata['isPSF']) == 'False':
+        psfname = filename[: -len(name)-1].split('_noise')[0] + '.tif'
+        subfolder = algorithm
+        for kw in alg_kwargs:
+            subfolder += '_' + kw + '=' + str(alg_kwargs[kw])
+        subfolder += '/'
+        if not os.path.exists(outputfolder + subfolder + filename):
+            filelib.make_folders([outputfolder + subfolder + os.path.dirname(filename)])
+            if algorithm in dir(deconvolution) and algorithm in deconvolution.valid_algorithms:
                 start = time.time()
-                run_rif(imagej_path=imagej_path, inputfile=os.getcwd() + '/' + inputfolder + filename,
-                        psffile=os.getcwd() + '/' + inputfolder + psfname, rif_lambda=rif_lambda,
-                        outputfile=os.getcwd() + '/' + outputfolder + subfolder + filename)
+                getattr(deconvolution, algorithm)(imagej_path=imagej_path,
+                                                  inputfile=os.getcwd() + '/' + inputfolder + filename,
+                                                  psffile=os.getcwd() + '/' + inputfolder + psfname,
+                                                  outputfile=os.getcwd() + '/' + outputfolder + subfolder + filename,
+                                                  **alg_kwargs)
                 elapsed_time = time.time() - start
-        if algorithm == 'deconvolution_lab_rltv':
-            rltv_lambda, iterations = item[2:4]
-            subfolder = 'DeconvolutionLab-RLTV_lambda=' + str(rltv_lambda) + '_iterations=' + str(iterations) + '/'
-            if not os.path.exists(outputfolder + subfolder + filename):
-                filelib.make_folders([outputfolder + subfolder + os.path.dirname(filename)])
-                start = time.time()
-                run_rltv(imagej_path=imagej_path, inputfile=os.getcwd() + '/' + inputfolder + filename,
-                         psffile=os.getcwd() + '/' + inputfolder + psfname, iterations=iterations, rltv_lambda=rltv_lambda,
-                         outputfile=os.getcwd() + '/' + outputfolder + subfolder + filename)
-                elapsed_time = time.time() - start
-        if algorithm == 'iterative_deconvolve_3d':
-            normalize, perform, detect, wiener, low, terminate = item[2:]
-            subfolder = 'IterativeDeconvolve3D_normalize=' + str(normalize) + '_perform=' + str(perform) + \
-                            '_detect=' + str(detect) + '_wiener=' + str(wiener) + '_low=' + str(low) + \
-                            '_terminate=' + str(terminate) + '/'
-            if not os.path.exists(outputfolder + subfolder + filename):
-                filelib.make_folders([outputfolder + subfolder + os.path.dirname(filename)])
-                start = time.time()
-                run_iterative(imagej_path=imagej_path, inputfile=os.getcwd() + '/' + inputfolder + filename,
-                              psffile=os.getcwd() + '/' + inputfolder + psfname,
-                              outputfile=os.getcwd() + '/' + outputfolder + subfolder + filename,
-                              normalize=normalize, perform=perform, detect=detect, wiener=wiener,
-                              low=low, terminate=terminate, iterations=200)
-                elapsed_time = time.time() - start
+            else:
+                raise AttributeError(algorithm + ' is not a valid algorithm!')
+            metadata = Metadata(filename=inputfolder + filename[:-4] + '.csv')
+            metadata['Deconvolution algorithm'] = algorithm
+            for c in alg_kwargs:
+                metadata[c] = alg_kwargs[c]
+            metadata.save(outputfolder + subfolder + filename[:-4] + '.csv')
 
         if log_computing_time is True and elapsed_time is not None:
             if logfolder is None:
@@ -203,12 +134,14 @@ def __deconvolve_batch_helper(item, inputfolder, outputfolder, imagej_path, log_
             filelib.make_folders([logfolder])
             t = pd.DataFrame({'Step': ['Deconvolution'],
                               'Computational time': [elapsed_time],
-                              'Algorithm': algorithm,
-                              'Name': subfolder[:-1] + '/' + filename})
+                              'Algorithm': algorithm})
+            for c in metadata.index:
+                try:
+                    t[c] = metadata[c]
+                except ValueError:
+                    t[c] = str(metadata[c])
+            t['Name'] = subfolder[:-1] + '/' + filename
             t.to_csv(logfolder + subfolder[:-1] + '_' + filename[:-4].replace('/', '_') + '.csv', sep='\t')
-        metadata = Metadata(filename=inputfolder + filename[:-4] + '.csv')
-        metadata.save(outputfolder + subfolder + filename[:-4] + '.csv')
-
 
 
 

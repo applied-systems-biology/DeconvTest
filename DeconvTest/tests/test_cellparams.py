@@ -2,6 +2,7 @@ import unittest
 
 from ddt import ddt, data
 import shutil
+import os
 
 from DeconvTest import CellParams
 
@@ -9,35 +10,14 @@ from DeconvTest import CellParams
 @ddt
 class TestCellData(unittest.TestCase):
 
-    def test_cell_data(self):
-        celldata = CellParams()
-        celldata.save('data/celldata.csv')
-        pl = celldata.plot_size_distribution()
-        pl.savefig('data/celldata_size.png')
-        pl = celldata.plot_angle_distribution()
-        pl.savefig('data/celldata_angle.png')
-        shutil.rmtree('data/')
-
     @data(
         (8, 2),
         [10, 1]
     )
     def test_cell_data(self, size):
-        celldata = CellParams(size_mean_and_std=size)
+        celldata = CellParams(number_of_cells=1, size_mean_and_std=size)
         celldata.save('data/celldata.csv')
-        pl = celldata.plot_size_distribution()
-        pl.savefig('data/celldata_size.png')
-        pl = celldata.plot_angle_distribution()
-        pl.savefig('data/celldata_angle.png')
-        shutil.rmtree('data/')
-
-    def test_cell_data100(self):
-        celldata = CellParams(number_of_cells=100)
-        celldata.save('data/celldata1.csv')
-        pl = celldata.plot_size_distribution()
-        pl.savefig('data/celldata1_size.png')
-        pl = celldata.plot_angle_distribution()
-        pl.savefig('data/celldata1_angle.png')
+        celldata.plot_size_distribution()
         shutil.rmtree('data/')
 
     def test_read_write(self):
@@ -49,6 +29,24 @@ class TestCellData(unittest.TestCase):
         for c in celldata.columns:
             self.assertEqual(c in celldata2.columns, True)
         shutil.rmtree('data/')
+
+    @data(
+            'ellipsoid',
+            'spiky_cell'
+        )
+    def test_valid_types(self, kind):
+        celldata = CellParams(kind=kind)
+        celldata.save('data/celldata.csv')
+        self.assertEqual(os.path.exists('data/celldata.csv'), True)
+        shutil.rmtree('data/')
+
+    @data(
+        'ellipsoids',
+        'invalid_shape'
+    )
+    def test_invalid_types(self, kind):
+        self.assertRaises(AttributeError, CellParams, input_cell_kind=kind)
+
 
 if __name__ == '__main__':
     unittest.main()

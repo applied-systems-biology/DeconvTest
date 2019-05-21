@@ -1,20 +1,12 @@
 from __future__ import division
 
-import os
-import warnings
 import numpy as np
-import pandas as pd
 from scipy import ndimage
 
-from skimage import io
-from skimage.measure import label as lbl
 
 from cell import Cell
 from image import Image
 from metadata import Metadata
-
-from helper_lib import filelib
-from helper_lib.image import unify_shape, segment
 
 
 class Stack(Image):
@@ -22,8 +14,7 @@ class Stack(Image):
     Class for a 3D multicellular stack.
     """
 
-    def __init__(self, filename=None, is_segmented=False, is_labeled=False,
-                 resolution=None, stack_size=None, cell_params=None):
+    def __init__(self, filename=None, input_voxel_size=None, stack_size=None, cell_params=None):
         """
         Initializes the Stack class.
 
@@ -33,15 +24,7 @@ class Stack(Image):
             Path used to load the cell image.
             If None or non-existent, no image will be loaded.
             Default is None.
-        is_segmented : bool, optional
-            If True the cell stack is assumed to be already segmented (binary mask or array of labeled objects).
-            If False the cell stack is assumed to be not segmented yet.
-            Default is False.
-        is_labeled : bool, optional
-            If True it is assumed that individual connected regions are labeled by unique labels.
-            If False individual cells are assumed not to be labeled.
-            Default is False.
-        resolution : scalar or sequence of scalars, optional
+        input_voxel_size : scalar or sequence of scalars, optional
             Voxel size used to generate the stack.
             If None, no stack will be generated.
             Default is None.
@@ -56,16 +39,10 @@ class Stack(Image):
             Default is None.
         """
         super(Stack, self).__init__(filename=filename)
-        self.cells = []
-        self.is_segmented = is_segmented
-        self.is_labeled = is_labeled
-        if resolution is not None and stack_size is not None and cell_params is not None:
-            self.generate(cell_params, resolution, stack_size)
+        if input_voxel_size is not None and stack_size is not None and cell_params is not None:
+            self.generate(cell_params, input_voxel_size, stack_size)
 
-    def __repr__(self):
-        return "Stack with " + str(len(self.cells)) + " cells"
-
-    def generate(self, cell_params, resolution, stack_size):
+    def generate(self, cell_params, input_voxel_size, stack_size):
         """
         Generates a multicellular stack image from cell parameters.
 
@@ -74,12 +51,12 @@ class Stack(Image):
         cell_params : pandas.DataFrame or CellParams
             Dictionary of cell parameters.
             The columns should include the keyword arguments passed though `Cell.generate`.
-        resolution : scalar or sequence of scalars
+        input_voxel_size : scalar or sequence of scalars
             Voxel size used to generate the stack.
         stack_size : sequence of scalars
             Dimensions of the image stack in micrometers.
         """
-        stack_size_pix = np.int_(np.round_(np.array(stack_size) / np.array(resolution)))
+        stack_size_pix = np.int_(np.round_(np.array(stack_size) / np.array(input_voxel_size)))
         if 'size' not in cell_params and \
                 ('size_x' not in cell_params or 'size_y' not in cell_params or 'size_z' not in cell_params):
             raise ValueError('Either `size` or `size_x`, `size_y` and `size_z` must be provided!')
@@ -87,19 +64,17 @@ class Stack(Image):
             shift = np.array([np.mean(cell_params['size'])]*3)
         else:
             shift = np.array([cell_params['size_z'].mean(), cell_params['size_y'].mean(), cell_params['size_x'].mean()])
-        shift = shift / np.array(resolution) / 2 / stack_size_pix
+        shift = shift / np.array(input_voxel_size) / 2 / stack_size_pix
         for i, c in enumerate(['z', 'y', 'x']):
-            # cell_params[c] = rescale_intensity(np.array(cell_params[c]), out_range=[shift[i], 1-shift[i]])
-            cell_params[c] = np.array(cell_params[c])*(1 - 2*shift[i]) + shift[i]
+            cell_params.loc[:, c] = np.array(cell_params[c])*(1 - 2*shift[i]) + shift[i]
         self.image = np.zeros(stack_size_pix)
 
         for i in range(len(cell_params)):
-            # create an instance of the CellSimulation class for each line in cell_params
             p = dict(cell_params.iloc[i])
             x = p.pop('x', None)
             y = p.pop('y', None)
             z = p.pop('z', None)
-            c = Cell(resolution=resolution, **p)
+            c = Cell(input_voxel_size=input_voxel_size, **p)
             if x is None or y is None or z is None:  # position the cell randomly if the positions are not specified
                 c.position = np.random.rand(3) * stack_size_pix
             else:
@@ -108,9 +83,11 @@ class Stack(Image):
                 c.position = np.array([z, y, x]) * stack_size_pix
 
             self.position_cell(c)
-        self.is_segmented = True
-        self.is_labeled = False
-        self.metadata = Metadata(resolution=resolution)
+        self.metadata = Metadata()
+        self.metadata.set_voxel_size(input_voxel_size)
+        self.metadata['Convolved'] = False
+        self.metadata['Number of cells'] = len(cell_params)
+        self.metadata['Stack size um'] = stack_size
 
     def position_cell(self, cell):
         """
@@ -136,169 +113,6 @@ class Stack(Image):
 
         self.image[ind] = 255  # add the new cell to the stack
 
-    def save_projection(self, outputfile, axis=1):
-        """
-        Saves the maximum intensity projection of the stack.
-
-        Parameters
-        ----------
-        outputfile : str
-            The path used to save the maximum intensity projection.
-        axis : int, optional
-            Axis along which the projection should be made.
-            Default is 1 (xz).
-        """
-        filelib.make_folders([os.path.dirname(outputfile)])
-        maxproj = np.max(self.image, axis=axis)
-        io.imsave(outputfile, maxproj.astype(np.uint8))
-
-    def segment(self, preprocess=False, thr=None, relative_thr=False, postprocess=False, label=True):
-        """
-        Segments the current image by thresholding with optional preprocessing and finding connected regions.
-        
-        Parameters
-        ----------
-        preprocess : bool, optional
-            If True, the image will be preprocessed with a median filter (size 3) prior to segmentation.
-            Default is False.
-        thr : scalar, optional
-            Threshold value for image segmentation.
-            If None, automatic Otsu threshold will be computed.
-            Default is None.
-        relative_thr : bool, optional
-            If True, the value of `thr` is multiplied by the maximum intensity of the image.
-            Default is False.
-        postprocess bool, optional
-            If True, morphological opening and closing and binary holes filling will be applied after theresholding.
-            Default is False.
-        label : bool, optional
-            If True, connected region will be labeled by unique labels.
-            Default is True.
-
-        Returns
-        -------
-        ndarray
-            Segmented binary mask or labeled image.
-        """
-        if self.image is None:
-            raise ValueError('Image is None!')
-        self.is_segmented = True
-
-        if preprocess:
-            median = 3
-        else:
-            median = None
-        if postprocess:
-            morphology = True
-            fill_holes = True
-        else:
-            morphology = False
-            fill_holes = False
-
-        self.image = segment(self.image, thr=thr, relative_thr=relative_thr, median=median,
-                             morphology=morphology, fill_holes=fill_holes, label=label)
-
-        if label is True:
-            self.is_labeled = True
-            self.split_to_cells()
-        else:
-            self.image = (self.image > 0)*255
-
-        return self.image
-
-    def split_to_cells(self):
-        """
-        Creates an instance of the `Cell` class for each connected region in the current image.
-
-        """
-        if self.image is None:
-            raise ValueError('Cannot split into cells: image is None')
-        if not self.is_segmented:
-            raise ValueError('Cannot split into cells: image is not segmented')
-        if not self.is_labeled:
-            self.image = lbl(self.image)
-            self.is_labeled = True
-
-        llist = np.unique(self.image)
-        llist = llist[llist > 0]
-        centers = np.round_(ndimage.center_of_mass(self.image, self.image, llist), 1)
-        for i, l in enumerate(llist):
-            c = Cell(ind=np.where(self.image == l), position=centers[i])
-            self.cells.append(c)
-
-    def dimensions(self, **kwargs):
-        """
-        Computes the sizes of the objects represented by individual connected regions in the current image.
-        
-        Parameters
-        ----------
-        kwargs : key, value pairings
-            Keyword arguments passed to the `dimensions` function of the `Cell` class.
-        
-        Returns
-        -------
-        ndarray
-            NxM array of the object sizes. 
-            N is the number of individual connected regions.
-            M is the number of dimensions in the image (M=3 for 3D).
-
-        """
-        if len(self.cells) == 0:
-            warnings.warn("No cells were found in the stack!", Warning)
-            dims = [np.zeros(3)]
-        else:
-            dims = []
-            for c in self.cells:
-                dims.append(c.dimensions(**kwargs))
-        return np.int_(np.round_(dims))
-
-    def compare_to_ground_truth(self, gt):
-        """   
-        Computes the overlap errors, Jaccard index, and other accuracy measures between each connected region 
-         in the current image and a given ground truth image.
-         
-        Parameters
-        ----------
-        gt : Image or Cell 
-            Ground truth image.            
-
-        Returns
-        -------
-        pandas.DataFrame()
-            Dictionary with the computed accuracy measures for all individual connected regions.
-            The length of the data frame equals to the number of connected regions in the ground truth image.
-
-        """
-        data = pd.DataFrame()
-        self.image, gt.image = unify_shape(self.image, gt.image)  # convert cell images to the same shape
-
-        if len(gt.cells) == 0:
-            gt.segment()
-            if len(gt.cells) == 0:
-                raise ValueError("No cells were found in the ground truth stack")
-
-        if len(self.cells) == 0:
-            warnings.warn("No cells were found in the stack!", Warning)
-            data = pd.DataFrame({'CellID': np.arange(len(gt.cells)),
-                                 'Overlap error': np.ones(len(gt.cells)),
-                                 'Overdetection error': np.zeros(len(gt.cells)),
-                                 'Underdetection error': np.ones(len(gt.cells)),
-                                 'Jaccard index': np.zeros(len(gt.cells)),
-                                 'Sensitivity': np.zeros(len(gt.cells)),
-                                 'Precision': np.zeros(len(gt.cells))})
-        else:
-            centers = []
-            for c in self.cells:
-                centers.append(c.position)
-
-            for i in range(len(gt.cells)):  # compare each cell to the closest one in the ground truth Stack
-                center = np.reshape(gt.cells[i].position, (1, 3))
-                dist = np.sum((centers - center) ** 2, axis=1)
-                curdata = self.cells[dist.argmin()].compare_to_ground_truth(gt.cells[i])
-                curdata['CellID'] = i
-                data = data.append(curdata, ignore_index=True)
-
-        return data
 
 
 

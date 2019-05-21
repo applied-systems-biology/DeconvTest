@@ -10,9 +10,10 @@ from DeconvTest import PSF
 
 @ddt
 class TestImageClass(unittest.TestCase):
+
     def test_empty_arguments(self):
         img = Image()
-        for var in ['image', 'metadata', 'filename']:
+        for var in ['image', 'filename']:
             self.assertIn(var, img.__dict__)
             self.assertEqual(img.__dict__[var], None)
 
@@ -53,8 +54,8 @@ class TestImageClass(unittest.TestCase):
         for var in ['image', 'metadata', 'filename']:
             self.assertIn(var, img.__dict__)
 
-        for var in ['image', 'metadata']:
-            self.assertEqual(img.__dict__[var], None)
+        self.assertEqual(img.__dict__['image'], None)
+        self.assertEqual(img.metadata['Convolved'], False)
 
         self.assertEqual(img.filename, filename)
 
@@ -84,20 +85,34 @@ class TestImageClass(unittest.TestCase):
         for i in range(len(img.image.shape)):
             self.assertGreater(img.image.shape[i], 3)
 
+    @data(
+        (0.1, 0.1, '[1. 1. 1.]'),
+        ([0.8, 0.3, 0.3], [1, 0.5, 0.5], '[0.8 0.6 0.6]'),
+        ([0.8], [1, 0.5, 0.5], '[0.8 1.6 1.6]'),
+    )
+    def test_voxel_size_change(self, case):
+        old, zoom, new = case
+        img = Image()
+        img.image = np.ones([100, 100, 100])
+        img.metadata.set_voxel_size(old)
+        img.resize(zoom=zoom)
+        self.assertEqual(img.metadata['Voxel size'], new)
+
     def test_convolve(self):
         img = Image()
         arr = np.zeros([50, 50, 50])
         arr[10:-10, 10:-10, 10:-10] = 255
         img.image = arr
         psf = PSF()
-        psf.generate(5, 4)
+        psf.generate(sigma=5, aspect_ratio=4)
         img.convolve(psf)
         self.assertEqual(len(img.image.shape), len(arr.shape))
+        self.assertEqual(img.metadata['Convolved'], True)
 
     def test_convolve_None(self):
         img = Image()
         psf = PSF()
-        psf.generate(5, 4)
+        psf.generate(sigma=5, aspect_ratio=4)
         self.assertRaises(ValueError, img.convolve, psf)
 
     def test_convolve_None2(self):
@@ -112,7 +127,7 @@ class TestImageClass(unittest.TestCase):
         arr = np.zeros([50, 50, 50])
         arr[10:-10, 10:-10, 10:-10] = 255
         img.image = arr
-        img.add_gaussian_noise(2)
+        img.add_noise(kind='gaussian', snr=2)
         self.assertEqual(img.image.shape, arr.shape)
 
     def test_noise2(self):
@@ -120,16 +135,97 @@ class TestImageClass(unittest.TestCase):
         arr = np.zeros([50, 50, 50])
         arr[10:-10, 10:-10, 10:-10] = 255
         img.image = arr
-        img.add_poisson_noise(2)
+        img.add_noise(kind='poisson', snr=2)
         self.assertEqual(img.image.shape, arr.shape)
 
     def test_noise_None(self):
         img = Image()
-        self.assertRaises(ValueError, img.add_poisson_noise, 2)
+        self.assertRaises(ValueError, img.add_noise, 'poisson', 2)
 
     def test_noise_None2(self):
         img = Image()
-        self.assertRaises(ValueError, img.add_gaussian_noise, 2)
+        self.assertRaises(ValueError, img.add_noise, 'gaussian', 2)
+
+    @data(
+        'gaussian',
+        'poisson',
+        ['poisson', 'gaussian'],
+        ['gaussian', 'poisson'],
+        ['poisson', 'poisson', 'gaussian'],
+    )
+    def test_valid_noise_types(self, kind):
+        img = Image()
+        arr = np.zeros([50, 50, 50])
+        arr[10:-10, 10:-10, 10:-10] = 255
+        img.image = arr
+        img.add_noise(kind=kind, snr=10)
+        self.assertIsNotNone(img.image)
+        self.assertGreater(np.sum(np.abs(img.image - arr)), 0)
+
+    @data(
+        'argwr',
+        'invalid_noise',
+    )
+    def test_invalid_noise_types(self, kind):
+        img = Image()
+        arr = np.zeros([50, 50, 50])
+        arr[10:-10, 10:-10, 10:-10] = 255
+        img.image = arr
+        self.assertRaises(AttributeError, img.add_noise, kind=kind, snr=10)
+
+    @data(
+        ('gaussian', 10),
+        (['poisson', 'gaussian'], 10),
+        (['gaussian', 'poisson'], [10, 5]),
+    )
+    def test_valid_noise_types2(self, case):
+        kind, snr = case
+        img = Image()
+        arr = np.zeros([50, 50, 50])
+        arr[10:-10, 10:-10, 10:-10] = 255
+        img.image = arr
+        img.add_noise(kind=kind, snr=snr)
+        self.assertIsNotNone(img.image)
+        self.assertGreater(np.sum(np.abs(img.image - arr)), 0)
+
+    @data(
+        (['gaussian', 'poisson'], [10, 5, 5]),
+    )
+    def test_invalid_noise_types2(self, case):
+        kind, snr = case
+        img = Image()
+        arr = np.zeros([50, 50, 50])
+        arr[10:-10, 10:-10, 10:-10] = 255
+        img.image = arr
+        self.assertRaises(TypeError, img.add_noise, kind=kind, snr=snr)
+
+    @data(
+        ('gaussian', 10),
+    )
+    def test_valid_noise_metadata(self, case):
+        kind, snr = case
+        img = Image()
+        arr = np.zeros([50, 50, 50])
+        arr[10:-10, 10:-10, 10:-10] = 255
+        img.image = arr
+        img.add_noise(kind=kind, snr=snr)
+        self.assertEqual(img.metadata['SNR'], snr)
+
+    @data(
+        (['gaussian', 'poisson'], [10, 5]),
+    )
+    def test_valid_noise_metadata2(self, case):
+        kind, snr = case
+        img = Image()
+        arr = np.zeros([50, 50, 50])
+        arr[10:-10, 10:-10, 10:-10] = 255
+        img.image = arr
+        img.add_noise(kind=kind, snr=snr)
+        self.assertEqual(img.metadata['SNR'], snr[0])
+        self.assertEqual(img.metadata['SNR 2'], snr[1])
+        self.assertEqual(img.metadata['noise type'], kind[0])
+        self.assertEqual(img.metadata['noise type 2'], kind[1])
+
 
 if __name__ == '__main__':
 

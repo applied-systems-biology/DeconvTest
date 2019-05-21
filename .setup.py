@@ -3,12 +3,12 @@ from setuptools import setup
 
 setup(
     name='deconvtest',
-    version='1.0',
+    version='2.0',
     url="https://applied-systems-biology.github.io/DeconvTest/",
     download_url="https://github.com/applied-systems-biology/DeconvTest",
     author="Anna Medyukhina",
     author_email='anna.medyukhina@gmail.com',
-    packages=['DeconvTest', 'DeconvTest.classes', 'DeconvTest.batch', 'DeconvTest.deconvolve'],
+    packages=['DeconvTest', 'DeconvTest.classes', 'DeconvTest.batch', 'DeconvTest.fiji', 'DeconvTest.modules'],
     scripts=['DeconvTest/scripts/run_simulation.py'],
     license='BSD-3-Clause',
     package_data={'': ['fiji_path']},
@@ -27,3 +27,4 @@ setup(
         "https://github.com/applied-systems-biology/HelperLib/releases/download/v1.0/helperlib-1.0.tar.gz"
     ]
  )
+

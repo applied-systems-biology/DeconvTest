@@ -15,7 +15,6 @@ def check_imagej_path(path):
     files = os.listdir(path)
     for fn in files:
         if len(fn.split('ImageJ')) > 1 and not fn.endswith('desktop'):
-        # if len(fn.split('ImageJ')) > 1:
             return path + fn
     return None
 
@@ -43,10 +42,10 @@ if __name__ == '__main__':
     if not os.path.exists(os.path.dirname(imagej_path) + '/macros'):
         os.makedirs(os.path.dirname(imagej_path) + '/macros')
 
-    shutil.copy('DeconvTest/deconvolve/version.ijm', os.path.dirname(imagej_path) + '/macros/' + 'version.ijm')
-    shutil.copy('DeconvTest/deconvolve/rif.ijm', os.path.dirname(imagej_path) + '/macros/' + 'rif.ijm')
-    shutil.copy('DeconvTest/deconvolve/rltv.ijm', os.path.dirname(imagej_path) + '/macros/' + 'rltv.ijm')
-    shutil.copy('DeconvTest/deconvolve/iterative.ijm', os.path.dirname(imagej_path) + '/macros/' + 'iterative.ijm')
+    shutil.copy('DeconvTest/fiji/get_fiji_version.ijm', os.path.dirname(imagej_path) + '/macros/' + 'get_fiji_version.ijm')
+    shutil.copy('DeconvTest/fiji/deconvolution_lab_rif.ijm', os.path.dirname(imagej_path) + '/macros/' + 'deconvolution_lab_rif.ijm')
+    shutil.copy('DeconvTest/fiji/deconvolution_lab_rltv.ijm', os.path.dirname(imagej_path) + '/macros/' + 'deconvolution_lab_rltv.ijm')
+    shutil.copy('DeconvTest/fiji/iterative_deconvolve_3d.ijm', os.path.dirname(imagej_path) + '/macros/' + 'iterative_deconvolve_3d.ijm')
 
     command = 'python ./.setup.py '
     for arg in args:

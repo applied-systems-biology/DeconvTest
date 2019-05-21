@@ -4,25 +4,26 @@ import sys
 import re
 import numpy as np
 import pandas as pd
+import os
 import time
 from helper_lib import filelib
 
 from DeconvTest.batch import simulation as sim
-from DeconvTest.batch import quantification as quant
-from DeconvTest.batch import deconvolution as dec
-from DeconvTest.deconvolve.fiji import save_fiji_version
+from DeconvTest import batch
+from DeconvTest.modules.deconvolution import save_fiji_version
 
 import mkl
 mkl.set_num_threads(1)
 
 
 def convert_args(**kwargs):
-    for c in ['max_threads', 'number_of_stacks', 'thr']:
-        if type(kwargs[c]) is str:
-            if kwargs[c] == 'None':
-                kwargs[c] = None
-            else:
-                kwargs[c] = float(kwargs[c])
+    for c in ['max_threads', 'number_of_stacks']:
+        if c in kwargs:
+            if type(kwargs[c]) is str:
+                if kwargs[c] == 'None':
+                    kwargs[c] = None
+                else:
+                    kwargs[c] = float(kwargs[c])
 
     p = re.compile('\d*\.*\d+')  # create a template for extracting nonnegative float numbers
     if type(kwargs['input_voxel_size']) is str:
@@ -37,16 +38,18 @@ def convert_args(**kwargs):
 
     for c in ['size_mean_and_std', 'spikiness_range', 'spike_size_range',
               'spike_smoothness_range', 'stack_size_microns',
-              'psf_sigmas', 'psf_elongations', 'poisson_snrs', 'gaussian_snrs',
-              'iterations', 'low', 'rif_lambda', 'rltv_lambda', 'terminate', 'wiener']:
-        if type(kwargs[c]) is str:
-            nums = np.float_(p.findall(kwargs[c]))
-            if len(kwargs[c].split('None')) > 1:
-                nums = np.concatenate((nums, np.array([None])))
-            kwargs[c] = nums
+              'psf_sigmas', 'psf_aspect_ratios', 'snr',
+              'deconvolution_lab_rltv_iterations', 'iterative_deconvolve_3d_low',
+              'deconvolution_lab_rif_regularization_lambda', 'deconvolution_lab_rltv_regularization_lambda',
+              'iterative_deconvolve_3d_terminate', 'iterative_deconvolve_3d_wiener']:
+        if c in kwargs:
+            if type(kwargs[c]) is str:
+                nums = np.float_(p.findall(kwargs[c]))
+                if len(kwargs[c].split('None')) > 1:
+                    nums = np.concatenate((nums, np.array([None])))
+                kwargs[c] = nums
 
-    for c in ['print_progress', 'equal_dimensions', 'preprocess', 'relative_thr',
-              'postprocess', 'log_computing_time']:
+    for c in ['print_progress', 'equal_dimensions', 'log_computing_time']:
         if str(kwargs[c]).upper() == 'FALSE':
             kwargs[c] = False
         else:
@@ -61,226 +64,134 @@ def convert_args(**kwargs):
         for arr in arrays:
             voxel_sizes.append(np.float_(p.findall(arr)))
             strvox = strvox.replace('['+arr+']', '')
-        nums = np.float_(p.findall(strvox))
+        nums = np.array(np.float_(p.findall(strvox)))
         for n in nums:
             voxel_sizes.append(round(n, 7))
         kwargs['voxel_sizes_for_resizing'] = voxel_sizes
+    for c in ['deconvolution_algorithm', 'noise_kind', 'simulation_steps']:
+        if c in kwargs:
+            if type(kwargs[c]) is str:
+                stralg = '[' + str(kwargs[c]) + ']'
+                p1 = re.compile('([A-Za-z0-9_]+)')
+                kwargs[c] = p1.findall(stralg)
 
-    if type(kwargs['algorithm']) is str:
-        stralg = str(kwargs['algorithm'])
-        p1 = re.compile('\'([A-Za-z0-9_,.]+)\'')
-        kwargs['algorithm'] = p1.findall(stralg)
-
-    for c in ['detect', 'perform', 'normalize']:
-        p1 = re.compile('([A-Za-z]+)')
-        parts = p1.findall(str(kwargs[c]))
-        arrays = []
-        for part in parts:
-            if part.upper() == 'TRUE':
-                arrays.append(True)
-            else:
-                arrays.append(False)
-        kwargs[c] = arrays
+    for c in ['iterative_deconvolve_3d_detect', 'iterative_deconvolve_3d_perform',
+              'iterative_deconvolve_3d_normalize']:
+        if c in kwargs:
+            p1 = re.compile('([A-Za-z]+)')
+            parts = p1.findall(str(kwargs[c]))
+            arrays = []
+            for part in parts:
+                if part.upper() == 'TRUE':
+                    arrays.append(True)
+                else:
+                    arrays.append(False)
+            kwargs[c] = arrays
     return kwargs
 
 
-def run_simulation(step=None, **params):
-    simulation_folder = params.get('simulation_folder')
-    filelib.make_folders([simulation_folder])
+def run_simulation(**kwargs):
+    simulation_folder = kwargs.get('simulation_folder')
     if not simulation_folder.endswith('/'):
         simulation_folder += '/'
+    filelib.make_folders([simulation_folder])
 
-    cell_parameter_filename = simulation_folder + params.get('cell_parameter_filename')
-    if not cell_parameter_filename.endswith('.csv'):
-        cell_parameter_filename += '.csv'
-
-    cell_parameter_folder = simulation_folder + params.get('cell_parameter_folder')
-    if not cell_parameter_folder.endswith('/'):
-        cell_parameter_folder += '/'
-
-    inputfolder = simulation_folder + params.get('inputfolder')
-    if not inputfolder.endswith('/'):
-        inputfolder += '/'
-
-    psffolder = simulation_folder + params.get('psffolder')
-    if not psffolder.endswith('/'):
-        psffolder += '/'
-
-    convolution_folder = simulation_folder + params.get('convolution_results_folder')
-    if not convolution_folder.endswith('/'):
-        convolution_folder += '/'
-
-    resizing_folder = simulation_folder + params.get('resizing_results_folder')
-    if not resizing_folder.endswith('/'):
-        resizing_folder += '/'
-
-    noise_folder = simulation_folder + params.get('noise_results_folder')
-    if not noise_folder.endswith('/'):
-        noise_folder += '/'
-
-    deconvolution_folder = simulation_folder + params.get('deconvolution_results_folder')
-    if not deconvolution_folder.endswith('/'):
-        deconvolution_folder += '/'
-
-    segmentation_folder = simulation_folder + params.get('segmentation_results_folder')
-    if not segmentation_folder.endswith('/'):
-        segmentation_folder += '/'
-
-    log_folder = simulation_folder + params.get('log_folder')
-    if not log_folder.endswith('/'):
-        log_folder += '/'
-
-    accuracy_folder = simulation_folder + params.get('accuracy_results_folder')
-    if not accuracy_folder.endswith('/'):
-        accuracy_folder += '/'
-
-    dimensions_folder = simulation_folder + params.get('dimensions_folder')
-    if not dimensions_folder.endswith('/'):
-        dimensions_folder += '/'
-
-    params = convert_args(**params)
-    params['Time of the simulation start'] = time.ctime()
-    pd.Series(params).to_csv(simulation_folder + 'simulation_parameters.csv', sep='\t')
+    kwargs = convert_args(**kwargs)
+    kwargs['Time of the simulation start'] = time.ctime()
+    pd.Series(kwargs).to_csv(simulation_folder + 'simulation_parameters.csv', sep='\t', header=False)
     save_fiji_version(simulation_folder)
+    kwargs['logfolder'] = simulation_folder + kwargs['logfolder']
+    steps = kwargs['simulation_steps']
+    valid_steps = ['generate_cells', 'generate_psfs', 'convolve', 'resize', 'add_noise', 'deconvolve', 'accuracy']
 
-    if step is None or step == 1:
-        number_of_stacks = params.get('number_of_stacks')
-        if number_of_stacks is None:
-            sim.generate_cell_parameters(outputfile=cell_parameter_filename,
-                                         number_of_cells=params.get('number_of_cells'),
-                                         size_mean_and_std=params.get('size_mean_and_std'),
-                                         equal_dimensions=params.get('equal_dimensions'),
-                                         spikiness_range=params.get('spikiness_range'),
-                                         spike_size_range=params.get('spike_size_range'),
-                                         spike_smoothness_range=params.get('spike_smoothness_range'))
-            sim.generate_cells_batch(params_file=cell_parameter_filename, outputfolder=inputfolder,
-                                     resolution=params.get('input_voxel_size'),
-                                     max_threads=params.get('max_threads'), print_progress=params.get('print_progress'))
+    for step in steps:
+        if step in valid_steps:
+            print "Run the step '" + step + "'"
+            if step == 'generate_cells':
+                params_file = simulation_folder + kwargs['cell_parameter_filename']
+                if not os.path.exists(params_file):
+                    print 'Generating new cell parameters'
+                    print 'Output file' + params_file
+                    sim.generate_cell_parameters(outputfile=params_file, **kwargs)
+                kwargs['inputfolder'] = simulation_folder + kwargs['inputfolder']
+                print 'Generating cells'
+                print 'Input file:', params_file, 'Output folder:', kwargs['inputfolder']
+                batch.generate_cells_batch(params_file=params_file,
+                                           outputfolder=kwargs['inputfolder'],
+                                           **kwargs)
+                kwargs['reffolder'] = kwargs['inputfolder']
+            elif step == 'generate_psfs':
+                kwargs['psffolder'] = simulation_folder + kwargs['psffolder']
+                print 'Output folder:', kwargs['psffolder']
+                batch.generate_psfs_batch(outputfolder=kwargs['psffolder'], **kwargs)
+            else:
+                kwargs['outputfolder'] = simulation_folder + kwargs[step + '_results_folder']
+                if len(kwargs['inputfolder'].split(simulation_folder)) == 1:
+                    kwargs['inputfolder'] = simulation_folder + kwargs['inputfolder']
+                print 'Input folder:', kwargs['inputfolder'], 'Output folder:', kwargs['outputfolder']
+                if step == 'accuracy':
+                    if 'reffolder' not in kwargs:
+                        kwargs['reffolder'] = kwargs['inputfolder']
+                    if len(kwargs['reffolder'].split(simulation_folder)) == 1:
+                        kwargs['reffolder'] = simulation_folder + kwargs['reffolder']
+                    print 'Reference folder:', kwargs['reffolder']
+                getattr(batch, step + '_batch')(**kwargs)
+                if step != 'accuracy':
+                    kwargs['inputfolder'] = kwargs['outputfolder']
         else:
-            number_of_stacks = int(float(number_of_stacks))
-            sim.generate_stack_parameters(outputfolder=cell_parameter_folder, number_of_stacks=number_of_stacks,
-                                          number_of_cells=params.get('number_of_cells'),
-                                          size_mean_and_std=params.get('size_mean_and_std'),
-                                          equal_dimensions=params.get('equal_dimensions'),
-                                          spikiness_range=params.get('spikiness_range'),
-                                          spike_size_range=params.get('spike_size_range'),
-                                          spike_smoothness_range=params.get('spike_smoothness_range'))
-            sim.generate_stacks_batch(params_folder=cell_parameter_folder, outputfolder=inputfolder,
-                                      resolution=params.get('input_voxel_size'),
-                                      stack_size_microns=params.get('stack_size_microns'),
-                                      max_threads=params.get('max_threads'), print_progress=params.get('print_progress'))
+            raise ValueError('"' + step + '" is not a valid simulation step! Valid simulation steps are: '
+                             + str(valid_steps))
 
-        sim.generate_psfs_batch(outputfolder=psffolder, sigmas=params.get('psf_sigmas'),
-                                elongations=params.get('psf_elongations'), resolution=params.get('input_voxel_size'),
-                                max_threads=params.get('max_threads'), print_progress=params.get('print_progress'))
-        sim.convolve_batch(inputfolder=inputfolder, psffolder=psffolder, outputfolder=convolution_folder,
-                           max_threads=int(params.get('max_threads')/3), print_progress=params.get('print_progress'))
-        sim.resize_batch(inputfolder=convolution_folder, outputfolder=resizing_folder,
-                         resolutions=params.get('voxel_sizes_for_resizing'),
-                         max_threads=params.get('max_threads'), print_progress=params.get('print_progress'))
-        sim.add_noise_batch(inputfolder=resizing_folder, outputfolder=noise_folder,
-                            gaussian_snrs=params.get('gaussian_snrs'), poisson_snrs=params.get('poisson_snrs'),
-                            max_threads=params.get('max_threads'), print_progress=params.get('print_progress'))
-
-    if step is None or step == 2:
-        dec.deconvolve_batch(inputfolder=noise_folder, outputfolder=deconvolution_folder,
-                             algorithm=params.get('algorithm'), rif_lambda=params.get('rif_lambda'),
-                             rltv_lambda=params.get('rltv_lambda'), iterations=params.get('iterations'),
-                             normalize=params.get('normalize'), perform=params.get('perform'),
-                             detect=params.get('detect'), wiener=params.get('wiener'), low=params.get('low'),
-                             terminate=params.get('terminate'), log_computing_time=True,
-                             logfolder=log_folder, print_progress=params.get('print_progress'))
-
-    if step is None or step == 3:
-        quant.segment_batch(inputfolder=deconvolution_folder, outputfolder=segmentation_folder,
-                            preprocess=params.get('preprocess'), thr=params.get('thr'),
-                            relative_thr=params.get('relative_thr'), postprocess=params.get('postprocess'),
-                            max_threads=params.get('max_threads'), print_progress=params.get('print_progress'),
-                            log_computing_time=False, logfolder=log_folder)
-        quant.compare_to_ground_truth_batch(inputfolder=segmentation_folder, reffolder=inputfolder,
-                                            outputfolder=accuracy_folder, max_threads=params.get('max_threads'),
-                                            print_progress=params.get('print_progress'))
-        quant.extract_metadata(inputfile=accuracy_folder[:-1] + '.csv', default_resolution=params.get('input_voxel_size'))
-        quant.combine_log(inputfolder=log_folder)
-        quant.extract_metadata(inputfile=log_folder[:-1] + '.csv', default_resolution=params.get('input_voxel_size'))
+    batch.combine_log(inputfolder=kwargs['logfolder'])
 
 
 ########################################
 
-default_parameters = pd.Series({'simulation_folder': '../../../Data/test_simulation',
-                                'max_threads': 4,
-                                'print_progress': True,
-                                'cell_parameter_filename': 'cell_parameters.csv',
-                                'cell_parameter_folder': 'cell_parameters',
-                                'number_of_stacks': None,
-                                'number_of_cells': 2,
-                                'size_mean_and_std': (10, 2),
-                                'equal_dimensions': False,
-                                'spikiness_range': (0, 0),
-                                'spike_size_range': (0, 0),
-                                'spike_smoothness_range': (0.05, 0.1),
-                                'inputfolder': 'input',
-                                'input_voxel_size': 0.3,
-                                'stack_size_microns': [10, 100, 100],
-                                'psffolder': 'psf',
-                                'psf_sigmas': [0.1, 0.5],
-                                'psf_elongations': [3],
-                                'convolution_results_folder': 'convolved',
-                                'resizing_results_folder': 'resized',
-                                'voxel_sizes_for_resizing': [[1, 0.5, 0.5]],
-                                'noise_results_folder': 'noise',
-                                'poisson_snrs': [None],
-                                'gaussian_snrs': [None],
-                                'deconvolution_results_folder': 'deconvolved',
-                                'algorithm': ['deconvolution_lab_rif', 'deconvolution_lab_rltv'],
-                                'rif_lambda': [0.001, 001],
-                                'rltv_lambda': 0.001,
-                                'iterations': [5, 10],
-                                'normalize': True,
-                                'perform': True,
-                                'detect': True,
-                                'wiener': 0.001,
-                                'low': 1,
-                                'terminate': 0.1,
-                                'log_computing_time': True,
-                                'segmentation_results_folder': 'segmented',
-                                'preprocess': False,
-                                'thr': None,
-                                'relative_thr': False,
-                                'postprocess': False,
-                                'log_folder': 'timelog',
-                                'accuracy_results_folder': 'accuracy',
-                                'dimensions_folder': 'dimensions'
-                                })
+default_parameters = dict({'simulation_folder': 'test_simulation',
+                           'simulation_steps': ['generate_cells', 'generate_psfs', 'convolve', 'resize', 'add_noise',
+                                                'deconvolve', 'accuracy'],
+                           'cell_parameter_filename': 'cell_parameters.csv',
+                           'inputfolder': 'input',
+                           'psffolder': 'psf',
+                           'convolve_results_folder': 'convolved',
+                           'resize_results_folder': 'resized',
+                           'add_noise_results_folder': 'noise',
+                           'deconvolve_results_folder': 'deconvolved',
+                           'accuracy_results_folder': 'accuracy_measures',
+                           'logfolder': 'timelog',
+                           'max_threads': 4,
+                           'print_progress': True,
+                           'number_of_stacks': None,
+                           'number_of_cells': 2,
+                           'input_cell_kind': 'ellipsoid',
+                           'size_mean_and_std': (10, 2),
+                           'equal_dimensions': False,
+                           'input_voxel_size': 0.3,
+                           'stack_size_microns': [10, 100, 100],
+                           'psf_sigmas': [0.1, 0.5],
+                           'psf_aspect_ratios': [3],
+                           'voxel_sizes_for_resizing': [[1, 0.5, 0.5]],
+                           'noise_kind': ['poisson'],
+                           'snr': [None, 5],
+                           'test_snr_combinations': False,
+                           'deconvolution_algorithm': ['deconvolution_lab_rif', 'deconvolution_lab_rltv'],
+                           'deconvolution_lab_rif_regularization_lambda': [0.001, 001],
+                           'deconvolution_lab_rltv_regularization_lambda': 0.001,
+                           'deconvolution_lab_rltv_iterations': [2, 3],
+                           'log_computing_time': True
+                            })
 
 
 if __name__ == '__main__':
 
     args = sys.argv[1:]
-    step = None
     if len(args) > 0:
-        params = pd.read_csv(args[0], sep='\t', index_col=0, header=-1).transpose().iloc[0].T.squeeze()
-        for c in default_parameters.index:
-            if c not in params.index:
+        params = dict(pd.read_csv(args[0], sep='\t', index_col=0, header=-1).transpose().iloc[0].T.squeeze())
+        for c in default_parameters:
+            if c not in params:
                 params[c] = default_parameters[c]
-        if len(args) > 1:
-            step = args[1]
-            try:
-                step = int(step)
-            except:
-                step = None
-            if step not in [1, 2, 3]:
-                step = None
     else:
         params = default_parameters
-    if step is None:
-        print "Running all 3 steps: simulation, deconvolution and quantification"
-    elif step == 1:
-        print "Running only simulation step"
-    elif step == 2:
-        print "Running only deconvolution step"
-    elif step == 3:
-        print "Running only quantification step"
-    run_simulation(step, **dict(params))
+    run_simulation(**params)
 
 

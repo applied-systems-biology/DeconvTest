@@ -1,3 +1,3 @@
-from simulation import *
-from quantification import *
-from deconvolution import *
+from DeconvTest.batch.simulation import *
+from DeconvTest.batch.quantification import *
+from DeconvTest.batch.deconvolution import *

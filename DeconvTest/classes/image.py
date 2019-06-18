@@ -10,7 +10,7 @@ import pylab as plt
 from skimage.exposure import rescale_intensity
 import warnings
 
-from metadata import Metadata
+from DeconvTest.classes.metadata import Metadata
 from DeconvTest.modules import noise
 from DeconvTest.modules import quantification
 from helper_lib import filelib

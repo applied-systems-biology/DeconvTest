@@ -17,21 +17,25 @@ class TestSimulation(unittest.TestCase):
         sim.generate_cells_batch(params_file='data/params.csv',
                                  outputfolder='data/cells/',
                                  input_voxel_size=1,
-                                 print_progress=False)
+                                 print_progress=False,
+                                 max_threads=2)
         sim.generate_psfs_batch('data/psfs',
                                 psf_sigmas=[1.5],
                                 psf_aspect_ratios=[4],
                                 input_voxel_size=1,
-                                print_progress=False)
+                                print_progress=False,
+                                max_threads=2)
         sim.convolve_batch('data/cells/',
                            'data/psfs',
                            'data/convolved/',
-                           print_progress=False)
+                           print_progress=False,
+                           max_threads=2)
 
         quant.accuracy_batch(inputfolder='data/convolved',
                              reffolder='data/cells',
                              outputfolder='data/accuracy',
-                             print_progress=False)
+                             print_progress=False,
+                             max_threads=2)
         files = os.listdir('data/accuracy')
         self.assertEqual(len(files), 1)
         files = os.listdir('data/accuracy/psf_sigma_1.5_aspect_ratio_4')

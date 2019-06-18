@@ -2,8 +2,8 @@ from __future__ import division
 
 import numpy as np
 
-from image import Image
-from metadata import Metadata
+from DeconvTest.classes.image import Image
+from DeconvTest.classes.metadata import Metadata
 from DeconvTest.modules import input_objects
 
 

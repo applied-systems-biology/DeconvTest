@@ -35,9 +35,9 @@ def deconvolution_lab_rif(inputfile, psffile, outputfile, regularization_lambda=
     if imagej_path is None:
         imagej_path = get_fiji_path()
 
-    os.system(imagej_path + " --headless --console -macro deconvolution_lab_rif.ijm '" + inputfile + ' ' +
-              psffile + ' ' + str(regularization_lambda) + ' ' + os.path.dirname(outputfile) + ' ' +
-              os.path.basename(outputfile)[:-4] + "'")
+    os.system(imagej_path + ' --headless --console -macro deconvolution_lab_rif.ijm "' + inputfile + '___' +
+              psffile + '___' + str(regularization_lambda) + '___' + os.path.dirname(outputfile) + '___' +
+              os.path.basename(outputfile)[:-4] + '"')
 
 
 def deconvolution_lab_rltv(inputfile, psffile, outputfile, iterations=10, regularization_lambda=0.01,
@@ -66,9 +66,9 @@ def deconvolution_lab_rltv(inputfile, psffile, outputfile, iterations=10, regula
     if imagej_path is None:
         imagej_path = get_fiji_path()
 
-    os.system(imagej_path + " --headless --console -macro deconvolution_lab_rltv.ijm '" + inputfile + ' ' +
-              psffile + ' ' + str(iterations) + ' ' + str(regularization_lambda) + ' ' +
-              os.path.dirname(outputfile) + ' ' + os.path.basename(outputfile)[:-4] + "'")
+    os.system(imagej_path + ' --headless --console -macro deconvolution_lab_rltv.ijm "' + inputfile + '___' +
+              psffile + '___' + str(iterations) + '___' + str(regularization_lambda) + '___' +
+              os.path.dirname(outputfile) + '___' + os.path.basename(outputfile)[:-4] + '"')
 
 
 def iterative_deconvolve_3d(inputfile, psffile, outputfile, normalize=False, perform=True,
@@ -121,10 +121,10 @@ def iterative_deconvolve_3d(inputfile, psffile, outputfile, normalize=False, per
     if imagej_path is None:
         imagej_path = get_fiji_path()
 
-    os.system(imagej_path + " --headless --console -macro iterative_deconvolve_3d.ijm '" + inputfile + ' ' +
-              psffile + ' ' + outputfile + ' ' + str(normalize).upper() + ' ' + str(perform).upper() +
-              ' ' + str(detect).upper() + ' ' + str(wiener) + ' ' + str(low) + ' ' +
-              str(terminate) + ' ' + str(iterations) + "'")
+    os.system(imagej_path + ' --headless --console -macro iterative_deconvolve_3d.ijm "' + inputfile + '___' +
+              psffile + '___' + outputfile + '___' + str(normalize).upper() + '___' + str(perform).upper() +
+              '___' + str(detect).upper() + '___' + str(wiener) + '___' + str(low) + '___' +
+              str(terminate) + '___' + str(iterations) + '"')
 
 
 ########################################################
@@ -169,7 +169,7 @@ def save_fiji_version(outputfolder):
     filelib.make_folders([outputfolder])
     if not outputfolder.endswith('/'):
         outputfolder += '/'
-    os.system(get_fiji_path() + " --headless --console -macro get_fiji_version.ijm '" + outputfolder + "'")
+    os.system(get_fiji_path() + ' --headless --console -macro get_fiji_version.ijm "' + outputfolder + '"')
 
 
 

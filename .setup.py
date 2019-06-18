@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='deconvtest',
-    version='2.0',
+    version='2.1',
     url="https://applied-systems-biology.github.io/DeconvTest/",
     download_url="https://github.com/applied-systems-biology/DeconvTest",
     author="Anna Medyukhina",
@@ -13,6 +13,7 @@ setup(
     license='BSD-3-Clause',
     package_data={'': ['fiji_path']},
     include_package_data=True,
+    test_suite='DeconvTest.tests',
 
     install_requires=[
         'scikit-image',
@@ -21,10 +22,10 @@ setup(
         'seaborn',
         'scipy',
         'ddt',
-        'helperlib'
+        'helper_lib',
       ],
     dependency_links=[
-        "https://github.com/applied-systems-biology/HelperLib/releases/download/v1.0/helperlib-1.0.tar.gz"
-    ]
+        "https://github.com/applied-systems-biology/HelperLib/releases/",
+    ],
  )
 

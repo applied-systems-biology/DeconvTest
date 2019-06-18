@@ -13,6 +13,7 @@ setup(
     license='BSD-3-Clause',
     package_data={'': ['fiji_path']},
     include_package_data=True,
+    test_suite='DeconvTest.tests',
 
     install_requires=[
         'scikit-image',
@@ -21,10 +22,10 @@ setup(
         'seaborn',
         'scipy',
         'ddt',
-        'helper_lib'
+        'helper_lib',
       ],
     dependency_links=[
-        "https://github.com/applied-systems-biology/HelperLib/releases/"
-    ]
+        "https://github.com/applied-systems-biology/HelperLib/releases/",
+    ],
  )
 

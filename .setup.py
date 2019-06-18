@@ -24,7 +24,7 @@ setup(
         'helperlib'
       ],
     dependency_links=[
-        "https://github.com/applied-systems-biology/HelperLib/releases/download/v1.0/helperlib-1.0.tar.gz"
+        "https://github.com/applied-systems-biology/HelperLib/releases/"
     ]
  )
 

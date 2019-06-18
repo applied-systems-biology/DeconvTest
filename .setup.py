@@ -21,7 +21,7 @@ setup(
         'seaborn',
         'scipy',
         'ddt',
-        'helperlib-img'
+        'helper_lib'
       ],
     dependency_links=[
         "https://github.com/applied-systems-biology/HelperLib/releases/"

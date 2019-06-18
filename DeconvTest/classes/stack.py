@@ -4,9 +4,9 @@ import numpy as np
 from scipy import ndimage
 
 
-from cell import Cell
-from image import Image
-from metadata import Metadata
+from DeconvTest.classes.cell import Cell
+from DeconvTest.classes.image import Image
+from DeconvTest.classes.metadata import Metadata
 
 
 class Stack(Image):

@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 from scipy.optimize import curve_fit
 
-from image import Image
+from DeconvTest.classes.image import Image
 from DeconvTest.modules import psfs
 
 

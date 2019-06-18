@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='deconvtest',
-    version='2.0',
+    version='3.0',
     url="https://applied-systems-biology.github.io/DeconvTest/",
     download_url="https://github.com/applied-systems-biology/DeconvTest",
     author="Anna Medyukhina",
@@ -21,7 +21,7 @@ setup(
         'seaborn',
         'scipy',
         'ddt',
-        'helperlib'
+        'helperlib-img'
       ],
     dependency_links=[
         "https://github.com/applied-systems-biology/HelperLib/releases/"

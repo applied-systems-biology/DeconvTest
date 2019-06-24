@@ -32,7 +32,7 @@ class TestCellClass(unittest.TestCase):
         cell = Cell()
         ind, shape = case
         cell.from_index(ind)
-        self.assertEquals(len(cell.image.shape), shape)
+        self.assertEqual(len(cell.image.shape), shape)
 
     @data(
         ([[1, 2, 3], [1, 1, 1]], 2),
@@ -44,7 +44,7 @@ class TestCellClass(unittest.TestCase):
     def test_from_index_shape2(self, case):
         ind, shape = case
         cell = Cell(ind=ind)
-        self.assertEquals(len(cell.image.shape), shape)
+        self.assertEqual(len(cell.image.shape), shape)
 
     @data(
         (dict({'size': [5, 6, 5],

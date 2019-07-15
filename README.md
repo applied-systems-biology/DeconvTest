@@ -1,4 +1,7 @@
 # DeconvTest: *in silico* microscopy framework to quantify deconvolution accuracy
+
+[![DOI](https://zenodo.org/badge/179464464.svg)](https://zenodo.org/badge/latestdoi/179464464)
+
 Author: *Anna Medyukhina*
 
 Affiliation: *Research Group Applied Systems Biology - Head: Prof. Dr. Marc Thilo Figge  

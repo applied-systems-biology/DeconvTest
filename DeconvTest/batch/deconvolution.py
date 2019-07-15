@@ -124,24 +124,24 @@ def __deconvolve_batch_helper(item, inputfolder, outputfolder, imagej_path,
                 metadata[c] = alg_kwargs[c]
             metadata.save(outputfolder + subfolder + filename[:-4] + '.csv')
 
-        if log_computing_time is True and elapsed_time is not None:
-            if logfolder is None:
-                logfolder = outputfolder + '../log/'
-            else:
-                if not logfolder.endswith('/'):
-                    logfolder += '/'
+            if log_computing_time is True and elapsed_time is not None:
+                if logfolder is None:
+                    logfolder = outputfolder + '../log/'
+                else:
+                    if not logfolder.endswith('/'):
+                        logfolder += '/'
 
-            filelib.make_folders([logfolder])
-            t = pd.DataFrame({'Step': ['Deconvolution'],
-                              'Computational time': [elapsed_time],
-                              'Algorithm': algorithm})
-            for c in metadata.index:
-                try:
-                    t[c] = metadata[c]
-                except ValueError:
-                    t[c] = str(metadata[c])
-            t['Name'] = subfolder[:-1] + '/' + filename
-            t.to_csv(logfolder + subfolder[:-1] + '_' + filename[:-4].replace('/', '_') + '.csv', sep='\t')
+                filelib.make_folders([logfolder])
+                t = pd.DataFrame({'Step': ['Deconvolution'],
+                                  'Computational time': [elapsed_time],
+                                  'Algorithm': algorithm})
+                for c in metadata.index:
+                    try:
+                        t[c] = metadata[c]
+                    except ValueError:
+                        t[c] = str(metadata[c])
+                t['Name'] = subfolder[:-1] + '/' + filename
+                t.to_csv(logfolder + subfolder[:-1] + '_' + filename[:-4].replace('/', '_') + '.csv', sep='\t')
 
 
 

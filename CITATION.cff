@@ -15,5 +15,5 @@ doi: "10.5281/zenodo.3336386"
 message: "If you use this software, please cite it using these metadata."
 repository-code: "https://github.com/applied-systems-biology/DeconvTest"
 title: "DeconvTest: in silico microscopy framework to quantify deconvolution errors"
-version: "v2.3"
+version: "v2.4"
 ...

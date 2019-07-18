@@ -92,8 +92,7 @@ def combine_log(inputfolder):
 # private helper functions
 
 
-def __compute_accuracy_measures_batch_helper(item, inputfolder, reffolder, outputfolder, log_computing_time=False,
-                                             logfolder=None, **segmentation_kwargs):
+def __compute_accuracy_measures_batch_helper(item, inputfolder, reffolder, outputfolder):
     if not reffolder.endswith('/'):
         reffolder += '/'
     parts = item.split('/')
@@ -115,7 +114,6 @@ def __compute_accuracy_measures_batch_helper(item, inputfolder, reffolder, outpu
         else:
             raise ValueError('No ground truth found for cell ' + item + '!')
 
-        start = time.time()
         input_voxel_size = stack.metadata['Voxel size arr']
         zoom = np.array(stack.metadata['Voxel size arr']) / np.array(refstack.metadata['Voxel size arr'])
         stack.resize(zoom=zoom)
@@ -131,22 +129,4 @@ def __compute_accuracy_measures_batch_helper(item, inputfolder, reffolder, outpu
 
         filelib.make_folders([os.path.dirname(outputfolder + item)])
         stats.to_csv(outputfolder + item[:-4] + '.csv', sep='\t')
-        elapsed_time = time.time() - start
-        if log_computing_time is True:
-            if logfolder is None:
-                logfolder = outputfolder + '../log/'
-            else:
-                if not logfolder.endswith('/'):
-                    logfolder += '/'
 
-            filelib.make_folders([logfolder])
-            t = pd.DataFrame({'Step': ['Computing binary accuracy measures'],
-                              'Computational time': [elapsed_time],
-                              'Name': item})
-            for c in stack.metadata.index:
-                try:
-                    t[c] = stack.metadata[c]
-                except ValueError:
-                    t[c] = str(stack.metadata[c])
-            t['Name'] = item
-            t.to_csv(logfolder + item[:-4].replace('/', '_') + '.csv', sep='\t')

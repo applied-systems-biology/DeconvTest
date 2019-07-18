@@ -1,0 +1,13 @@
+{
+    "creators": [
+        {
+            "affiliation": "Applied Systems Biology, Leibniz Institute for Natural Product Research and Infection Biology, Hans Knöll Institute, Jena, Germany",
+            "name": "Medyukhina, Anna"
+        },
+        {
+            "affiliation": "Applied Systems Biology, Leibniz Institute for Natural Product Research and Infection Biology, Hans Knöll Institute, Jena, Germany \n ",
+            "name": "Figge, Marc Thilo"
+        }
+    ],
+    "title": "DeconvTest: in silico microscopy framework to quantify deconvolution errors"
+}

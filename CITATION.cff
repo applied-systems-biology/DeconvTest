@@ -1,0 +1,20 @@
+# YAML 1.2
+---
+authors: 
+  -
+    affiliation: "Applied Systems Biology, Leibniz Institute for Natural Product Research and Infection Biology, Hans Knöll Institute, Jena, Germany"
+    family-names: Medyukhina
+    given-names: Anna
+  -
+    affiliation: "Applied Systems Biology, Leibniz Institute for Natural Product Research and Infection Biology, Hans Knöll Institute, Jena, Germany \n "
+    family-names: Figge
+    given-names: "Marc Thilo"
+cff-version: "1.0.3"
+date-released: 2019-07-15
+doi: "10.5281/zenodo.3336386"
+license: "BSD 3-Clause"
+message: "If you use this software, please cite it using these metadata."
+repository-code: "https://github.com/applied-systems-biology/DeconvTest"
+title: "DeconvTest: in silico microscopy framework to quantify deconvolution errors"
+version: "v2.3"
+...

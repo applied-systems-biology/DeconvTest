@@ -12,7 +12,6 @@ authors:
 cff-version: "1.0.3"
 date-released: 2019-07-15
 doi: "10.5281/zenodo.3336386"
-license: "BSD 3-Clause"
 message: "If you use this software, please cite it using these metadata."
 repository-code: "https://github.com/applied-systems-biology/DeconvTest"
 title: "DeconvTest: in silico microscopy framework to quantify deconvolution errors"

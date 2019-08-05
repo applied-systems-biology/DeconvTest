@@ -92,7 +92,7 @@ def combine_log(inputfolder):
 # private helper functions
 
 
-def __compute_accuracy_measures_batch_helper(item, inputfolder, reffolder, outputfolder):
+def __compute_accuracy_measures_batch_helper(item, inputfolder, reffolder, outputfolder, **kwargs_to_ignore):
     if not reffolder.endswith('/'):
         reffolder += '/'
     parts = item.split('/')

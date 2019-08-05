@@ -1,4 +1,4 @@
-# DeconvTest: *in silico* microscopy framework to quantify deconvolution accuracy
+# DeconvTest: Simulation Framework for Quantifying Deconvolution Errors and Selecting Optimal Deconvolution Parameters
 
 [![DOI](https://zenodo.org/badge/179464464.svg)](https://zenodo.org/badge/latestdoi/179464464)
 

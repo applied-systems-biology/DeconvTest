@@ -1,4 +1,4 @@
-# DeconvTest: Simulation Framework for Quantifying Deconvolution Errors and Selecting Optimal Deconvolution Parameters
+# DeconvTest: Simulation Framework for Quantifying Errors and Selecting Optimal Parameters of Image Deconvolution
 
 [![DOI](https://zenodo.org/badge/179464464.svg)](https://zenodo.org/badge/latestdoi/179464464)
 
@@ -13,7 +13,7 @@ Adolf-Reichwein-Straße 23, 07745 Jena, Germany*
 
 ---
 
-DeconvTest is a python-based simulation framework that allows the user to quantify and compare the 
+DeconvTest is a Python-based simulation framework that allows the user to quantify and compare the
 performance of different deconvolution methods. The framework integrates all components needed for such 
 quantitative comparison and consists of three main modules: (1) *in silico* microscopy, 
 (2) deconvolution, and (3) performance quantification. 

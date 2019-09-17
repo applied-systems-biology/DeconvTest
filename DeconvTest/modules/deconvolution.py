@@ -149,7 +149,7 @@ def get_fiji_path():
                         zf = zipfile.ZipFile(path + '/' + fn, 'r')
                         zf.extract('DeconvTest/fiji_path', path='temp/')
                         imagej_path = pd.read_csv('temp/DeconvTest/fiji_path', sep='\t',
-                                                  index_col=0, header=-1).transpose().iloc[0].T['Fiji_path']
+                                                  index_col=0, header=None).transpose().iloc[0].T['Fiji_path']
                         shutil.rmtree('temp')
                 if imagej_path is not None:
                     break

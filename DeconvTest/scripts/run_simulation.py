@@ -186,7 +186,7 @@ if __name__ == '__main__':
 
     args = sys.argv[1:]
     if len(args) > 0:
-        params = dict(pd.read_csv(args[0], sep='\t', index_col=0, header=-1).transpose().iloc[0].T.squeeze())
+        params = dict(pd.read_csv(args[0], sep='\t', index_col=0, header=None).transpose().iloc[0].T.squeeze())
         for c in default_parameters:
             if c not in params:
                 params[c] = default_parameters[c]

@@ -26,7 +26,7 @@ if __name__ == '__main__':
     if int(sys.version_info.major) == 3:
         raw_input = input
     if os.path.exists('DeconvTest/fiji_path'):
-        stat = pd.read_csv('DeconvTest/fiji_path', sep='\t', index_col=0, header=-1).transpose().iloc[0].T
+        stat = pd.read_csv('DeconvTest/fiji_path', sep='\t', index_col=0, header=None).transpose().iloc[0].T
         if 'Fiji_path' in stat.index:
             imagej_path = stat['Fiji_path']
         else:

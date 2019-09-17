@@ -58,7 +58,7 @@ class Metadata(pd.Series):
             st = f.readlines()
             f.close()
             if len(st) > 0:
-                data = pd.read_csv(filename, sep='\t', index_col=0, header=-1).transpose()
+                data = pd.read_csv(filename, sep='\t', index_col=0, header=None).transpose()
                 if len(data.columns == 1):
                     data = data.iloc[0]
                 else:

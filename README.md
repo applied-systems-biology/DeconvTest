@@ -28,6 +28,17 @@ quantitative comparison and consists of three main modules: (1) *in silico* micr
 1. Download the [DeconvTest](https://github.com/applied-systems-biology/DeconvTest/releases) package, enter the package directory and install the package by running ``python setup.py install``
 1. Provide the path to Fiji when prompted
 
+## Requirements
+
+The software was tested for the following versions of the required packakges:
+
+- scikit-image 0.15.0
+- pandas 0.25.1
+- numpy 1.16.5
+- seaborn 0.9.0
+- scipy 1.3.1
+- ddt 1.2.1
+
 ## License
 
 The source code of this framework is released under the <a href="/LICENSE">3-clause BSD license</a>

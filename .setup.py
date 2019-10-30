@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='deconvtest',
-    version='2.4',
+    version='2.5',
     url="https://applied-systems-biology.github.io/DeconvTest/",
     download_url="https://github.com/applied-systems-biology/DeconvTest",
     author="Anna Medyukhina",

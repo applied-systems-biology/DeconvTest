@@ -16,6 +16,8 @@ def check_imagej_path(path):
     for fn in files:
         if len(fn.split('ImageJ')) > 1 and not fn.endswith('desktop'):
             return path + fn
+    if os.path.exists(path + 'Contents/MacOS/ImageJ-macosx'):
+        return path + 'Contents/MacOS/ImageJ-macosx'
     return None
 
 
@@ -41,13 +43,17 @@ if __name__ == '__main__':
         config = pd.Series({'Fiji_path': imagej_path})
         config.to_csv('DeconvTest/fiji_path', sep='\t')
 
+    if len(imagej_path.split('MacOS')) > 1:
+        macropath = os.path.dirname(imagej_path) + '/../../macros/'
+    else:
+        macropath = os.path.dirname(imagej_path) + '/macros/'
     if not os.path.exists(os.path.dirname(imagej_path) + '/macros'):
         os.makedirs(os.path.dirname(imagej_path) + '/macros')
 
-    shutil.copy('DeconvTest/fiji/get_fiji_version.ijm', os.path.dirname(imagej_path) + '/macros/' + 'get_fiji_version.ijm')
-    shutil.copy('DeconvTest/fiji/deconvolution_lab_rif.ijm', os.path.dirname(imagej_path) + '/macros/' + 'deconvolution_lab_rif.ijm')
-    shutil.copy('DeconvTest/fiji/deconvolution_lab_rltv.ijm', os.path.dirname(imagej_path) + '/macros/' + 'deconvolution_lab_rltv.ijm')
-    shutil.copy('DeconvTest/fiji/iterative_deconvolve_3d.ijm', os.path.dirname(imagej_path) + '/macros/' + 'iterative_deconvolve_3d.ijm')
+    shutil.copy('DeconvTest/fiji/get_fiji_version.ijm', macropath + 'get_fiji_version.ijm')
+    shutil.copy('DeconvTest/fiji/deconvolution_lab_rif.ijm', macropath + 'deconvolution_lab_rif.ijm')
+    shutil.copy('DeconvTest/fiji/deconvolution_lab_rltv.ijm', macropath + 'deconvolution_lab_rltv.ijm')
+    shutil.copy('DeconvTest/fiji/iterative_deconvolve_3d.ijm', macropath + 'iterative_deconvolve_3d.ijm')
 
     command = 'python ./.setup.py '
     for arg in args:

@@ -103,6 +103,7 @@ def run_simulation(**kwargs):
     kwargs['logfolder'] = simulation_folder + kwargs['logfolder']
     steps = kwargs['simulation_steps']
     valid_steps = ['generate_cells', 'generate_psfs', 'convolve', 'resize', 'add_noise', 'deconvolve', 'accuracy']
+    kwargs['psffolder'] = simulation_folder + kwargs['psffolder']
 
     for step in steps:
         if step in valid_steps:
@@ -121,7 +122,6 @@ def run_simulation(**kwargs):
                                            **kwargs)
                 kwargs['reffolder'] = kwargs['inputfolder']
             elif step == 'generate_psfs':
-                kwargs['psffolder'] = simulation_folder + kwargs['psffolder']
                 print('Output folder:', kwargs['psffolder'])
                 batch.generate_psfs_batch(outputfolder=kwargs['psffolder'], **kwargs)
             else:

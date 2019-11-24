@@ -1,0 +1,21 @@
+Convolved	True
+Voxel size	[0.5 0.5 0.5]
+Voxel size z	0.5
+Voxel size y	0.5
+Voxel size x	0.5
+Voxel size arr	[0.5 0.5 0.5]
+size_x	7.81215346614493
+size_y	5.72132853219328
+size_z	7.1239029421075
+phi	4.60966809974598
+theta	2.97200966268925
+z	0.840501024624366
+y	0.640824376743115
+x	0.992598731144042
+kind	ellipsoid
+CellID	1
+PSF sigma xy um	0.5
+PSF aspect ratio	4
+SNR	5
+noise type	poisson
+LW gamma	1

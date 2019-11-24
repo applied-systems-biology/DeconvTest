@@ -1,0 +1,5 @@
+simulation_folder	../Data/simulation1_settings
+simulation_steps	['accuracy']
+max_threads	75
+inputfolder	deconvolved
+reffolder	input

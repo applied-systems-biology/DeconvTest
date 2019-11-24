@@ -1,0 +1,16 @@
+simulation_folder	../Data/qualitative_settings
+simulation_steps	['generate_cells', 'generate_psfs', 'convolve', 'resize', 'add_noise', 'deconvolve']
+max_threads	6
+number_of_stacks	None
+number_of_cells	5
+input_cell_kind	ellipsoid
+size_mean_and_std	(10, 2)
+equal_dimensions	False
+input_voxel_size	0.1
+psf_sigmas	[0.5, 1.2]
+psf_aspect_ratios	[4.5]
+voxel_sizes_for_resizing	[0.3, [3, 0.3, 0.3]]
+noise_kind	poisson
+snr	[None, 2]
+deconvolution_algorithm	['deconvolution_lab_rif']
+deconvolution_lab_rif_regularization_lambda	[0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000]

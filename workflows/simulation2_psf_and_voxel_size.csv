@@ -1,0 +1,23 @@
+simulation_folder	../Data/simulation2_psf_and_voxel_size
+simulation_steps	['generate_cells', 'generate_psfs', 'convolve', 'resize', 'deconvolve', 'accuracy']
+max_threads	75
+number_of_stacks	None
+number_of_cells	10
+input_cell_kind	ellipsoid
+size_mean_and_std	(10, 2)
+equal_dimensions	False
+input_voxel_size	0.1
+psf_sigmas	[0.5, 0.8, 1.0, 1.2]
+psf_aspect_ratios	[2, 3, 4, 5, 6]
+voxel_sizes_for_resizing	[0.2, 0.3, 0.4, 0.5, [1, 0.3, 0.3], [1, 0.5, 0.5], [3, 0.3, 0.3], [3, 0.5, 0.5]]
+deconvolution_algorithm	['deconvolution_lab_rif', 'deconvolution_lab_rltv', 'iterative_deconvolve_3d']
+deconvolution_lab_rif_regularization_lambda	100
+deconvolution_lab_rltv_regularization_lambda	0.01
+deconvolution_lab_rltv_iterations	5
+iterative_deconvolve_3d_detect	FALSE
+iterative_deconvolve_3d_low	2
+iterative_deconvolve_3d_normalize	TRUE
+iterative_deconvolve_3d_perform	TRUE
+iterative_deconvolve_3d_terminate	0.1
+iterative_deconvolve_3d_wiener	1.0
+

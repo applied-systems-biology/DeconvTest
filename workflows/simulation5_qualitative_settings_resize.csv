@@ -1,0 +1,6 @@
+simulation_folder	../Data/qualitative_settings
+simulation_steps	['resize']
+max_threads	6
+voxel_sizes_for_resizing	[0.1]
+inputfolder	deconvolved
+resize_results_folder	deconvolved_upsampled

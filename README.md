@@ -30,7 +30,7 @@ quantitative comparison and consists of three main modules: (1) *in silico* micr
 
 ## Requirements
 
-The software was tested for the following versions of the required packakges:
+The software was tested with the following versions of the required packakges:
 
 - scikit-image 0.15.0
 - pandas 0.25.1

@@ -56,3 +56,7 @@ The DeconvTest package contains several subpackages.
 
 For a detailed user guide, 
 see the <a href="https://applied-systems-biology.github.io/DeconvTest/">online documentation</a>
+
+For instructions how to use DeconvTest to optimally deconvolve microscopy images, see the corresponding <a href="https://github.com/applied-systems-biology/DeconvTest/blob/master/docs/DeconvTest_guide_for_microscopy_image_deconvolution.ipynb">jupyter notebook</a>
+59
+

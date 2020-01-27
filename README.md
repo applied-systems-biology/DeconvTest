@@ -1,7 +1,5 @@
 # DeconvTest: Simulation Framework for Quantifying Errors and Selecting Optimal Parameters of Image Deconvolution
 
-[![DOI](https://zenodo.org/badge/179464464.svg)](https://zenodo.org/badge/latestdoi/179464464)
-
 Author: *Anna Medyukhina*
 
 Affiliation: *Research Group Applied Systems Biology - Head: Prof. Dr. Marc Thilo Figge  
@@ -42,6 +40,10 @@ The software was tested with the following versions of the required packakges:
 ## License
 
 The source code of this framework is released under the <a href="/LICENSE">3-clause BSD license</a>
+
+## Citation
+
+A. Medyukhina & M.T. Figge (2020) DeconvTest: simulation framework for quantifying errors and selecting optimal parameters of image deconvolution. J. Biophotonics. [https://doi.org/10.1002/jbio.201960079](https://doi.org/10.1002/jbio.201960079)
 
 ## Documentation
 
